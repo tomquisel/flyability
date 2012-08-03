@@ -7,6 +7,8 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'flyability.views.home', name='home'),
+    url(r'^flyability/(?P<name>[^/]+)/forecast.png$', 
+		'siteviewer.views.forecastImage'),
     url(r'^flyability/(?P<name>[^/]+)/?$', 'siteviewer.views.site'),
 
     # Uncomment the admin/doc line below to enable admin documentation:

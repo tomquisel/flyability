@@ -5,7 +5,8 @@ import grapher
 import utils
 
 
-data = fetcher.cachingFetch(fetcher.hourlyWeather)
+loc = (42.0443, -73.492626)
+data = fetcher.cachingFetch(fetcher.hourlyWeather, loc)
 
 scale, timeseries = utils.parseData(data)
 utils.graphData(scale, timeseries)

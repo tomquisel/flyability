@@ -1,0 +1,15 @@
+{% extends "siteviewer/base.html" %}
+
+{% block content %} 
+<ul>
+<li>{{site.name}}</li>
+<li>{{site.lat}}</li>
+<li>{{site.lon}}</li>
+<li>{{site.altitude}}</li>
+<li>{{site.takeoffDirLeft}}</li>
+<li>{{site.takeoffDirRight}}</li>
+</ul>
+
+<img src="/flyability/{{site.name}}/forecast.png"></img>
+
+{% endblock %}

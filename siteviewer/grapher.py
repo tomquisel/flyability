@@ -3,15 +3,17 @@ import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 from matplotlib.font_manager import FontProperties
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from xml2json import Scale, TimeSeries
 
-def plot(t, timeseries):
+
+def plot(t, timeseries, canvas = False):
     temp, dewpt, pop, wind, dir, clouds, humidity = timeseries
 
     fontP = FontProperties()
     fontP.set_size('small')
 
-    fig = plt.figure(1)
+    fig = plt.figure(1, figsize=(35,7))
 
     ax = plt.subplot(411)
     plt.plot(t, wind.values, 'r', label="wind speed")
@@ -64,8 +66,12 @@ def plot(t, timeseries):
         if i != len(fig.axes) - 1 and i != 0:
             ax.set_xticklabels([])
         ax.tick_params(labelsize='small', which='minor')
-
-    plt.show()
+    
+    if canvas:
+        canvas = FigureCanvas(fig)
+        return canvas
+    else:
+        plt.show()
 
 def displayHeightToData(ax, d):
     inv = ax.transData.inverted()

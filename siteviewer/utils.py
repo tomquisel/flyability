@@ -15,16 +15,18 @@ def parseData(data):
     Xml2TimeSeries(scale, timeseries, data)
     return (scale, timeseries)
 
-def graphData(scale, timeseries):
-    start = 0
-    for t in scale.times:
-        if t.hour==0:
-            break
-        start += 1
+def graphData(scale, timeseries, canvas = False):
+    #start = 0
+    #for t in scale.times:
+    #    if t.hour==0:
+    #        break
+    #    start += 1
 
-    end = start + 48
+    #end = start + 48
+    start = 0
+    end = len(scale.times)
 
     for x in timeseries:
         x.values = x.values[start:end]
 
-    grapher.plot(scale.times[start:end], timeseries)
+    return grapher.plot(scale.times[start:end], timeseries, canvas = canvas)
