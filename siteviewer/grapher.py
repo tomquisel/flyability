@@ -7,23 +7,31 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from xml2json import Scale, TimeSeries
 
 
-def plot(t, timeseries, canvas = False):
+def plot(t, timeseries, flyability, canvas = False):
     temp, dewpt, pop, wind, dir, clouds, humidity = timeseries
 
     fontP = FontProperties()
     fontP.set_size('small')
 
-    fig = plt.figure(1, figsize=(35,7))
+    fig = plt.figure(1, figsize=(35,9))
 
-    ax = plt.subplot(411)
-    plt.plot(t, wind.values, 'r', label="wind speed")
-    plt.ylabel("mph")
+    ax = plt.subplot(511)
+    plt.plot(t, flyability.values, 'r', label="flyability")
+    plt.ylabel("%")
+    plt.ylim(0,110)
     locs, labels = plt.yticks()
     plt.yticks(locs[:-1])
     plt.tick_params(axis='x', which='both', labeltop='on', labelbottom='off')
     ax.legend(loc='best', prop=fontP, fancybox=True, shadow=True)
 
-    ax = plt.subplot(412)
+    ax = plt.subplot(512)
+    plt.plot(t, wind.values, 'r', label="wind speed")
+    plt.ylabel("mph")
+    locs, labels = plt.yticks()
+    plt.yticks(locs[:-1])
+    ax.legend(loc='best', prop=fontP, fancybox=True, shadow=True)
+
+    ax = plt.subplot(513)
     X = getXComponents(dir.values, wind.values)
     Y = getYComponents(dir.values, wind.values)
     plt.xlim(0,len(t)-1)
@@ -35,7 +43,7 @@ def plot(t, timeseries, canvas = False):
     ax.get_yaxis().set_visible(False)
     plt.xticks(range(0,len(t),3))
 
-    ax = plt.subplot(413)
+    ax = plt.subplot(514)
     plt.plot(t, temp.values, 'r', label="temperature")
     plt.plot(t, dewpt.values, 'b', label="dew point")
     locs, labels = plt.yticks()
@@ -43,7 +51,7 @@ def plot(t, timeseries, canvas = False):
     plt.ylabel(u"\u00b0F")
     ax.legend(loc='best', prop=fontP, ncol=2, fancybox=True, shadow=True)
 
-    plt.subplot(414)
+    plt.subplot(515)
     plt.plot(t, clouds.values, 'g', label = "cloud cover")
     plt.plot(t, humidity.values, 'r', label = "humidity")
     plt.plot(t, pop.values, 'b', label="chance of precipitation")

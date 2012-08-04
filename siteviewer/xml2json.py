@@ -6,11 +6,25 @@ class Scale:
     def __init__(self, valuetag="start-valid-time"):
         self.valuetag = valuetag
         self.times = []
+        self.awareTimes = []
 
     def appendTime(self, s):
-        s = "-".join(re.split("[\+\-]", s)[0:3])
-        t = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
+        class TZ (datetime.tzinfo):
+            def __init__(self, offset):
+                self.offset = datetime.timedelta(hours=offset)
+            def utcoffset(self, d):
+                return self.offset
+            def dst(self, d):
+                return datetime.timedelta(hours=0)
+
+        timeStr = s[:-6]
+        tzStr = s[-6:]
+
+        tz = TZ(int(tzStr.split(":")[0]))
+        t = datetime.datetime.strptime(timeStr, "%Y-%m-%dT%H:%M:%S")
+        at = t.replace(tzinfo=tz)
         self.times.append(t)
+        self.awareTimes.append(at)
 
 class TimeSeries:
     def __init__(self, tag, valuetag="value", type=None):
@@ -21,7 +35,7 @@ class TimeSeries:
         self.values = []
 
     def appendVal(self, v):
-        if v.contains("."):
+        if v.find(".") >= 0:
             self.values.append(float(v))
         else:
             self.values.append(int(v))
@@ -103,7 +117,7 @@ class Xml2TimeSeries:
 
         data = self._data
         if self.currentTS and tag == self.currentTS.valuetag:
-            self.currentTS.values.append(data)
+            self.currentTS.appendVal(data)
         if self.currentTS and tag == self.currentTS.tag:
             self.currentTS = None
         if tag == self.scale.valuetag:

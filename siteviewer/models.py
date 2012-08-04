@@ -10,3 +10,19 @@ class Site(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def getTakeoffRange(self, numeric=True):
+        if numeric:
+            dirMap = {
+                    'N' : 0,
+                    'NE' : 45,
+                    'E' : 90,
+                    'SE' : 135,
+                    'S' : 180,
+                    'SW' : 225,
+                    'W' : 270,
+                    'NW' : 315
+                    }
+            return (dirMap[self.takeoffDirLeft], dirMap[self.takeoffDirRight])
+        else:
+            return (self.takeoffDirLeft, self.takeoffDirRight)

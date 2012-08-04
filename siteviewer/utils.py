@@ -15,7 +15,7 @@ def parseData(data):
     Xml2TimeSeries(scale, timeseries, data)
     return (scale, timeseries)
 
-def graphData(scale, timeseries, canvas = False):
+def graphData(scale, timeseries, flyability, canvas = False):
     #start = 0
     #for t in scale.times:
     #    if t.hour==0:
@@ -29,4 +29,4 @@ def graphData(scale, timeseries, canvas = False):
     for x in timeseries:
         x.values = x.values[start:end]
 
-    return grapher.plot(scale.times[start:end], timeseries, canvas = canvas)
+    return grapher.plot(scale.times[start:end], timeseries, flyability, canvas = canvas)
