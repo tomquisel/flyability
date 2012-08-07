@@ -14,7 +14,7 @@ def site(request, name):
 
 def forecastImage(request, name):
     site = get_object_or_404(Site, pk=name)
-    data = fetcher.cachingFetch(fetcher.hourlyWeather, (site.lat, site.lon))
+    scale, timeseries = utils.getWeatherData(site.lat, site.lon)
     scale, timeseries = utils.parseData(data)
     flyability = predictor.flyability(site, scale, timeseries)
     canvas = utils.graphData(scale, timeseries, flyability, canvas = True)

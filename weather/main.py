@@ -1,12 +1,9 @@
 from xml2json import Xml2TimeSeries, Scale, TimeSeries
-import grapher
 import fetcher
 
-
 def getWeatherData(lat, lon):
-    hourly = fetcher.cachingFetch(fetcher.hourlyWeather, (lat, lon))
-    fourhourly = fetcher.cachingFetch(fetcher.fourHourlyWeather, (lat, lon))
-
+    hourly = cachingFetch(hourlyWeather, (lat, lon))
+    fourhourly = cachingFetch(fourHourlyWeather, (lat, lon))
 
 def parseData(data):
     scale = Scale()
@@ -21,19 +18,3 @@ def parseData(data):
     # populates items in place
     Xml2TimeSeries(scale, timeseries, data)
     return (scale, timeseries)
-
-def graphData(scale, timeseries, flyability, canvas = False):
-    #start = 0
-    #for t in scale.times:
-    #    if t.hour==0:
-    #        break
-    #    start += 1
-
-    #end = start + 48
-    start = 0
-    end = len(scale.times)
-
-    for x in timeseries:
-        x.values = x.values[start:end]
-
-    return grapher.plot(scale.times[start:end], timeseries, flyability, canvas = canvas)
