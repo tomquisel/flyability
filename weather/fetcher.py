@@ -21,12 +21,13 @@ def cachingFetch(query, params):
     cacheDir = '/var/django/cache/'
     key = hashit( (query, params) )
     fn = cacheDir + key
+    print fn,
     if os.path.exists(fn):
         if os.path.getmtime(fn) > (time.time() - 600):
             data = open(fn).read()
-            print ("cache hit")
+            print " cache hit"
             return data
-    print ("cache miss")
+    print " cache miss"
     data = fetch(query, params)
     if data is None:
         return None
