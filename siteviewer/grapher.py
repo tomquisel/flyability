@@ -4,8 +4,6 @@ import matplotlib.transforms as transforms
 from matplotlib.font_manager import FontProperties
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from xml2json import Scale, TimeSeries
-
 
 def plot(t, timeseries, flyability, canvas = False):
     temp, dewpt, pop, wind, dir, clouds, humidity = timeseries

@@ -12,7 +12,7 @@ for site in sites:
         print "Skipping update of forecast for %s" % site
         continue
     print "Updating forecast for %s" % site
-    forecast, values = main.getWeatherData(site)
+    forecast, values = main.fetchForecast(site)
     forecast.save()
     for v in values:
         v.forecast = forecast

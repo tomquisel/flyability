@@ -1,7 +1,7 @@
-from xml2json import Scale, TimeSeries
 import astral
 import datetime
 from scipy.stats import norm
+from weather.models import Scale, TimeSeries
 
 def flyability(site, times, timeseries):
     temp, dewpt, pop, wind, dir, clouds, humidity = timeseries
