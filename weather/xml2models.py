@@ -3,7 +3,7 @@ from lxml import etree
 import datetime
 from weather.models import Forecast, ForecastValue, Scale, TimeSeries
 
-def parseHourlyData(data, site):
+def parseHourlyData(data):
     dataMap = { 
         "temp" : TimeSeries("temperature", type="hourly"),
         "dewpt" : TimeSeries("temperature", type="dew point"),
@@ -13,15 +13,15 @@ def parseHourlyData(data, site):
         "clouds" : TimeSeries("cloud-amount"),
         "humidity" : TimeSeries("humidity")
     }
-    return parseData(data, site, dataMap)
+    return parseData(data, dataMap)
 
-def parseFourHourlyData(data, site):
+def parseFourHourlyData(data):
     dataMap = { 
         "gust" : TimeSeries("wind-speed", type="gust")
     }
-    return parseData(data, site, dataMap)
+    return parseData(data, dataMap)
 
-def parseData(data, site, dataMap):
+def parseData(data, dataMap):
 
     tree = etree.fromstring(data)
     times = tree.xpath("//time-layout/start-valid-time/text()")
@@ -34,12 +34,10 @@ def parseData(data, site, dataMap):
         vals = tree.xpath("//%s%s/value/text()" % (ts.name, typeStr))
         ts.appendValues(vals)
 
-    forecast = Forecast(site = site, lat = site.lat, lon = site.lon)
     vals = []
     for name, ts in dataMap.items():
         for i,val in enumerate(ts.values):
-            vals.append(ForecastValue(forecast = forecast, 
-                                      name = name, value = val,
+            vals.append(ForecastValue(name = name, value = val,
                                       time = scale.awareTimes[i]))
 
-    return forecast, vals
+    return vals
