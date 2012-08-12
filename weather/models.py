@@ -48,17 +48,14 @@ class Scale(object):
             def dst(self, d):
                 return datetime.timedelta(hours=0)
 
-        if type(s) is str:
-            timeStr = s[:-6]
-            tzStr = s[-6:]
+        timeStr = s[:-6]
+        tzStr = s[-6:]
 
-            tz = TZ(int(tzStr.split(":")[0]))
-            t = datetime.datetime.strptime(timeStr, "%Y-%m-%dT%H:%M:%S")
-            at = t.replace(tzinfo=tz)
-            self.times.append(t)
-            self.awareTimes.append(at)
-        else:
-            pass
+        tz = TZ(int(tzStr.split(":")[0]))
+        t = datetime.datetime.strptime(timeStr, "%Y-%m-%dT%H:%M:%S")
+        at = t.replace(tzinfo=tz)
+        self.times.append(t)
+        self.awareTimes.append(at)
 
 class TimeSeries(object):
     def __init__(self, name, type=None):
