@@ -13,6 +13,15 @@ def parseHourlyData(data, site):
         "clouds" : TimeSeries("cloud-amount"),
         "humidity" : TimeSeries("humidity")
     }
+    return parseData(data, site, dataMap)
+
+def parseFourHourlyData(data, site):
+    dataMap = { 
+        "gust" : TimeSeries("wind-speed", type="gust")
+    }
+    return parseData(data, site, dataMap)
+
+def parseData(data, site, dataMap):
 
     tree = etree.fromstring(data)
     times = tree.xpath("//time-layout/start-valid-time/text()")

@@ -5,8 +5,10 @@ from weather.models import Forecast, ForecastValue, Scale, TimeSeries
 
 def fetchForecast(site):
     hourly = fetcher.cachingFetch(fetcher.hourlyWeather, (site.lat, site.lon))
-    #fourhourly = cachingFetch(fourHourlyWeather, (lat, lon))
     forecast, values = xml2models.parseHourlyData(hourly, site)
+    fourhourly = fetcher.cachingFetch(fetcher.fourHourlyWeather, 
+                                      (site.lat, site.lon))
+    fourforecast, fourvalues = xml2models.parseFourHourlyData(fourhourly, site)
     return forecast, values
 
 def getWeatherData(site):
