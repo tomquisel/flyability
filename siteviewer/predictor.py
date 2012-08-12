@@ -4,7 +4,10 @@ from scipy.stats import norm
 from weather.models import Scale, TimeSeries
 
 def flyability(site, times, timeseries):
-    temp, dewpt, pop, wind, dir, clouds, humidity = timeseries
+    pop = timeseries['pop']
+    wind = timeseries['wind']
+    dir = timeseries['dir']
+
     res = TimeSeries("flyability")
 
     dayIntervals = getDayIntervals(site, times)

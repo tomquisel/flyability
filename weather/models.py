@@ -9,7 +9,7 @@ class Forecast(models.Model):
     fetchTime = models.DateTimeField(auto_now_add=True, db_index=True)
 
 class ForecastValue(models.Model):
-    forecast = models.ForeignKey(Forecast, db_index=True)
+    forecast = models.ForeignKey(Forecast)
     name = models.CharField(max_length=100)
     value = models.FloatField()
     time = models.DateTimeField()
@@ -48,14 +48,17 @@ class Scale(object):
             def dst(self, d):
                 return datetime.timedelta(hours=0)
 
-        timeStr = s[:-6]
-        tzStr = s[-6:]
+        if type(s) is str:
+            timeStr = s[:-6]
+            tzStr = s[-6:]
 
-        tz = TZ(int(tzStr.split(":")[0]))
-        t = datetime.datetime.strptime(timeStr, "%Y-%m-%dT%H:%M:%S")
-        at = t.replace(tzinfo=tz)
-        self.times.append(t)
-        self.awareTimes.append(at)
+            tz = TZ(int(tzStr.split(":")[0]))
+            t = datetime.datetime.strptime(timeStr, "%Y-%m-%dT%H:%M:%S")
+            at = t.replace(tzinfo=tz)
+            self.times.append(t)
+            self.awareTimes.append(at)
+        else:
+            pass
 
 class TimeSeries(object):
     def __init__(self, name, type=None):
@@ -66,11 +69,15 @@ class TimeSeries(object):
     def appendValues(self, vs):
         for v in vs:
             self.appendValue(v)
+        return self
 
     def appendValue(self, v):
-        if v.find(".") >= 0:
-            self.values.append(float(v))
-        else:
-            self.values.append(int(v))
+        if type(v) is str:
+            if v.find(".") >= 0:
+                v = float(v)
+            else:
+                v = int(v)
+        self.values.append(v)
+        return self
 
 

@@ -13,10 +13,10 @@ def site(request, name):
 
 def forecastImage(request, name):
     site = get_object_or_404(Site, pk=name)
-    weatherData = weather.getWeatherData(site)
+    scale, timeseries = weather.getWeatherData(site)
     flyability = predictor.flyability(site, scale, timeseries)
-    #canvas = utils.graphData(scale, timeseries, flyability, canvas = True)
+    canvas = grapher.plot(scale.times, timeseries, flyability, canvas = True)
     response = HttpResponse(content_type='image/png')
-    #canvas.print_png(response)
-    #plt.clf()
+    canvas.print_png(response)
+    plt.clf()
     return response

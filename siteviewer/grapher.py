@@ -6,7 +6,13 @@ from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 def plot(t, timeseries, flyability, canvas = False):
-    temp, dewpt, pop, wind, dir, clouds, humidity = timeseries
+    temp = timeseries['temp']
+    dewpt = timeseries['dewpt']
+    pop = timeseries['pop']
+    wind = timeseries['wind']
+    dir = timeseries['dir']
+    clouds = timeseries['clouds']
+    humidity = timeseries['humidity']
 
     fontP = FontProperties()
     fontP.set_size('small')
