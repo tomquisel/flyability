@@ -1,6 +1,10 @@
 {% extends "siteviewer/base.html" %}
 
-{% block content %} 
+{% block title %} 
+{{site.name}} Paragliding Forecast
+{% endblock %}
+
+{% block content %}
 <ul>
 <li>{{site.name}}</li>
 <li>{{site.lat}}</li>
@@ -10,6 +14,14 @@
 <li>{{site.takeoffDirRight}}</li>
 </ul>
 
+<ul>
+	{% for day in days %}
+		<li>{{ day }}</li>
+	{% endfor %}
+</ul>
+
+{%comment%}
 <img src="/flyability/{{site.name}}/forecast.png"></img>
+{%endcomment%}
 
 {% endblock %}

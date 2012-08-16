@@ -1,17 +1,13 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 
 <title>{% block title %} My Title {% endblock %}</title>
 
-<meta name="keywords" content="hydroponics, DIY hydroponics,
-indoor gardening, indoor farming, indoor hydropoincs, outdoor hydroponics,
-hydroponics system, hydroponics guide, hydroponic gardening" />
-<meta name="description" content="Helpful hydroponic gardening 
-guides and resources. Build your own hydroponic system!" />
+<link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" />
+<script src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
 
 {% comment %}
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}style.css" />
-
 {% include "guides/google_analytics.inc" %}
 {% endcomment %}
 </head>
