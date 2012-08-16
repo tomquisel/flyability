@@ -1,11 +1,13 @@
-from siteviewer.models import Site
+import datetime, pytz
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 import matplotlib.pyplot as plt
 
+from siteviewer.models import Site
+from weather.timeseries import TimeSeries
+import weather.main as weather
 import grapher
 import predictor
-import weather.main as weather
 
 def site(request, name):
     site = get_object_or_404(Site, pk=name)
@@ -13,9 +15,13 @@ def site(request, name):
 
 def forecastImage(request, name):
     site = get_object_or_404(Site, pk=name)
-    scale, timeseries = weather.getWeatherData(site)
-    flyability = predictor.flyability(site, scale, timeseries)
-    canvas = grapher.plot(scale.times, timeseries, flyability, canvas = True)
+    seriesDict = weather.getWeatherData(site)
+    tz = pytz.timezone(site.timezone)
+    times = TimeSeries.range(datetime.datetime.now(), 168, TimeSeries.hour)
+    awareTimes = TimeSeries.makeAware(times, tz)
+    flyability = predictor.flyability(site, awareTimes, seriesDict)
+    seriesDict['flyability'] = flyability
+    canvas = grapher.plot(times, seriesDict, canvas = True)
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response)
     plt.clf()

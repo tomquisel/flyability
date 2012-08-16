@@ -5,14 +5,18 @@ from matplotlib.font_manager import FontProperties
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
-def plot(t, timeseries, flyability, canvas = False):
-    temp = timeseries['temp']
-    dewpt = timeseries['dewpt']
-    pop = timeseries['pop']
-    wind = timeseries['wind']
-    dir = timeseries['dir']
-    clouds = timeseries['clouds']
-    humidity = timeseries['humidity']
+def plot(t, timeseries, canvas = False):
+    def r(x):
+        return x.read(t, 0.0)
+    temp = r(timeseries['temp'])
+    dewpt = r(timeseries['dewpt'])
+    pop = r(timeseries['pop'])
+    wind = r(timeseries['wind'])
+    dir = r(timeseries['dir'])
+    gust = r(timeseries['gust'])
+    clouds = r(timeseries['clouds'])
+    humidity = r(timeseries['humidity'])
+    flyability = r(timeseries['flyability'])
 
     fontP = FontProperties()
     fontP.set_size('small')
@@ -20,7 +24,7 @@ def plot(t, timeseries, flyability, canvas = False):
     fig = plt.figure(1, figsize=(35,9))
 
     ax = plt.subplot(511)
-    plt.plot(t, flyability.values, 'r', label="flyability")
+    plt.plot(t, flyability, 'r', label="flyability")
     plt.ylabel("%")
     plt.ylim(0,110)
     locs, labels = plt.yticks()
@@ -29,15 +33,16 @@ def plot(t, timeseries, flyability, canvas = False):
     ax.legend(loc='best', prop=fontP, fancybox=True, shadow=True)
 
     ax = plt.subplot(512)
-    plt.plot(t, wind.values, 'r', label="wind speed")
+    plt.plot(t, wind, 'r', label="wind speed")
+    plt.plot(t, gust, 'b', label="gust speed")
     plt.ylabel("mph")
     locs, labels = plt.yticks()
     plt.yticks(locs[:-1])
     ax.legend(loc='best', prop=fontP, fancybox=True, shadow=True)
 
     ax = plt.subplot(513)
-    X = getXComponents(dir.values, wind.values)
-    Y = getYComponents(dir.values, wind.values)
+    X = getXComponents(dir, wind)
+    Y = getYComponents(dir, wind)
     plt.xlim(0,len(t)-1)
     plt.ylim(-1,1)
     Q = plt.quiver(range(0,len(t)), [0]*len(t), X,Y, units='height', 
@@ -48,17 +53,17 @@ def plot(t, timeseries, flyability, canvas = False):
     plt.xticks(range(0,len(t),3))
 
     ax = plt.subplot(514)
-    plt.plot(t, temp.values, 'r', label="temperature")
-    plt.plot(t, dewpt.values, 'b', label="dew point")
+    plt.plot(t, temp, 'r', label="temperature")
+    plt.plot(t, dewpt, 'b', label="dew point")
     locs, labels = plt.yticks()
     plt.yticks(locs[1:])
     plt.ylabel(u"\u00b0F")
     ax.legend(loc='best', prop=fontP, ncol=2, fancybox=True, shadow=True)
 
     plt.subplot(515)
-    plt.plot(t, clouds.values, 'g', label = "cloud cover")
-    plt.plot(t, humidity.values, 'r', label = "humidity")
-    plt.plot(t, pop.values, 'b', label="chance of precipitation")
+    plt.plot(t, clouds, 'g', label = "cloud cover")
+    plt.plot(t, humidity, 'r', label = "humidity")
+    plt.plot(t, pop, 'b', label="chance of precipitation")
     plt.ylabel("%")
     plt.ylim(0,120)
     locs, labels = plt.yticks()

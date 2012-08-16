@@ -1,26 +1,29 @@
 import astral
 import datetime
 from scipy.stats import norm
-from weather.models import Scale, TimeSeries
+from weather.timeseries import TimeSeries
 
 def flyability(site, times, timeseries):
-    pop = timeseries['pop']
-    wind = timeseries['wind']
-    dir = timeseries['dir']
-
-    res = TimeSeries("flyability")
+    pop = timeseries['pop'].read(times, 0.0)
+    wind = timeseries['wind'].read(times, 0.0)
+    dir = timeseries['dir'].read(times, 0.0)
 
     dayIntervals = getDayIntervals(site, times)
 
-    for i,t in enumerate(times.awareTimes):
+    values = []
+    for i,t in enumerate(times):
         prob = 0
         if isDay(t, dayIntervals):
             prob = 1.0
-        prob *= getWindDirChances(site, dir.values[i])
-        prob *= getWindSpeedChances(wind.values[i])
-        prob *= getRainChances(pop.values[i])
-        res.values.append(100 * prob)
-    return res
+        prob *= getWindDirChances(site, dir[i])
+        prob *= getWindSpeedChances(wind[i])
+        prob *= getRainChances(pop[i])
+        values.append(100 * prob)
+
+    series = TimeSeries("flyability", times, values, site.timezone)
+    for i, v in enumerate(values):
+        print i, v
+    return series
 
 ################## HELPERS ##########################
 
@@ -28,7 +31,7 @@ def getDayIntervals(site, times):
     days = []
     a = astral.Astral()
     dates = set([])
-    for dt in times.awareTimes:
+    for dt in times:
        date = datetime.datetime.date(dt)
        dates.add(date)
     dates = list(dates)

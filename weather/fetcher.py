@@ -6,6 +6,7 @@ hourlyWeather = ['forecast.weather.gov', '/MapClick.php?lat=%s&lon=%s&FcstType=d
 fourHourlyWeather = ['graphical.weather.gov', '/xml/SOAP_server/ndfdXMLclient.php?lat=%s&lon=%s&product=time-series&Unit=e&wgust=wgust&Submit=Submit']
 
 def fetch(query, params):
+    print "Fetching %s%s" % (query[0],query[1] % params)
     conn = httplib.HTTPConnection(query[0])
     conn.request("GET", query[1] % params)
     r = conn.getresponse()
