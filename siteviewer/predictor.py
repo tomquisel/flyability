@@ -2,51 +2,77 @@ import astral
 import datetime
 from scipy.stats import norm
 from weather.timeseries import TimeSeries
+import bisect
 
-def flyability(site, times, timeseries):
-    pop = timeseries['pop'].read(times, 0.0)
-    wind = timeseries['wind'].read(times, 0.0)
-    dir = timeseries['dir'].read(times, 0.0)
+class Predictor(object):
 
-    dayIntervals = getDayIntervals(site, times)
+    def __init__(self, times, timeseries, site):
+        self.times = times
+        self.timeseries = timeseries
+        self.site = site
 
-    values = []
-    for i,t in enumerate(times):
-        prob = 0
-        if isDay(t, dayIntervals):
-            prob = 1.0
-        prob *= getWindDirChances(site, dir[i])
-        prob *= getWindSpeedChances(wind[i])
-        prob *= getRainChances(pop[i])
-        values.append(100 * prob)
+        self.dayIntervals = self.getDayIntervals()
+        self.values = self.computeFlyability()
+        self.flyability = TimeSeries("flyability", self.times, self.values, 
+                                     self.site.timezone)
 
-    series = TimeSeries("flyability", times, values, site.timezone)
-    for i, v in enumerate(values):
-        print i, v
-    return series
+    def getRangeFlyability(self, start, end):
+        i = bisect.bisect_left(self.times, start)
+        scores = []
+        while i < len(self.times) and self.times[i] < end:
+            if self.isDay(self.times[i]):
+                scores.append(self.values[i])
+            i += 1
+        scores.sort()
+        # take the top 30th percentile as the score
+        res = scores[len(scores) * 2 / 3]
+        return res
+
+    def computeFlyability(self):
+        times = self.times
+        timeseries = self.timeseries
+        site = self.site
+        pop = timeseries['pop'].read(times, 0.0)
+        wind = timeseries['wind'].read(times, 0.0)
+        dir = timeseries['dir'].read(times, 0.0)
+
+        values = []
+        for i,t in enumerate(times):
+            prob = 0
+            if self.isDay(t):
+                prob = 1.0
+            prob *= getWindDirChances(site, dir[i])
+            prob *= getWindSpeedChances(wind[i])
+            prob *= getRainChances(pop[i])
+            values.append(100 * prob)
+
+        return values
+
+    def getDayIntervals(self):
+        site = self.site
+        times = self.times
+        days = []
+        a = astral.Astral()
+        dates = set([])
+        for dt in times:
+           date = datetime.datetime.date(dt)
+           dates.add(date)
+        dates = list(dates)
+        dates.sort()
+        for date in dates:
+            sunInfo = a.sun_utc(date, site.lat, site.lon)
+            days.append( (sunInfo['sunrise'], sunInfo['sunset']) )
+        return days
+
+    def isDay(self, t, twilightLen = 1):
+        twiLen = datetime.timedelta(hours=twilightLen)
+        for sunrise, sunset in self.dayIntervals:
+            if t > sunrise + twiLen and t < sunset - twiLen:
+                return True
+        return False
 
 ################## HELPERS ##########################
 
-def getDayIntervals(site, times):
-    days = []
-    a = astral.Astral()
-    dates = set([])
-    for dt in times:
-       date = datetime.datetime.date(dt)
-       dates.add(date)
-    dates = list(dates)
-    dates.sort()
-    for date in dates:
-        sunInfo = a.sun_utc(date, site.lat, site.lon)
-        days.append( (sunInfo['sunrise'], sunInfo['sunset']) )
-    return days
-
-def isDay(t, dayIntervals, twilightLen = 1):
-    twiLen = datetime.timedelta(hours=twilightLen)
-    for sunrise, sunset in dayIntervals:
-        if t > sunrise + twiLen and t < sunset - twiLen:
-            return True
-    return False
 
 def getWindDirChances(site, dir):
     left, right = site.getTakeoffRange()

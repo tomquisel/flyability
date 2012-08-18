@@ -14,9 +14,9 @@
 <li>{{site.takeoffDirRight}}</li>
 </ul>
 
-<ul>
+<ul class="nav nav-pills">
 	{% for day in days %}
-		<li>{{ day }}</li>
+		<li><a href="#"><p>{{ day.name }}</p><h1>{{day.flyability}}</h1></a></li>
 	{% endfor %}
 </ul>
 

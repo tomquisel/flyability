@@ -11,14 +11,14 @@ def site(request, name):
     site = get_object_or_404(Site, pk=name)
     mgr = main.ForecastMgr(site)
     days = mgr.getDays()
-    dayNames = [ d.strftime("%A") for d in days]
-    env = {'site' : site, 'days': dayNames}
+    env = {'site' : site, 'days': days}
     return render_to_response('siteviewer/siteview.html', env,
                               context_instance=RequestContext(request))
 
 def forecastImage(request, name):
     site = get_object_or_404(Site, pk=name)
-    (times, seriesDict) = main.getForecast(site)
+    mgr = main.ForecastMgr(site)
+    (times, seriesDict) = mgr.getSeries()
     canvas = grapher.plot(times, seriesDict, canvas = True)
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response)
