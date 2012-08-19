@@ -21,7 +21,7 @@ def plot(t, timeseries, canvas = False):
     fontP = FontProperties()
     fontP.set_size('small')
 
-    fig = plt.figure(1, figsize=(35,9))
+    fig = plt.figure(1, figsize=(7,5))
 
     ax = plt.subplot(511)
     plt.plot(t, flyability, 'r', label="flyability")

@@ -16,17 +16,27 @@ class Predictor(object):
         self.flyability = TimeSeries("flyability", self.times, self.values, 
                                      self.site.timezone)
 
-    def getRangeFlyability(self, start, end):
+    def getDay(self, start):
+        end = start + datetime.timedelta(days=1)
         i = bisect.bisect_left(self.times, start)
-        scores = []
+        startInd = None
+        endInd = None
         while i < len(self.times) and self.times[i] < end:
-            if self.isDay(self.times[i]):
-                scores.append(self.values[i])
+            isDay = self.isDay(self.times[i]) 
+            if isDay and startInd is None:
+                startInd = i
+            if not isDay and not startInd is None:
+                endInd = i
+                break
             i += 1
+        res = TimeSeries("flyability", self.times[startInd:endInd],
+                         self.values[startInd:endInd],
+                         self.site.timezone)
+        scores = list(res.values)
         scores.sort()
         # take the top 30th percentile as the score
-        res = scores[len(scores) * 2 / 3]
-        return res
+        summary = scores[len(scores) * 2 / 3]
+        return (res, summary)
 
     def computeFlyability(self):
         times = self.times

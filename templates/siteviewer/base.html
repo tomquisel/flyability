@@ -5,7 +5,9 @@
 <title>{% block title %} My Title {% endblock %}</title>
 
 <link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" />
-<script src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
+<!--[if IE lt 9]>
+<script type="text/javascript" src="{{ STATIC_URL }}excanvas.js"></script>
+<![endif]-->
 
 {% comment %}
 {% include "guides/google_analytics.inc" %}
@@ -17,5 +19,15 @@
 		content
 		{% endblock %}
 	</div>
+
+<script src="{{ STATIC_URL }}jquery-1.8.0.min.js"></script>
+<script src="{{ STATIC_URL }}jquery.sparkline.min.js"></script>
+<script src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
+<script src="{{ STATIC_URL }}bootstrap/js/bootstrap-tab.js"></script>
+<script src="{{ STATIC_URL }}script.js"></script>
+
+{% block js %}
+{% endblock %}
+
 </body>
 </html>

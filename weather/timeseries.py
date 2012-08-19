@@ -56,6 +56,8 @@ class TimeSeries(object):
             res.append(v)
         return res
 
+    def readNatural(self):
+        return (self.times, self.values)
     
     @classmethod
     def makeAware(cls, tslist, tz):
@@ -72,6 +74,7 @@ class TimeSeries(object):
 
     @classmethod
     def range(cls, start, num, inc):
+        """Generates a sequence of times"""
         res = []
         cur = start
         for i in range(0, num):
