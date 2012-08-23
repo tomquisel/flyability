@@ -2,6 +2,7 @@ import datetime as dt, pytz
 from weather.timeseries import TimeSeries
 import weather.main as weather
 from predictor import Predictor
+import json
 
 class ForecastMgr(object):
     def __init__(self, site, startDay = dt.date.today(), days=7):
@@ -33,7 +34,7 @@ class ForecastMgr(object):
             names = ['wind', 'gust', 'dir', 'pop', 'clouds', 'temp']
             for i,t in enumerate(flyabilityHours.times):
                 hour = {}
-                hour['name'] = t.strftime("%l%P")
+                hour['name'] = t.strftime("%l %P").strip()
                 hour['hour'] = t.hour
                 hour['flyability'] = flyabilityHours.values[i]
                 for name in names:
@@ -42,6 +43,7 @@ class ForecastMgr(object):
             for name in names:
                 day[name] = self.getValues(name, flyabilityHours.times)
             day['scores'] = flyabilityHours.values
+            day['times'] = json.dumps([ h['name'] for h in day['hours'] ])
             days.append(day)
         return days
 

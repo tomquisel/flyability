@@ -1,27 +1,5 @@
-function render() {
-}
-
 function plotSummary(id, data) {
 	$("#"+id).sparkline(toint(data), {type:"bar", chartRangeMin:0, chartRangeMax:100});
-}
-
-function plotFlyability(id, data) {
-	opts = {}
-	opts.type = "bar";
-	opts.chartRangeMin = 0;
-	opts.chartRangeMax = 100;
-	opts.barWidth = '20';
-	opts.height = '5em';
-	$("#"+id).sparkline(toint(data), opts);
-}
-
-function plot(id, data) {
-	opts = {}
-	opts.type = "bar";
-	opts.chartRangeMin = 0;
-	opts.barWidth = '20';
-	opts.height = '5em';
-	$("#"+id).sparkline(toint(data), opts);
 }
 
 function toint(vals) {
@@ -58,4 +36,110 @@ function canvasArrow(context, fromx, fromy, tox, toy){
     context.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
     context.moveTo(tox, toy);
     context.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
+}
+
+var chartWidth=400;
+var smallChartHeight=200;
+var percYAxis = 
+	{
+		title: { text : null },
+		labels : {
+			formatter: function() {
+				return '' + this.value + '%';
+			}
+		},
+		min: 0,
+		max: 100
+	};
+var percToolFormatter = function() { return '<b>'+ Math.floor(this.y) +'%</b><br/>'; };
+	
+var chartPrecip, chartFlyability; 
+function setOptions() {
+	Highcharts.setOptions({
+		chart: {
+			type: 'spline', 
+			height: smallChartHeight,
+			width: chartWidth,
+		},
+		tooltip: {
+			crosshairs : true,
+			shared : true,
+		},
+		legend: { enabled: false },
+		credits: { enabled: false },
+	});
+}
+function plotFlyability(id, times, values) {
+	chartFlyability = new Highcharts.Chart({
+		chart: {
+			renderTo: id,
+		},
+		title: { text: "Chance of Flying" },
+		xAxis: { categories: times },
+		yAxis: percYAxis,
+		tooltip: {
+			formatter : percToolFormatter,
+			crosshairs : true,
+			shared : true,
+		},
+		series: [{
+			name: "Flyability",
+			data: values
+		}],
+	});
+}
+function plotWind(id, times, wind, gust) {
+	chartFlyability = new Highcharts.Chart({
+		chart: {
+			renderTo: id,
+		},
+		title: { text: "Wind Speed" },
+		xAxis: { categories: times },
+		yAxis: {
+			title: { text : null },
+			labels : {
+				formatter: function() {
+					return '' + this.value + 'mph';
+				}
+			},
+			min: 0
+		},
+		legend: { enabled: true },
+		tooltip: {
+			crosshairs : true,
+			shared : true,
+		},
+		series: [
+			{ name: "Wind", data: wind },
+			{ name: "Gust", data: gust }
+		],
+	});
+}
+function plotPrecip(id, times, values) {
+	chartPrecip = new Highcharts.Chart({
+		chart: {
+			renderTo: id,
+			plotBackgroundColor : {
+				linearGradient: [0,0,0,smallChartHeight],
+				stops: [
+					[0, 'rgb(255, 100, 100)'],
+					[0.5, 'rgb(255, 200, 200)'],
+					[0.7, 'rgb(255, 255, 255)'],
+				]
+
+			}
+		},
+		title: { text: "Chance of Precipitation" },
+		xAxis: { categories: times },
+		yAxis: percYAxis,
+		tooltip: {
+			formatter : percToolFormatter,
+			crosshairs : true,
+			shared : true,
+		},
+		series: [{
+			name: "Chance of Precipitation",
+			data: values
+		}],
+	});
 }
