@@ -38,8 +38,8 @@ function canvasArrow(context, fromx, fromy, tox, toy){
     context.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
 }
 
-var chartWidth=400;
-var smallChartHeight=200;
+var chartWidth=600;
+var smallChartHeight=300;
 var percYAxis = 
 	{
 		title: { text : null },
@@ -53,7 +53,7 @@ var percYAxis =
 	};
 var percToolFormatter = function() { return '<b>'+ Math.floor(this.y) +'%</b><br/>'; };
 	
-var chartPrecip, chartFlyability; 
+var chartPrecip, chartFlyability, chartWind; 
 function setOptions() {
 	Highcharts.setOptions({
 		chart: {
@@ -89,7 +89,7 @@ function plotFlyability(id, times, values) {
 	});
 }
 function plotWind(id, times, wind, gust) {
-	chartFlyability = new Highcharts.Chart({
+	chartWind = new Highcharts.Chart({
 		chart: {
 			renderTo: id,
 		},
@@ -102,7 +102,43 @@ function plotWind(id, times, wind, gust) {
 					return '' + this.value + 'mph';
 				}
 			},
-			min: 0
+			min: 0,
+			max: 20,
+			plotBands: [
+				{
+					from: 12,
+					to: 15,
+					color: 'rgba(255,0,0, 0.2)',
+					label: {
+						text: 'P2 wind unsafe',
+						style: {
+							color: '#606060'
+						}
+					}
+				}, 
+				{
+					from: 15,
+					to: 18,
+					color: 'rgba(255,0,0, 0.3)',
+					label: {
+						text: 'P3 wind / P2 gust unsafe',
+						style: {
+							color: '#606060'
+						}
+					}
+				}, 
+				{
+					from: 18,
+					to: 20,
+					color: 'rgba(255,0,0, 0.4)',
+					label: {
+						text: 'P3 gust unsafe',
+						style: {
+							color: '#606060'
+						}
+					}
+				}, 
+			],
 		},
 		legend: { enabled: true },
 		tooltip: {
