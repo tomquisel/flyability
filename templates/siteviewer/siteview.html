@@ -15,6 +15,8 @@
 <li>{{site.altitude}}</li>
 <li>{{site.takeoffDirLeft}}</li>
 <li>{{site.takeoffDirRight}}</li>
+<li>{{site.left}}</li>
+<li>{{site.right}}</li>
 </ul>
 
 <ul class="nav nav-pills">
@@ -59,6 +61,7 @@
 			</table>
 		{% endcomment %}
 			<div id="{{day.name}}_flyability">Loading...</div>
+			<div id="{{day.name}}_dir">Loading...</div>
 			<div id="{{day.name}}_wind">Loading...</div>
 		{% comment %}
 			Cloud Cover (%)
@@ -86,14 +89,9 @@
 		times = {{day.times|safe}};
 		plotSummary("{{day.name}}_mini", {{day.scores}});
 		$('#{{day.name}}_tab').on('shown', function (e) {
-			//{% for hour in day.hours %}
-			//	drawArrow("{{day.name}}{{hour.hour}}", {{hour.dir}});
-			//{% endfor %}
-			//plotFlyability("{{day.name}}_flyability", {{day.scores}});
-			//plot("{{day.name}}_wind", {{day.wind}});
-			//plotFlyability("{{day.name}}_pop", {{day.pop}});
-			//plotFlyability("{{day.name}}_clouds", {{day.clouds}});
 			plotFlyability("{{day.name}}_flyability", times, {{day.scores}});
+			plotWindDir("{{day.name}}_dir", times, {{day.dir}},
+                {{site.left}}, {{site.right}});
 			plotWind("{{day.name}}_wind", times, {{day.wind}}, {{day.gust}});
 			plotPrecip("{{day.name}}_precip", times, {{day.pop}});
 		});

@@ -6,38 +6,6 @@ function toint(vals) {
 	return $.map(vals, function(val, i) { return Math.round(val); });
 }
 
-function drawArrow(id, dir) {
-	var canvas = $("#"+id).get(0);
-	var context = canvas.getContext("2d");
-	// this assumes it's a square.
-	w = canvas.width;
-	context.clearRect(0,0,w,w);
-	pad = 1;
-	angle = dir * Math.PI / 180.0;
-	c = w / 2;
-	halflen = w / 2 - pad;
-	incx = halflen * -Math.sin(angle);
-	incy = halflen * Math.cos(angle);
-	fromx = c - incx;
-	fromy = c - incy;
-	tox = c + incx;
-	toy = c + incy;
-	context.beginPath();
-	context.lineWidth = 3;
-	canvasArrow(context,fromx, fromy, tox, toy);
-	context.stroke();
-}
-
-function canvasArrow(context, fromx, fromy, tox, toy){
-    var headlen = 10;   // length of head in pixels
-    var angle = Math.atan2(toy-fromy,tox-fromx);
-    context.moveTo(fromx, fromy);
-    context.lineTo(tox, toy);
-    context.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
-    context.moveTo(tox, toy);
-    context.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
-}
-
 var chartWidth=600;
 var smallChartHeight=300;
 var percYAxis = 
@@ -53,7 +21,7 @@ var percYAxis =
 	};
 var percToolFormatter = function() { return '<b>'+ Math.floor(this.y) +'%</b><br/>'; };
 	
-var chartPrecip, chartFlyability, chartWind; 
+var chartPrecip, chartFlyability, chartWind, chartDir; 
 function setOptions() {
 	Highcharts.setOptions({
 		chart: {
@@ -84,6 +52,26 @@ function plotFlyability(id, times, values) {
 		},
 		series: [{
 			name: "Flyability",
+			data: values
+		}],
+	});
+}
+function plotWindDir(id, times, dir, left, right) {
+    var values = [];
+    for ( d in dir ) {
+        url = '/flyability/wind/dir_' + d + '_' + left + '_' + right + 
+              '_40.png';
+        values.push( { y: 0, marker: { symbol: 'url(' + url + ')' } } );
+    }
+	chartFlyability = new Highcharts.Chart({
+		chart: {
+			renderTo: id,
+		},
+		title: { text: "Wind Direction" },
+		xAxis: { categories: times },
+		yAxis: {},
+		series: [{
+			name: "Wind",
 			data: values
 		}],
 	});
@@ -140,7 +128,6 @@ function plotWind(id, times, wind, gust) {
 				}, 
 			],
 		},
-		legend: { enabled: true },
 		tooltip: {
 			crosshairs : true,
 			shared : true,

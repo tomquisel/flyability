@@ -10,11 +10,22 @@ import grapher
 
 def site(request, name):
     site = get_object_or_404(Site, pk=name)
+    left, right = site.getTakeoffRange()
+    site.left = left
+    site.right = right
     mgr = main.ForecastMgr(site)
     days = mgr.getDays()
     env = {'site' : site, 'days': days}
     return render_to_response('siteviewer/siteview.html', env,
                               context_instance=RequestContext(request))
+
+def windDir(request, wind, left, right, size):
+    wind, left, right, size = int(wind), int(left), int(right), int(size)
+    canvas = grapher.drawWindDir(wind, left, right, size)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response)
+    plt.clf()
+    return response
 
 def forecastImage(request, name, date):
     site = get_object_or_404(Site, pk=name)
