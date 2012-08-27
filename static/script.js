@@ -6,8 +6,8 @@ function toint(vals) {
 	return $.map(vals, function(val, i) { return Math.round(val); });
 }
 
-var chartWidth=600;
-var smallChartHeight=300;
+var chartWidth=800;
+var chartHeight=200;
 var percYAxis = 
 	{
 		title: { text : null },
@@ -26,8 +26,9 @@ function setOptions() {
 	Highcharts.setOptions({
 		chart: {
 			type: 'spline', 
-			height: smallChartHeight,
-			width: chartWidth,
+			height: chartHeight,
+            //width: chartWidth,
+            marginLeft: 50
 		},
 		tooltip: {
 			crosshairs : true,
@@ -56,30 +57,49 @@ function plotFlyability(id, times, values) {
 		}],
 	});
 }
+
 function plotWindDir(id, times, dir, left, right) {
     var values = [];
-    for ( d in dir ) {
-        url = '/flyability/wind/dir_' + d + '_' + left + '_' + right + 
+    for ( i in dir ) {
+        url = '/flyability/wind/dir_' + dir[i] + '_' + left + '_' + right + 
               '_40.png';
         values.push( { y: 0, marker: { symbol: 'url(' + url + ')' } } );
     }
 	chartFlyability = new Highcharts.Chart({
 		chart: {
 			renderTo: id,
+            height: 130,
+            type: 'scatter',
 		},
 		title: { text: "Wind Direction" },
-		xAxis: { categories: times },
-		yAxis: {},
+		xAxis: { 
+            categories: times,
+        },
+		yAxis: {
+            gridLineWidth: 0,
+            title: { text : null },
+            labels : {
+                formatter: function() {
+                    return '   ';
+                }
+            },
+        },
+        tooltip: { enabled: false}, 
 		series: [{
 			name: "Wind",
 			data: values
 		}],
 	});
 }
+
 function plotWind(id, times, wind, gust) {
+    var gustMax = Math.max.apply(Math, gust);
+    var windMax = Math.max.apply(Math, wind);
+    var chartMax = Math.max(gustMax, windMax, 20);
 	chartWind = new Highcharts.Chart({
 		chart: {
 			renderTo: id,
+            height: 300,
 		},
 		title: { text: "Wind Speed" },
 		xAxis: { categories: times },
@@ -91,7 +111,7 @@ function plotWind(id, times, wind, gust) {
 				}
 			},
 			min: 0,
-			max: 20,
+			max: chartMax,
 			plotBands: [
 				{
 					from: 12,
@@ -117,7 +137,7 @@ function plotWind(id, times, wind, gust) {
 				}, 
 				{
 					from: 18,
-					to: 20,
+					to: 2000,
 					color: 'rgba(255,0,0, 0.4)',
 					label: {
 						text: 'P3 gust unsafe',
@@ -143,7 +163,7 @@ function plotPrecip(id, times, values) {
 		chart: {
 			renderTo: id,
 			plotBackgroundColor : {
-				linearGradient: [0,0,0,smallChartHeight],
+				linearGradient: [0,0,0,chartHeight],
 				stops: [
 					[0, 'rgb(255, 100, 100)'],
 					[0.5, 'rgb(255, 200, 200)'],

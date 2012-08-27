@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 from siteviewer.models import Site
 import siteviewer.main as main
 import grapher
+import threading
+
+threadLock = threading.Lock()
 
 def site(request, name):
     site = get_object_or_404(Site, pk=name)
@@ -21,8 +24,11 @@ def site(request, name):
 
 def windDir(request, wind, left, right, size):
     wind, left, right, size = int(wind), int(left), int(right), int(size)
+    threadLock.acquire()
     canvas = grapher.drawWindDir(wind, left, right, size)
+    threadLock.release()
     response = HttpResponse(content_type='image/png')
+    #response.write(open("asdf.png").read())
     canvas.print_png(response)
     plt.clf()
     return response

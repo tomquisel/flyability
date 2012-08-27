@@ -29,10 +29,8 @@ def drawWindDir(wind, left, right, size):
     y = -np.cos(theta)
     x = np.append(x, 0)
     y = np.append(y, 0)
-    ax.fill(x, y, alpha=0.4, facecolor='red', linewidth=0, clip_on=False,
+    ax.fill(x, y, alpha=0.15, facecolor='red', linewidth=0, clip_on=False,
             zorder=1)
-
-
 
     canvas = FigureCanvas(fig)
     return canvas
