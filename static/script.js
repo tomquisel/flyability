@@ -1,5 +1,5 @@
 function plotSummary(id, data) {
-	$("#"+id).sparkline(toint(data), {type:"bar", chartRangeMin:0, chartRangeMax:100});
+	$("#"+id).sparkline(toint(data), {type:"bar", chartRangeMin:0, chartRangeMax:100, tooltipSuffix: "%"});
 }
 
 function toint(vals) {

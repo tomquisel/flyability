@@ -20,57 +20,60 @@
 </ul>
 
 <ul class="nav nav-pills">
-	{% for day in days %}
-		<li><a href="#{{day.name}}_details" data-toggle="pill" id="{{day.name}}_tab">
-			<p>{{ day.name }}</p>
-			<h1>{{ day.flyability|floatformat:0 }}</h1>
-			<span id="{{day.name}}_mini">Loading...</span>
-			</a></li>
-	{% endfor %}
+    {% for day in days %}
+        <li><a href="#{{day.name}}_details" data-toggle="pill" 
+                id="{{day.name}}_tab">
+            <div class="daypill">
+            <p>{{ day.name }}</p>
+            <h1>{{ day.flyability|floatformat:0 }}</h1>
+            <span id="{{day.name}}_mini">Loading...</span>
+            </div>
+            </a></li>
+    {% endfor %}
 </ul>
 
 <div class="tab-content">
-	{% for day in days %}
-		<div class="tab-pane" id="{{day.name}}_details">
-		{% comment %}
-			<table class="table table-bordered">
-				<thead>
-					<tr>
-						<th>Time</th>
-						<th>Flyability</th>
-						<th>Wind (Gust) Speed in mph</th>
-						<th>Wind Direction</th>
-						<th>Chance of Precipitation (%)</th>
-						<th>Cloud Cover (%)</th>
-						<th>Temperature (F)</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for hour in day.hours %}
-						<tr>
-						<td>{{hour.name}}</td>
-						<td>{{hour.flyability|floatformat:0}}</td>
-						<td>{{hour.wind|floatformat:0}} ({{hour.gust|floatformat:0}})</td>
-						<td><canvas id="{{day.name}}{{hour.hour}}" width="15" height="15"></canvas></td>
-						<td>{{hour.pop|floatformat:0}}</td>
-						<td>{{hour.clouds|floatformat:0}}</td>
-						<td>{{hour.temp|floatformat:0}}</td>
-						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		{% endcomment %}
-			<div id="{{day.name}}_flyability">Loading...</div>
-			<div id="{{day.name}}_dir">Loading...</div>
-			<div id="{{day.name}}_wind">Loading...</div>
-		{% comment %}
-			Cloud Cover (%)
-			<div id="{{day.name}}_clouds">Loading...</div>
-			Chance of Precipitation
-		{% endcomment %}
-			<div id="{{day.name}}_precip">Loading...</div>
-		</div>
-	{% endfor %}
+    {% for day in days %}
+        <div class="tab-pane" id="{{day.name}}_details">
+        {% comment %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Flyability</th>
+                        <th>Wind (Gust) Speed in mph</th>
+                        <th>Wind Direction</th>
+                        <th>Chance of Precipitation (%)</th>
+                        <th>Cloud Cover (%)</th>
+                        <th>Temperature (F)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hour in day.hours %}
+                        <tr>
+                        <td>{{hour.name}}</td>
+                        <td>{{hour.flyability|floatformat:0}}</td>
+                        <td>{{hour.wind|floatformat:0}} ({{hour.gust|floatformat:0}})</td>
+                        <td><canvas id="{{day.name}}{{hour.hour}}" width="15" height="15"></canvas></td>
+                        <td>{{hour.pop|floatformat:0}}</td>
+                        <td>{{hour.clouds|floatformat:0}}</td>
+                        <td>{{hour.temp|floatformat:0}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endcomment %}
+            <div id="{{day.name}}_flyability">Loading...</div>
+            <div id="{{day.name}}_dir">Loading...</div>
+            <div id="{{day.name}}_wind">Loading...</div>
+        {% comment %}
+            Cloud Cover (%)
+            <div id="{{day.name}}_clouds">Loading...</div>
+            Chance of Precipitation
+        {% endcomment %}
+            <div id="{{day.name}}_precip">Loading...</div>
+        </div>
+    {% endfor %}
 </div>
 
 {%comment%}
@@ -83,18 +86,18 @@
 <script src="{{ STATIC_URL }}highcharts.js" type="text/javascript"></script>
 
 <script type="text/javascript">
-	setOptions();
-	var times;
-	{% for day in days %}
-		times = {{day.times|safe}};
-		plotSummary("{{day.name}}_mini", {{day.scores}});
-		$('#{{day.name}}_tab').on('shown', function (e) {
-			plotFlyability("{{day.name}}_flyability", times, {{day.scores}});
-			plotWindDir("{{day.name}}_dir", times, {{day.dir}},
+    setOptions();
+    var times;
+    {% for day in days %}
+        times = {{day.times|safe}};
+        plotSummary("{{day.name}}_mini", {{day.scores}});
+        $('#{{day.name}}_tab').on('shown', function (e) {
+            plotFlyability("{{day.name}}_flyability", times, {{day.scores}});
+            plotWindDir("{{day.name}}_dir", times, {{day.dir}},
                 {{site.left}}, {{site.right}});
-			plotWind("{{day.name}}_wind", times, {{day.wind}}, {{day.gust}});
-			plotPrecip("{{day.name}}_precip", times, {{day.pop}});
-		});
-	{% endfor %}
+            plotWind("{{day.name}}_wind", times, {{day.wind}}, {{day.gust}});
+            plotPrecip("{{day.name}}_precip", times, {{day.pop}});
+        });
+    {% endfor %}
 </script>
 {% endblock %}

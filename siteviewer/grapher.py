@@ -16,7 +16,8 @@ def drawWindDir(wind, left, right, size):
     ax = fig.add_subplot(111)
     ax.set_axis_off()
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-    Q = plt.quiver([-X[0]], [-Y[0]], X,Y, scale=1, units='height', width = 0.1)
+    Q = plt.quiver([-X[0]], [-Y[0]], X,Y, scale=1, units='height', width = 0.1,
+                   color='0.2')
 
     if left < right:
         start = right
