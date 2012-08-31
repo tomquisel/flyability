@@ -3,3 +3,24 @@
     color: #444;
     text-align: center;
 }
+
+.inline {
+    display: inline;
+}
+
+.lpad {
+    padding-left: 20px;
+}
+
+.bpad {
+    padding-bottom: 20px;
+}
+
+.textcenter {
+    text-align: center;
+}
+
+.orient {
+    display: block;
+    margin: auto;
+}

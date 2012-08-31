@@ -9,14 +9,26 @@
 
 {% block content %}
 <div class="page-header">
-    <h1> 
-        {{site.name}}
-        <small><a href="#">Site Details</a></small>
-    </h1>
-    <h1> 
-        <small>Flyability Report</small>
-    </h1>
+    <h1 class="lpad"> {{site.name}}, {{site.state}} </h1>
 </div>
+<div class="row lpad bpad">
+    <div class="span3 textcenter">
+        <strong>Takeoff Orientation</strong>
+        <img class="img-rounded orient" 
+             src="/flyability/wind/dir_0_{{site.left}}_{{site.right}}_80.png" >
+    </div>
+    <div class="span3">
+        <strong class="textcenter" >Further Info</strong>
+        <ul>
+          <li><a href="{{site.website}}">{{site.name}} Website</a></li>
+          <li><a href="{{site.pgearthPage}}">{{site.name}} Details on PG Earth</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="lpad">
+<h1 class="inline"><small> Flyability Report </small></h1>
+(<a href="#">What?</a>)
 {% comment %}
 <ul>
 <li></li>
@@ -85,6 +97,7 @@
             <div id="{{day.name}}_precip">Loading...</div>
         </div>
     {% endfor %}
+</div>
 </div>
 
 {%comment%}
