@@ -26,23 +26,11 @@
 
 <div class="lpad">
 <h1 class="inline"><small> Flyability Report </small></h1>
-(<a id="what" 
-    href="javascript:$('#what').popover();"
+(<a rel="popover"
+    href=""
     title="What is a Flyability Report?"
-    data-content="asdf"
-    >What?</a>)
-{% comment %}
-<ul>
-<li></li>
-<li>{{site.lat}}</li>
-<li>{{site.lon}}</li>
-<li>{{site.altitude}}</li>
-<li>{{site.takeoffDirLeft}}</li>
-<li>{{site.takeoffDirRight}}</li>
-<li>{{site.left}}</li>
-<li>{{site.right}}</li>
-</ul>
-{% endcomment %}
+    data-content="It's like a weather forecast for paragliding. It shows your hourly chances of a successful takeoff on a scale from 0 to 100. Click on a day to see forecast details."
+    >Eh?</a>)
 
 <ul class="nav nav-pills">
     {% for day in days %}
@@ -60,34 +48,6 @@
 <div class="tab-content">
     {% for day in days %}
         <div class="tab-pane" id="{{day.name}}_details">
-        {% comment %}
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Flyability</th>
-                        <th>Wind (Gust) Speed in mph</th>
-                        <th>Wind Direction</th>
-                        <th>Chance of Precipitation (%)</th>
-                        <th>Cloud Cover (%)</th>
-                        <th>Temperature (F)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for hour in day.hours %}
-                        <tr>
-                        <td>{{hour.name}}</td>
-                        <td>{{hour.flyability|floatformat:0}}</td>
-                        <td>{{hour.wind|floatformat:0}} ({{hour.gust|floatformat:0}})</td>
-                        <td><canvas id="{{day.name}}{{hour.hour}}" width="15" height="15"></canvas></td>
-                        <td>{{hour.pop|floatformat:0}}</td>
-                        <td>{{hour.clouds|floatformat:0}}</td>
-                        <td>{{hour.temp|floatformat:0}}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endcomment %}
             <div id="{{day.name}}_flyability">Loading...</div>
             <div id="{{day.name}}_dir">Loading...</div>
             <div id="{{day.name}}_wind">Loading...</div>
@@ -113,6 +73,13 @@
 
 <script type="text/javascript">
     setOptions();
+    $(document).ready(function() {
+        $("a[rel=popover]")
+            .popover()
+            .click(function(e) {
+                e.preventDefault()
+            })
+    });
     var times;
     {% for day in days %}
         times = {{day.times|safe}};
