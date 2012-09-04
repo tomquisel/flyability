@@ -8,9 +8,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1 class="lpad"> {{site.name}}, {{site.state}} </h1>
-</div>
+<h1 class="lpad"> {{site.name}}, {{site.state}} </h1>
 <div class="row lpad bpad">
     <div class="span3 textcenter">
         <strong>Takeoff Orientation</strong>
@@ -28,7 +26,11 @@
 
 <div class="lpad">
 <h1 class="inline"><small> Flyability Report </small></h1>
-(<a href="#">What?</a>)
+(<a id="what" 
+    href="javascript:$('#what').popover();"
+    title="What is a Flyability Report?"
+    data-content="asdf"
+    >What?</a>)
 {% comment %}
 <ul>
 <li></li>
