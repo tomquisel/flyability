@@ -24,3 +24,11 @@
     display: block;
     margin: auto;
 }
+
+.nav > .active * {
+    color: #fff;
+}
+
+.nav > .active span {
+    display: none;
+}
