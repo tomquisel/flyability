@@ -41,7 +41,8 @@ class ForecastMgr(object):
                     hour[name] = self.getValue(name, t)
                 day['hours'].append(hour)
             for name in names:
-                day[name] = self.getValues(name, flyabilityHours.times)
+                vals = self.getValues(name, flyabilityHours.times)
+                day[name] = TimeSeries.stripTrailingNones(vals)
             day['scores'] = flyabilityHours.values
             day['times'] = json.dumps([ h['name'] for h in day['hours'] ])
             days.append(day)
@@ -51,10 +52,10 @@ class ForecastMgr(object):
         return (self.times, self.seriesDict)
 
     def getValues(self, name, times):
-        return self.seriesDict[name].interpolate(times, 0)
+        return self.seriesDict[name].interpolate(times)
 
     def getValue(self, name, time):
-        return self.seriesDict[name].interpolate([time], 0)[0]
+        return self.seriesDict[name].interpolate([time])[0]
 
     def fetchSeries(self, start=dt.datetime.now(), hours=168):
         seriesDict = weather.getWeatherData(self.site)

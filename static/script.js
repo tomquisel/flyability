@@ -151,10 +151,21 @@ function plotWind(id, times, wind, gust) {
 		tooltip: {
 			crosshairs : true,
 			shared : true,
+            formatter: function() {
+                var s = '';
+                $.each(this.points, function(i, point) {
+                    ser = point.series;
+                    y = Math.round(point.y);
+                    s += '<span style="color:' + ser.color + '">' + 
+                         ser.name + '</span>: <b>'+ y +'</b>mph<br/>';
+                });
+                
+                return s;
+            },
 		},
 		series: [
+			{ name: "Gust", data: gust },
 			{ name: "Wind", data: wind },
-			{ name: "Gust", data: gust }
 		],
 	});
 }

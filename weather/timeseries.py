@@ -91,3 +91,15 @@ class TimeSeries(object):
             cur += inc
         return res
 
+    @classmethod
+    def stripTrailingNones(cls, values):
+        newvalues = []
+        skip = True
+        for i in range(len(values)-1, 0, -1):
+            if values[i] != None:
+                skip = False
+            if not skip:
+                newvalues.append(values[i])
+        newvalues.reverse()
+        return newvalues
+
