@@ -5,9 +5,8 @@ import matplotlib.transforms as transforms
 from matplotlib.font_manager import FontProperties
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.backend_bases import FigureManagerBase
 
-def drawWindDir(wind, left, right, size):
+def drawWindDir(wind, left, right, size, showWind=True):
     fig = plt.figure(figsize=(1,1), dpi=size, facecolor='w')
     X = getXComponents([wind], [1])
     Y = getYComponents([wind], [1])
@@ -16,29 +15,36 @@ def drawWindDir(wind, left, right, size):
     ax = fig.add_subplot(111)
     ax.set_axis_off()
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-    Q = plt.quiver([-X[0]], [-Y[0]], X,Y, scale=1, units='height', width = 0.1,
-                   color='0.2')
+    cir = plt.Circle( (0,0), radius=0.5, color='w', zorder=3)
+    fig.gca().add_patch(cir)
+    if showWind:
+        Q = plt.quiver([-X[0]], [-Y[0]], [X[0]/2.0], [Y[0]/2.0], scale=1, 
+                       units='height', width = 0.05, color='0.2', zorder=4,
+                       headlength=4, headwidth=4)
+    else:
+        plt.axvline(color='black', zorder=4)
+        plt.axhline(color='black', zorder=4)
 
     if left < right:
-        start = right
-        end = 360 + left
+        start = left
+        end = right
     else:
-        start = right
-        end = left
-    theta = np.arange(start, end, 1.0)*np.pi/180.0
-    x = -np.sin(theta)
-    y = -np.cos(theta)
+        start = left
+        end = right + 360
+    theta = np.arange(start, end, 2.0)*np.pi/180.0
+    x = np.sin(theta)
+    y = np.cos(theta)
     x = np.append(x, 0)
     y = np.append(y, 0)
-    ax.fill(x, y, alpha=0.15, facecolor='red', linewidth=0, clip_on=False,
-            zorder=1)
+    ax.fill(x, y, alpha=0.5, facecolor='green', linewidth=0, clip_on=False,
+            zorder=2)
 
     canvas = FigureCanvas(fig)
     return canvas
 
 def plot(t, timeseries, canvas = False):
     def r(x):
-        return x.read(t, 0.0)
+        return x.interpolate(t, 0.0)
     temp = r(timeseries['temp'])
     dewpt = r(timeseries['dewpt'])
     pop = r(timeseries['pop'])

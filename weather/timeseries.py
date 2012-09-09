@@ -25,7 +25,7 @@ class TimeSeries(object):
 
         return res
 
-    def read(self, tslist, default=None):
+    def interpolate(self, tslist, default=None):
         """Returns the value of the series at each timestamp in tslist.
         
         Assumes that tslist is sorted.
@@ -34,25 +34,34 @@ class TimeSeries(object):
         res = []
         awareTsList = self.makeAware(tslist, self.tz)
 
-        before = 0.0
+        before = None
         ind = 0
         after = self.values[ind]
         l = len(self.times)
         for ts in awareTsList:
-            while ind < l and ts >= self.times[ind]:
+            # this is necessary if ts == self.times[-1]
+            if ind < l and ts == self.times[ind]:
+                res.append(after)
+                continue
+            # advance our position in self.values
+            while ind < l and ts > self.times[ind]:
                 before = after
                 ind += 1
                 if ind >= l:
-                    before = 0.0
-                    after = 0.0
-                    break
-                after = self.values[ind]
-            if ind == 0 or ind >= l:
+                    after = None
+                else:
+                    after = self.values[ind]
+            # if we're before the start of self.times or after the end 
+            # of self.times, just use the default value
+            if before is None or after is None:
                 v = default
-            else :
-                bdist = (ts - self.times[ind-1]).total_seconds()
-                adist = (ts - self.times[ind]).total_seconds()
-                v = (bdist * before + adist * after) / (bdist + adist)
+            else:
+                # compute our value as the weighted average of before and after
+                bdist = abs((ts - self.times[ind-1]).total_seconds())
+                adist = abs((ts - self.times[ind]).total_seconds())
+                aweight = 1 - adist / (adist + bdist)
+                bweight = 1 - aweight
+                v = bweight * before + aweight * after
             res.append(v)
         return res
 

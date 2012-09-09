@@ -26,8 +26,9 @@ def site(request, name):
 
 def windDir(request, wind, left, right, size):
     wind, left, right, size = int(wind), int(left), int(right), int(size)
+    showWind = wind >= 0
     threadLock.acquire()
-    canvas = grapher.drawWindDir(wind, left, right, size)
+    canvas = grapher.drawWindDir(wind, left, right, size, showWind)
     threadLock.release()
     response = HttpResponse(content_type='image/png')
     #response.write(open("asdf.png").read())

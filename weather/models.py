@@ -1,6 +1,6 @@
 import datetime
 from django.db import models
-from flyability.siteviewer.models import Site
+from siteviewer.models import Site
 
 class Forecast(models.Model):
     site = models.ForeignKey(Site)

@@ -51,10 +51,10 @@ class ForecastMgr(object):
         return (self.times, self.seriesDict)
 
     def getValues(self, name, times):
-        return self.seriesDict[name].read(times, 0)
+        return self.seriesDict[name].interpolate(times, 0)
 
     def getValue(self, name, time):
-        return self.seriesDict[name].read([time], 0)[0]
+        return self.seriesDict[name].interpolate([time], 0)[0]
 
     def fetchSeries(self, start=dt.datetime.now(), hours=168):
         seriesDict = weather.getWeatherData(self.site)

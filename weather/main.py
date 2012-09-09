@@ -3,6 +3,7 @@ import xml2models
 import fetcher
 from weather.models import Forecast, ForecastValue
 from timeseries import TimeSeries
+from siteviewer.models import Site
 
 def fetchForecast(site):
     forecast = Forecast(site = site, lat = site.lat, lon = site.lon)
@@ -41,7 +42,6 @@ def getWeatherData(site):
     query = ForecastValue.objects.filter(forecast=forecast.id)
     values = query.order_by('name','time')
     res = modelsToTimeSeries(values, site.timezone)
-    test = res['gust'].read(res['wind'].times)
     return res
 
 def modelsToTimeSeries(values, tz):
@@ -49,9 +49,27 @@ def modelsToTimeSeries(values, tz):
     valuesDict = {}
     for v in values:
         n = v.name
-        l =  valuesDict.get(n,[])
+        l = valuesDict.get(n,[])
         l.append(v)
         valuesDict[n] = l
     for n,vlist in valuesDict.items():
         seriesDict[n] = TimeSeries.fromModels(vlist, tz)
+    # do some unit conversions
+    TSKnotsToMPH(seriesDict['gust'])
     return seriesDict
+
+def TSKnotsToMPH(ts):
+    ts.values = [ knotsToMPH(v) for v in ts.values ]
+
+def knotsToMPH(knots):
+    return knots * 1.15078
+
+def debug():
+    sites = Site.objects.all()
+    forecast, values = fetchForecast(sites[0])
+    print forecast
+    for v in values:
+        print v
+
+if __name__ == "__main__":
+    debug()

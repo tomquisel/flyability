@@ -42,9 +42,9 @@ class Predictor(object):
         times = self.times
         timeseries = self.timeseries
         site = self.site
-        pop = timeseries['pop'].read(times, 0.0)
-        wind = timeseries['wind'].read(times, 0.0)
-        dir = timeseries['dir'].read(times, 0.0)
+        pop = timeseries['pop'].interpolate(times, 0.0)
+        wind = timeseries['wind'].interpolate(times, 0.0)
+        dir = timeseries['dir'].interpolate(times, 0.0)
 
         values = []
         for i,t in enumerate(times):

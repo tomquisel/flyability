@@ -62,7 +62,7 @@ function plotWindDir(id, times, dir, left, right) {
     var values = [];
     for ( i in dir ) {
         url = '/flyability/wind/dir_' + dir[i] + '_' + left + '_' + right + 
-              '_40.png';
+              '_60.png';
         values.push( { y: 0, marker: { symbol: 'url(' + url + ')' } } );
     }
 	chartFlyability = new Highcharts.Chart({
