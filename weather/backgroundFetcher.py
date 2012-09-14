@@ -1,8 +1,9 @@
-import main
-from siteviewer.models import Site
-from weather.models import Forecast
-import django.utils.timezone as tz
 import datetime
+
+import django.utils.timezone as tz
+from siteviewer.models import Site
+import weather.main
+from weather.models import Forecast
 
 sites = Site.objects.all()
 old = tz.now() - datetime.timedelta(minutes=30)
