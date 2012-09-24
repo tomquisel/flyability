@@ -1,7 +1,7 @@
 ## {{{ http://code.activestate.com/recipes/577494/ (r2)
 from lxml import etree
 import datetime
-from weather.models import Forecast, ForecastValue
+from weather.models import ForecastValue
 
 def parseHourlyData(data):
     dataMap = { 

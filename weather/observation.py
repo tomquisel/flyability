@@ -1,18 +1,28 @@
 from lxml import etree
+from weather.models import Observation, ObservationValue
+import email.utils
+import datetime
 
 class ObservationObj(object):
     def __init__(self, data):
         self.failed = False
+        self.mapping = {
+            "station_id" : ("name", str, None, None),
+            "latitude" : ("latitude", float, -90.0, 90.0),
+            "longitude" : ("longitude", float, -180.0, 180.0),
+            "temp_f" : ("temp", float, -200.0, 200.0),
+            "dewpoint_f" : ("dewpt", float, -200.0, 200.0),
+            "wind_degrees" : ("dir", float, 0.0, 360.0),
+            "wind_mph" : ("wind", float, 0.0, 300.0),
+            "weather" : ("weather", str, None, None),
+            "observation_time_rfc822" : 
+                ("time", ObservationObj._grabTime, None, None)
+        }
         self.readFromData(data)
 
     def readFromData(self, data):
         tree = etree.fromstring(data)
-        mapping = {
-            "station_id" : ("name", str),
-            "latitude" : ("latitude", float),
-            "longitude" : ("longitude", float)
-        }
-        for tag, (name, conv) in mapping.items():
+        for tag, (name, conv, minv, maxv) in self.mapping.items():
             v = tree.xpath("/current_observation/%s/text()" % tag)
             if len(v) < 1:
                 self.failed = True
@@ -20,8 +30,39 @@ class ObservationObj(object):
             v = v[0]
             if conv:
                 v = conv(v)
+            if minv is not None and v < minv:
+                self.failed = True
+                return
+            if maxv is not None and v > maxv:
+                self.failed = True
+                return
             setattr(self, name, v)
         self.iid = int(self.name, 36)
+
+    @classmethod
+    def _grabTime(cls, s):
+        tup = email.utils.parsedate_tz(s)
+        ts = email.utils.mktime_tz(tup)
+        return ts
+
+    def toDjangoModels(self, site, tz, conditionsMgr):
+        dt = datetime.datetime(self.time)
+        utcdt = pytz.utc.localize(dt)
+        locdt = dt.astimezone(tz)
+        obs = Observation(site=site, lat=self.latitude, lon=self.longitude,
+                          time=locdt)
+        skip = set(["name", "weather", "time"])
+        values = []
+        for v in self.mapping.values():
+            name = v[0]
+            if name in skip:
+                continue
+            o = ObservationValue(name=name, value=getattr(self, name))
+            values.append(o)
+        pop = conditionsMgr.getPOP(self.weather)
+        o = ObservationValue(name="pop", value=pop)
+        values.append(o)
+        return (obs, values)
 
     def __unicode__(self):
         s = "Observation:\n"
