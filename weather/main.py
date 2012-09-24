@@ -29,7 +29,7 @@ def isValid(values):
                 print "Error: %s has %d values" % (name, count)
                 return False
         else:
-            if count < 167:
+            if count < 166:
                 print "Error: %s has %d values" % (name, count)
                 return False
     return True

@@ -13,7 +13,7 @@ for site in sites:
         print "Skipping update of forecast for %s" % site
         continue
     print "Updating forecast for %s" % site
-    res = main.fetchForecast(site)
+    res = weather.main.fetchForecast(site)
     if res is None:
         print "weather.gov is having trouble. Rejecting results."
         continue
