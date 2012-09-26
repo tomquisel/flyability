@@ -34,13 +34,16 @@ def isValid(values):
                 return False
     return True
 
-def getWeatherData(site):
+def getWeatherData(site, start):
     # the most recently fetched forecast
+    # TODO: needs to select on site as well
     forecast = Forecast.objects.order_by('-fetchTime')[0]
     et = pytz.timezone("US/Eastern")
-    print "Fetch time:", et.normalize(forecast.fetchTime.astimezone(et))
+    fft = et.normalize(forecast.fetchTime.astimezone(et)
+    print "Forecast fetch time:", fft)
     query = ForecastValue.objects.filter(forecast=forecast.id)
     values = query.order_by('name','time')
+    # TODO: need to also select observation values since start
     res = modelsToTimeSeries(values, site.timezone)
     return res
 

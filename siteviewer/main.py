@@ -58,7 +58,7 @@ class ForecastMgr(object):
         return self.seriesDict[name].interpolate([time])[0]
 
     def fetchSeries(self, start=dt.datetime.now(), hours=168):
-        seriesDict = weather.getWeatherData(self.site)
+        seriesDict = weather.getWeatherData(self.site, start)
         times = TimeSeries.range(start, hours, TimeSeries.hour)
         awareTimes = TimeSeries.makeAware(times, self.tz)
         predictor = Predictor(awareTimes, seriesDict, self.site)
