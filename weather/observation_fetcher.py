@@ -34,7 +34,7 @@ class ObservationIndex(object):
             self.tree.insert(obs.iid, (lat, lon, lat, lon), obj=obs)
 
     def getNearest(self, lat, lon):
-        return self.tree.nearest((lat, lon, lat, lon), 10, 'raw')
+        return self.tree.nearest((lat, lon, lat, lon), 1, 'raw')
 
 def buildIndex():
     si = ObservationIndex(tmpDir)

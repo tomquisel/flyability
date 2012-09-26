@@ -1,6 +1,6 @@
 import pytz, datetime
-import xml2models
-import fetcher
+import forecast_parser as fparser
+import forecast_fetcher as fetcher
 from weather.models import Forecast, ForecastValue
 from timeseries import TimeSeries
 from siteviewer.models import Site
@@ -8,10 +8,10 @@ from siteviewer.models import Site
 def fetchForecast(site):
     forecast = Forecast(site = site, lat = site.lat, lon = site.lon)
     hourly = fetcher.cachingFetch(fetcher.hourlyWeather, (site.lat, site.lon))
-    values = xml2models.parseHourlyData(hourly)
+    values = fparser.parseHourlyData(hourly)
     fourhourly = fetcher.cachingFetch(fetcher.fourHourlyWeather, 
                                       (site.lat, site.lon))
-    fourvalues = xml2models.parseFourHourlyData(fourhourly)
+    fourvalues = fparser.parseFourHourlyData(fourhourly)
     values.extend(fourvalues)
     if not isValid(values):
         return None

@@ -1,7 +1,7 @@
 from lxml import etree
 from weather.models import Observation, ObservationValue
 import email.utils
-import datetime
+import datetime, pytz
 
 class ObservationObj(object):
     def __init__(self, data):
@@ -15,8 +15,7 @@ class ObservationObj(object):
             "wind_degrees" : ("dir", float, 0.0, 360.0),
             "wind_mph" : ("wind", float, 0.0, 300.0),
             "weather" : ("weather", str, None, None),
-            "observation_time_rfc822" : 
-                ("time", ObservationObj._grabTime, None, None)
+            "observation_time_rfc822" : ("time", _grabTime, None, None)
         }
         self.readFromData(data)
 
@@ -39,19 +38,13 @@ class ObservationObj(object):
             setattr(self, name, v)
         self.iid = int(self.name, 36)
 
-    @classmethod
-    def _grabTime(cls, s):
-        tup = email.utils.parsedate_tz(s)
-        ts = email.utils.mktime_tz(tup)
-        return ts
-
-    def toDjangoModels(self, site, tz, conditionsMgr):
-        dt = datetime.datetime(self.time)
-        utcdt = pytz.utc.localize(dt)
-        locdt = dt.astimezone(tz)
+    def toDjangoModels(self, site, conditionMgr):
+        dt = datetime.datetime.fromtimestamp(self.time)
+        tz = pytz.timezone(site.timezone)
+        locdt = tz.localize(dt)
         obs = Observation(site=site, lat=self.latitude, lon=self.longitude,
                           time=locdt)
-        skip = set(["name", "weather", "time"])
+        skip = set(["name", "weather", "time", "latitude", "longitude"])
         values = []
         for v in self.mapping.values():
             name = v[0]
@@ -59,7 +52,7 @@ class ObservationObj(object):
                 continue
             o = ObservationValue(name=name, value=getattr(self, name))
             values.append(o)
-        pop = conditionsMgr.getPOP(self.weather)
+        pop = conditionMgr.getPOP(self.weather)
         o = ObservationValue(name="pop", value=pop)
         values.append(o)
         return (obs, values)
@@ -75,4 +68,9 @@ class ObservationObj(object):
 
     def __str__(self):
             return unicode(self).encode('utf-8')
+
+def _grabTime(s):
+    tup = email.utils.parsedate_tz(s)
+    ts = email.utils.mktime_tz(tup)
+    return ts
 

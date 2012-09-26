@@ -23,6 +23,9 @@ class ConditionMgr(object):
     def getPOP(self, name):
         return self.nameToPop.get(name)
 
+def buildConditionMgr():
+    return ConditionMgr(conditionsFilename)
+
 if __name__  == "__main__":
     c = ConditionMgr(conditionsFilename)
     print c.nameToPop
