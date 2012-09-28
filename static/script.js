@@ -28,7 +28,7 @@ function setOptions() {
 			type: 'spline', 
 			height: chartHeight,
             //width: chartWidth,
-            marginLeft: 50
+            marginLeft: 0
 		},
 		tooltip: {
 			crosshairs : true,
@@ -62,13 +62,13 @@ function plotWindDir(id, times, dir, left, right) {
     var values = [];
     for ( i in dir ) {
         url = '/flyability/wind/dir_' + dir[i] + '_' + left + '_' + right + 
-              '_60.png';
+              '_35.png';
         values.push( { y: 0, marker: { symbol: 'url(' + url + ')' } } );
     }
 	chartFlyability = new Highcharts.Chart({
 		chart: {
 			renderTo: id,
-            height: 130,
+            //height: 130,
             type: 'scatter',
 		},
 		title: { text: "Wind Direction" },
@@ -99,7 +99,7 @@ function plotWind(id, times, wind, gust) {
 	chartWind = new Highcharts.Chart({
 		chart: {
 			renderTo: id,
-            height: 300,
+            //height: 300,
 		},
 		title: { text: "Wind Speed" },
 		xAxis: { categories: times },
@@ -173,7 +173,7 @@ function plotPrecip(id, times, values) {
 	chartPrecip = new Highcharts.Chart({
 		chart: {
 			renderTo: id,
-			plotBackgroundColor : {
+			/*plotBackgroundColor : {
 				linearGradient: [0,0,0,chartHeight],
 				stops: [
 					[0, 'rgb(255, 100, 100)'],
@@ -181,7 +181,7 @@ function plotPrecip(id, times, values) {
 					[0.7, 'rgb(255, 255, 255)'],
 				]
 
-			}
+			}*/
 		},
 		title: { text: "Chance of Precipitation" },
 		xAxis: { categories: times },

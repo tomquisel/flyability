@@ -5,10 +5,13 @@ from predictor import Predictor
 import json
 
 class ForecastMgr(object):
-    def __init__(self, site, startDay = dt.date.today(), days=7):
+    def __init__(self, site, startDay = None, days=7):
         self.site = site
         self.days = days
         self.tz = pytz.timezone(site.timezone)
+        if startDay is None:
+            now = dt.datetime.now(self.tz)
+            startDay = dt.date(now.year, now.month, now.day)
         self.startDay = startDay
         self.startTime = dt.datetime.combine(self.startDay, 
                                              dt.time(tzinfo=self.tz))

@@ -6,10 +6,10 @@ class Forecast(models.Model):
     site = models.ForeignKey(Site)
     lat = models.FloatField()
     lon = models.FloatField()
-    fetchTime = models.DateTimeField(auto_now_add=True, db_index=True)
+    fetch_time = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def __unicode__(self):
-        return "Forecast for %f,%f @ %s" % (self.lat, self.lon, self.fetchTime)
+        return "Forecast for %f,%f @ %s" % (self.lat, self.lon, self.fetch_time)
 
 class ForecastValue(models.Model):
     forecast = models.ForeignKey(Forecast)
@@ -24,7 +24,7 @@ class Observation(models.Model):
     site = models.ForeignKey(Site)
     lat = models.FloatField()
     lon = models.FloatField()
-    fetchTime = models.DateTimeField(auto_now_add=True)
+    fetch_time = models.DateTimeField(auto_now_add=True)
     time = models.DateTimeField()
 
 class ObservationValue(models.Model):

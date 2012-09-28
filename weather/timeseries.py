@@ -25,6 +25,13 @@ class TimeSeries(object):
 
         return res
 
+    def add(self, time, value):
+        for i,t in enumerate(self.times):
+            if time < t:
+                self.times.insert(i, time)
+                self.values.insert(i, value)
+                break
+
     def interpolate(self, tslist, default=None):
         """Returns the value of the series at each timestamp in tslist.
         
@@ -63,6 +70,7 @@ class TimeSeries(object):
                 bweight = 1 - aweight
                 v = bweight * before + aweight * after
             res.append(v)
+        assert(len(res) == len(tslist))
         return res
 
     def readNatural(self):
@@ -95,7 +103,7 @@ class TimeSeries(object):
     def stripTrailingNones(cls, values):
         newvalues = []
         skip = True
-        for i in range(len(values)-1, 0, -1):
+        for i in range(len(values)-1, -1, -1):
             if values[i] != None:
                 skip = False
             if not skip:

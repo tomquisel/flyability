@@ -1,8 +1,9 @@
 import pytz, datetime
 import forecast_parser as fparser
 import forecast_fetcher as fetcher
-from weather.models import Forecast, ForecastValue
 from timeseries import TimeSeries
+from weather.models import Forecast, ForecastValue
+from weather.models import Observation, ObservationValue
 from siteviewer.models import Site
 
 def fetchForecast(site):
@@ -35,17 +36,27 @@ def isValid(values):
     return True
 
 def getWeatherData(site, start):
-    # the most recently fetched forecast
-    # TODO: needs to select on site as well
-    forecast = Forecast.objects.order_by('-fetchTime')[0]
+    # the most recently fetched forecast for this site
+    forecast = Forecast.objects.filter(site=site).order_by('-fetch_time')[0]
     et = pytz.timezone("US/Eastern")
-    fft = et.normalize(forecast.fetchTime.astimezone(et)
-    print "Forecast fetch time:", fft)
-    query = ForecastValue.objects.filter(forecast=forecast.id)
+    fft = et.normalize(forecast.fetch_time.astimezone(et))
+    print "Forecast fetch time:", fft
+    query = ForecastValue.objects.filter(forecast=forecast)
     values = query.order_by('name','time')
-    # TODO: need to also select observation values since start
-    res = modelsToTimeSeries(values, site.timezone)
-    return res
+    seriesDict = modelsToTimeSeries(values, site.timezone)
+
+    # get observation data
+    observations = Observation.objects.filter(
+            time__gt=start
+        ).order_by(
+            '-fetch_time'
+        )
+    for o in observations:
+        values = ObservationValue.objects.filter(observation=o)
+        for v in values:
+            seriesDict[v.name].add(o.time, v.value)
+
+    return seriesDict
 
 def modelsToTimeSeries(values, tz):
     seriesDict = {}

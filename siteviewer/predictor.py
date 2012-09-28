@@ -74,10 +74,11 @@ class Predictor(object):
             days.append( (sunInfo['sunrise'], sunInfo['sunset']) )
         return days
 
-    def isDay(self, t, twilightLen = 1):
-        twiLen = datetime.timedelta(hours=twilightLen)
+    def isDay(self, t):
+        sunsetFudge = datetime.timedelta(hours=1)
+        sunriseFudge = datetime.timedelta(hours=2)
         for sunrise, sunset in self.dayIntervals:
-            if t > sunrise + twiLen and t < sunset - twiLen:
+            if t > sunrise + sunriseFudge and t < sunset + sunsetFudge:
                 return True
         return False
 
