@@ -18,13 +18,30 @@ def drawWindDir(wind, left, right, size, showWind=True):
     cir = plt.Circle( (0,0), radius=0.5, color='w', zorder=3)
     fig.gca().add_patch(cir)
     if showWind:
+        in_range = isInRange(wind, left, right)
+        if in_range:
+            arrow_color = 'green'
+        else:
+            arrow_color = 'red'
         Q = plt.quiver([-X[0]], [-Y[0]], [X[0]/2.0], [Y[0]/2.0], scale=1, 
-                       units='height', width = 0.05, color='0.2', zorder=4,
-                       headlength=4, headwidth=4)
+                       units='height', width = 0.05, zorder=4,
+                       headlength=4, headwidth=4, color=arrow_color)
     else:
         plt.axvline(color='black', zorder=4)
         plt.axhline(color='black', zorder=4)
 
+    drawArc(ax, left, right, 'green', 2)
+    drawArc(ax, right, left, 'red', 2)
+
+    canvas = FigureCanvas(fig)
+    return canvas
+
+def isInRange(wind, left, right):
+    if left < right:
+        return left < wind < right
+    return wind > left or wind < right
+
+def drawArc(ax, left, right, color, zorder):
     if left < right:
         start = left
         end = right
@@ -36,11 +53,8 @@ def drawWindDir(wind, left, right, size, showWind=True):
     y = np.cos(theta)
     x = np.append(x, 0)
     y = np.append(y, 0)
-    ax.fill(x, y, alpha=0.5, facecolor='green', linewidth=0, clip_on=False,
-            zorder=2)
-
-    canvas = FigureCanvas(fig)
-    return canvas
+    ax.fill(x, y, alpha=0.5, facecolor=color, linewidth=0, clip_on=False,
+            zorder=zorder)
 
 def plot(t, timeseries, canvas = False):
     def r(x):

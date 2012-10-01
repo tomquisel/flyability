@@ -1,3 +1,5 @@
+"use strict";
+
 function plotSummary(id, data) {
 	$("#"+id).sparkline(toint(data), {type:"bar", chartRangeMin:0, chartRangeMax:100, tooltipSuffix: "%"});
 }
@@ -60,15 +62,18 @@ function plotFlyability(id, times, values) {
 
 function plotWindDir(id, times, dir, left, right) {
     var values = [];
-    for ( i in dir ) {
-        url = '/flyability/wind/dir_' + dir[i] + '_' + left + '_' + right + 
-              '_35.png';
+    left = Math.round(left);
+    right = Math.round(right);
+    for ( var i in dir ) {
+        var d = Math.round(dir[i]);
+        var url = '/flyability/wind/dir_' + d + '_' + left + '_' 
+                  + right + '_50.png';
         values.push( { y: 0, marker: { symbol: 'url(' + url + ')' } } );
     }
 	chartFlyability = new Highcharts.Chart({
 		chart: {
 			renderTo: id,
-            //height: 130,
+            height: 130,
             type: 'scatter',
 		},
 		title: { text: "Wind Direction" },
@@ -154,8 +159,8 @@ function plotWind(id, times, wind, gust) {
             formatter: function() {
                 var s = '';
                 $.each(this.points, function(i, point) {
-                    ser = point.series;
-                    y = Math.round(point.y);
+                    var ser = point.series;
+                    var y = Math.round(point.y);
                     s += '<span style="color:' + ser.color + '">' + 
                          ser.name + '</span>: <b>'+ y +'</b>mph<br/>';
                 });
