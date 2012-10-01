@@ -1,5 +1,9 @@
 import sys, os, math
 import numpy as np
+import tempfile
+os.environ['MPLCONFIGDIR'] = tempfile.mkdtemp()
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.transforms as transforms
 from matplotlib.font_manager import FontProperties
@@ -35,6 +39,9 @@ def drawWindDir(wind, left, right, size, showWind=True):
 
     canvas = FigureCanvas(fig)
     return canvas
+
+def finish():
+    plt.clf()
 
 def isInRange(wind, left, right):
     if left < right:

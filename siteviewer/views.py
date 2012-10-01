@@ -2,10 +2,6 @@ import datetime
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, loader
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-
 from siteviewer.models import Site
 import siteviewer.main as main
 import grapher
@@ -33,7 +29,7 @@ def windDir(request, wind, left, right, size):
     response = HttpResponse(content_type='image/png')
     #response.write(open("asdf.png").read())
     canvas.print_png(response)
-    plt.clf()
+    grapher.finish()
     return response
 
 def forecastImage(request, name, date):
@@ -44,5 +40,5 @@ def forecastImage(request, name, date):
     canvas = grapher.plot(times, seriesDict, canvas = True)
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response)
-    plt.clf()
+    grapher.finish()
     return response
