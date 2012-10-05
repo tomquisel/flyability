@@ -86,11 +86,10 @@
             })
     });
     setOptions();
-    var times;
     {% for day in days %}
-        times = {{day.times|safe}};
         plotSummary("{{day.name}}_mini", {{day.scores}});
         $('#{{day.name}}_tab').on('shown', function (e) {
+            var times = {{day.times|safe}};
             plotFlyability("{{day.name}}_flyability", times, {{day.scores}});
             plotWindDir("{{day.name}}_dir", times, {{day.dir}},
                 {{site.left}}, {{site.right}});
