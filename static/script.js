@@ -107,6 +107,10 @@ function plotWind(id, times, wind, gust) {
             //height: 300,
 		},
 		title: { text: "Wind Speed" },
+        colors: [
+            '#4EA54E', 
+            '#4572A7',
+            ],
 		xAxis: { categories: times },
 		yAxis: {
 			title: { text : null },
@@ -154,6 +158,7 @@ function plotWind(id, times, wind, gust) {
 			],
 		},
 		tooltip: {
+            borderColor : '#4572A7',
 			crosshairs : true,
 			shared : true,
             formatter: function() {

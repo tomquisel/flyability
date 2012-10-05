@@ -32,3 +32,10 @@
 .nav > .active span {
     display: none;
 }
+
+.rightbar {
+    z-index: 980000!important;
+    position: fixed;
+    right: 0;
+    width: 70px;
+}
