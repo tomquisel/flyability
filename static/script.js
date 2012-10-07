@@ -38,6 +38,11 @@ function setOptions() {
 		},
 		legend: { enabled: false },
 		credits: { enabled: false },
+        plotOptions : {
+            series : {
+                animation : false
+            }
+        }
 	});
 }
 function plotFlyability(id, times, values) {

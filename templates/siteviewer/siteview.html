@@ -82,20 +82,22 @@
         $("a[rel=popover]")
             .popover()
             .click(function(e) {
-                e.preventDefault()
+                e.preventDefault();
             })
     });
     setOptions();
     {% for day in days %}
         plotSummary("{{day.name}}_mini", {{day.scores}});
-        $('#{{day.name}}_tab').on('shown', function (e) {
+    {% endfor %}
+    $(window).load(function () {
+        {% for day in days %}
             var times = {{day.times|safe}};
             plotFlyability("{{day.name}}_flyability", times, {{day.scores}});
             plotWindDir("{{day.name}}_dir", times, {{day.dir}},
                 {{site.left}}, {{site.right}});
             plotWind("{{day.name}}_wind", times, {{day.wind}}, {{day.gust}});
             plotPrecip("{{day.name}}_precip", times, {{day.pop}});
-        });
-    {% endfor %}
+        {% endfor %}
+    });
 </script>
 {% endblock %}
