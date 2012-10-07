@@ -8,6 +8,7 @@ function toint(vals) {
 	return $.map(vals, function(val, i) { return Math.round(val); });
 }
 
+var chartPrecip, chartFlyability, chartWind, chartDir; 
 var chartWidth=800;
 var chartHeight=200;
 var percYAxis = 
@@ -23,7 +24,6 @@ var percYAxis =
 	};
 var percToolFormatter = function() { return '<b>'+ Math.floor(this.y) +'%</b><br/>'; };
 	
-var chartPrecip, chartFlyability, chartWind, chartDir; 
 function setOptions() {
 	Highcharts.setOptions({
 		chart: {
