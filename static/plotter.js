@@ -15,7 +15,10 @@ Plotter.prototype.percYAxis = {
     max: 100
 };
 Plotter.prototype.percToolFormatter = function() { 
-    return '<b>'+ Math.floor(this.y) +'%</b><br/>'; 
+    return '<b>'+ Math.round(this.y) +'%</b><br/>'; 
+};
+Plotter.prototype.percFormatter = function() { 
+    return Math.round(this.y) +'%'; 
 };
 Plotter.prototype.setOptions = function() {
     Highcharts.setOptions({
@@ -199,22 +202,91 @@ Plotter.prototype.plotWind = function(id, times, wind, gust) {
 function Plotter2() { }
 Plotter2.prototype = new Plotter();
 
+Plotter.prototype.percYAxis = {
+    title: { text : null },
+    labels : {
+        formatter: function() {
+            return '' + this.value + '%';
+        }
+    },
+    tickInterval : 20,
+    min: 0,
+    max: 100
+};
+Plotter.prototype.setOptions = function() {
+    Highcharts.setOptions({
+        chart: {
+            type: 'spline', 
+            height: this.chartHeight,
+            //width: chartWidth,
+            marginLeft: 0
+        },
+        legend: { enabled: false },
+        credits: { enabled: false },
+        plotOptions : {
+            series : {
+                animation : false,
+                states: {
+                    hover: {
+                        enabled: false
+                    }
+                }
+            }
+        }
+    });
+};
+Plotter2.prototype.dataLabel = function(obj, suffix) {
+    var color = obj.series.color;
+    var y = Math.round(obj.y);
+    return '<span style="color:' + color + '">' + y + suffix + '</span>';
+}
 Plotter2.prototype.plotFlyAndPrecip = function(id, times, flyability, precip) {
+    var dataLabels = {
+        enabled: true,
+        formatter: function() { 
+            return Plotter2.prototype.dataLabel(this, "%"); 
+        },
+        backgroundColor: '#FFF',
+        borderColor: '#AAA',
+        borderRadius: 5,
+        borderWidth: 1,
+        shadow: true,
+        padding: 1,
+        y: -10
+    }
+    var flDataLabels = jQuery.extend({}, dataLabels);
+    flDataLabels.align = 'left';
+    flDataLabels.x = 2;
+    var prDataLabels = jQuery.extend({}, dataLabels);
+    prDataLabels.align = 'right';
+    prDataLabels.x = -2;
+
     this.chartFlyability = new Highcharts.Chart({
         chart: {
             renderTo: id,
         },
         title: { text: null },
-        legend: { enabled: true },
+        legend: { 
+            enabled: true,
+            verticalAlign: "top"    
+        },
+        colors: [
+            '#4EA54E', 
+            '#4572A7',
+        ],
         xAxis: { categories: times },
         yAxis: this.percYAxis,
-        tooltip: {
-            formatter : this.percToolFormatter,
-            crosshairs : true,
-            shared : true,
-        },
-        series: [{ name: "Flyability", data: flyability },
-                 { name: "Precipitation", data: precip}
-                ],
+        tooltip: { enabled: false},
+        series: [{ 
+                name: "Flyability", 
+                data: flyability, 
+                lineWidth: 5,
+                marker: { radius: 5 },
+                dataLabels: flDataLabels
+            }, { 
+                name: "Chance of Precipitation", 
+                data: precip,
+                dataLabels: prDataLabels
+        }],
     });
 };
