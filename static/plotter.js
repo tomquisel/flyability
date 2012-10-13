@@ -134,10 +134,7 @@ Plotter.prototype.plotWind = function(id, times, wind, gust) {
             //height: 300,
         },
         title: { text: "Wind Speed" },
-        colors: [
-            '#4EA54E', 
-            '#4572A7',
-            ],
+        colors: plotColors,
         xAxis: { categories: times },
         yAxis: {
             title: { text : null },
@@ -261,8 +258,8 @@ Plotter2.prototype.listFormatter = function(obj, suffix, skip) {
     return s;
 }
 Plotter2.prototype.plotFlyAndPrecip = function(id, times, flyability, precip) {
-    var flColor = '#4EA54E';
-    var prColor = '#4572A7';
+    //var flColor = '#4EA54E';
+    //var prColor = '#4572A7';
     //var dataLabels = {
     //    enabled: true,
     //    formatter: function() { 
@@ -293,10 +290,7 @@ Plotter2.prototype.plotFlyAndPrecip = function(id, times, flyability, precip) {
             enabled: true,
             verticalAlign: "top"    
         },
-        colors: [
-            flColor, 
-            prColor,
-        ],
+        colors: plotColors,
         xAxis: { categories: times },
         yAxis: this.percYAxis,
         tooltip: { 
@@ -386,10 +380,7 @@ Plotter2.prototype.plotWind = function(id, times, wind, gust, dir,
             enabled: true,
             verticalAlign: "top"    
         },
-        colors: [
-            '#4EA54E', 
-            '#4572A7',
-            ],
+        colors: plotColors,
         xAxis: { categories: times },
         yAxis: {
             title: { text : null },
