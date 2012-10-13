@@ -51,9 +51,11 @@
             <div class="row">
                 <div class="span12" id="{{day.name}}_flyability">Loading...</div>
             </div>
+            {% comment %}
             <div class="row">
                 <div class="span12" id="{{day.name}}_dir">Loading...</div>
             </div>
+            {% endcomment %}
             <div class="row">
                 <div class="span12" id="{{day.name}}_wind">Loading...</div>
             {% comment %}
@@ -94,9 +96,11 @@
         {% for day in days %}
             var times = {{day.times|safe}};
             plotter.plotFlyAndPrecip("{{day.name}}_flyability", times, {{day.scores}}, {{day.pop}});
-            plotter.plotWindDir("{{day.name}}_dir", times, {{day.dir}},
-                {{site.left}}, {{site.right}});
-            plotter.plotWind("{{day.name}}_wind", times, {{day.wind}}, {{day.gust}});
+            //plotter.plotWindDir("{{day.name}}_dir", times, {{day.dir}},
+            //    {{site.left}}, {{site.right}});
+            plotter.plotWind("{{day.name}}_wind", times, {{day.wind}}, 
+                             {{day.gust}}, {{day.dir}}, {{site.left}}, 
+                             {{site.right}});
             //plotter.plotPrecip("{{day.name}}_precip", times, {{day.pop}});
         {% endfor %}
     });

@@ -40,6 +40,28 @@ def drawWindDir(wind, left, right, size, showWind=True):
     canvas = FigureCanvas(fig)
     return canvas
 
+def drawArrow(wind, left, right, size):
+    fig = plt.figure(figsize=(1,1), dpi=size, facecolor='w')
+    fig.patch.set_facecolor('none')
+    X = getXComponents([wind], [1])
+    Y = getYComponents([wind], [1])
+    plt.xlim(-1,1)
+    plt.ylim(-1,1)
+    ax = fig.add_subplot(111)
+    ax.set_axis_off()
+    ax.patch.set_facecolor('none')
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    in_range = isInRange(wind, left, right)
+    if in_range:
+        arrow_color = 'green'
+    else:
+        arrow_color = 'red'
+    Q = plt.quiver([-X[0]], [-Y[0]], [X[0]], [Y[0]], scale=1, 
+                   units='height', width = 0.15, zorder=4,
+                   headlength=4, headwidth=4, headaxislength=3, color=arrow_color)
+    canvas = FigureCanvas(fig)
+    return canvas
+
 def finish():
     plt.clf()
 

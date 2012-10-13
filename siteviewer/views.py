@@ -27,8 +27,17 @@ def windDir(request, wind, left, right, size):
     canvas = grapher.drawWindDir(wind, left, right, size, showWind)
     threadLock.release()
     response = HttpResponse(content_type='image/png')
-    #response.write(open("asdf.png").read())
     canvas.print_png(response)
+    grapher.finish()
+    return response
+
+def windArrow(request, wind, left, right, size):
+    wind, left, right, size = int(wind), int(left), int(right), int(size)
+    threadLock.acquire()
+    canvas = grapher.drawArrow(wind, left, right, size)
+    threadLock.release()
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response, transparent=True)
     grapher.finish()
     return response
 

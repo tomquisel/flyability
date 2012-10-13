@@ -219,7 +219,7 @@ Plotter.prototype.setOptions = function() {
             type: 'spline', 
             height: this.chartHeight,
             //width: chartWidth,
-            marginLeft: 0
+            marginLeft: 50
         },
         legend: { enabled: false },
         credits: { enabled: false },
@@ -235,31 +235,54 @@ Plotter.prototype.setOptions = function() {
         }
     });
 };
-Plotter2.prototype.dataLabel = function(obj, suffix) {
+Plotter2.prototype.formatter = function(obj, suffix, hasColor, isBold) {
     var color = obj.series.color;
     var y = Math.round(obj.y);
-    return '<span style="color:' + color + '">' + y + suffix + '</span>';
+    var s = y + suffix;
+    if (isBold) {
+        s = "<b>" + s + "</b>";
+    }
+    if (hasColor) {
+        s = '<span style="color:' + color + '">' + s + '</span>';
+    }
+    return s;
+}
+Plotter2.prototype.listFormatter = function(obj, suffix, skip) {
+    var s = '';
+    for (var i in obj.points) {
+        var p = obj.points[i];
+        var ser = p.series;
+        var y = Math.round(p.y);
+        if (ser.name == skip) { continue; }
+        s += '<span style="color:' + ser.color + '">' + 
+             ser.name + '</span>: <b>'+ y +'</b>' + suffix + '<br/>';
+    };
+    
+    return s;
 }
 Plotter2.prototype.plotFlyAndPrecip = function(id, times, flyability, precip) {
-    var dataLabels = {
-        enabled: true,
-        formatter: function() { 
-            return Plotter2.prototype.dataLabel(this, "%"); 
-        },
-        backgroundColor: '#FFF',
-        borderColor: '#AAA',
-        borderRadius: 5,
-        borderWidth: 1,
-        shadow: true,
-        padding: 1,
-        y: -10
-    }
-    var flDataLabels = jQuery.extend({}, dataLabels);
-    flDataLabels.align = 'left';
-    flDataLabels.x = 2;
-    var prDataLabels = jQuery.extend({}, dataLabels);
-    prDataLabels.align = 'right';
-    prDataLabels.x = -2;
+    var flColor = '#4EA54E';
+    var prColor = '#4572A7';
+    //var dataLabels = {
+    //    enabled: true,
+    //    formatter: function() { 
+    //        return Plotter2.prototype.dataLabel(this, "%"); 
+    //    },
+    //    backgroundColor: '#FFF',
+    //    borderRadius: 5,
+    //    borderWidth: 1,
+    //    shadow: true,
+    //    padding: 2,
+    //    y: -10
+    //}
+    //var flDataLabels = jQuery.extend({}, dataLabels);
+    //flDataLabels.align = 'left';
+    //flDataLabels.x = 2;
+    //flDataLabels.borderColor = flColor;
+    //var prDataLabels = jQuery.extend({}, dataLabels);
+    //prDataLabels.align = 'right';
+    //prDataLabels.x = -2;
+    //prDataLabels.borderColor = prColor;
 
     this.chartFlyability = new Highcharts.Chart({
         chart: {
@@ -271,22 +294,133 @@ Plotter2.prototype.plotFlyAndPrecip = function(id, times, flyability, precip) {
             verticalAlign: "top"    
         },
         colors: [
-            '#4EA54E', 
-            '#4572A7',
+            flColor, 
+            prColor,
         ],
         xAxis: { categories: times },
         yAxis: this.percYAxis,
-        tooltip: { enabled: false},
+        tooltip: { 
+            crosshairs: true,
+            shared : true,     
+            formatter: function() {
+                return Plotter2.prototype.listFormatter(this, "%");
+            },
+        },
         series: [{ 
                 name: "Flyability", 
                 data: flyability, 
                 lineWidth: 5,
                 marker: { radius: 5 },
-                dataLabels: flDataLabels
+                //dataLabels: flDataLabels
             }, { 
                 name: "Chance of Precipitation", 
                 data: precip,
-                dataLabels: prDataLabels
+                //dataLabels: prDataLabels
         }],
     });
 };
+
+function makePlotBands() {
+    var res = [
+        {
+            from: 12,
+            to: 15,
+            color: 'rgba(255,0,0, 0.2)',
+            label: {
+                text: 'P2 wind unsafe',
+                style: { color: '#606060' }
+            }
+        }, {
+            from: 15,
+            to: 18,
+            color: 'rgba(255,0,0, 0.3)',
+            label: {
+                text: 'P3 wind / P2 gust unsafe',
+                style: { color: '#606060' }
+            }
+        }, {
+            from: 18,
+            to: 2000,
+            color: 'rgba(255,0,0, 0.4)',
+            label: {
+                text: 'P3 gust unsafe',
+                style: { color: '#606060' }
+            }
+        }, 
+    ];
+    return res;
+}
+
+function makeArrowUrl(dir, left, right) {
+    return 'url(/flyability/wind/arrow_' + dir + '_' + left + '_' + right + 
+            '_20.png)';
+}
+
+function makeWindValues(dir, left, right, lim) {
+    var values = [];
+    var y = lim / 15.0;
+    left = Math.round(left);
+    right = Math.round(right);
+    for ( var i in dir ) {
+        var d = Math.round(dir[i]);
+        var url = makeArrowUrl(d, left, right);
+        values.push( { y: y, marker: { fillColor: '#FFF', symbol: url } } );
+    }
+    return values;
+}
+
+Plotter2.prototype.plotWind = function(id, times, wind, gust, dir, 
+                                       left, right) 
+{
+    var gustMax = Math.max.apply(Math, gust);
+    var windMax = Math.max.apply(Math, wind);
+    var chartMax = Math.max(gustMax, windMax, 20);
+    dir = makeWindValues(dir, left, right, chartMax);
+    this.chartWind = new Highcharts.Chart({
+        chart: {
+            renderTo: id,
+            //height: 300,
+        },
+        title: { text: null },
+        legend: { 
+            enabled: true,
+            verticalAlign: "top"    
+        },
+        colors: [
+            '#4EA54E', 
+            '#4572A7',
+            ],
+        xAxis: { categories: times },
+        yAxis: {
+            title: { text : null },
+            labels : {
+                formatter: function() {
+                    return '' + this.value + 'mph';
+                }
+            },
+            tickInterval : 5,
+            min: 0,
+            max: chartMax,
+            plotBands : makePlotBands(),
+        },
+        tooltip: {
+            borderColor : '#4572A7',
+            crosshairs : true,
+            shared : true,
+            formatter: function() {
+                return Plotter2.prototype.listFormatter(this, "mph", "Direction");
+            },
+        },
+        series: [
+            { name: "Gust", data: gust },
+            { name: "Wind", data: wind },
+            { 
+                name: "Direction", 
+                data: dir, 
+                type: 'scatter', 
+                marker: { symbol: makeArrowUrl(215, 200, 220) } 
+            }
+        ],
+    });
+};
+
