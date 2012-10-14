@@ -16,12 +16,23 @@
 
 </head>
 <body>
-
-	<div class="content">
-		{% block content %}
-		content
-		{% endblock %}
-	</div>
+    <div class="navbar navbar-inverse">
+        <div class="navbar-inner">
+        <div class="container">
+            <a class="brand" href="/">Flyability</a>
+            <ul class="nav">
+            </ul>
+            <form class="navbar-search">
+                <input type="text" class="search-query" placeholder="Find a site">
+            </form>
+        </div>
+        </div>
+    </div>
+    <div class="container">
+        {% block content %}
+        content
+        {% endblock %}
+    </div>
 
 <script src="{{ STATIC_URL }}jquery-1.8.0.min.js"></script>
 <script src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>

@@ -3,6 +3,7 @@ from weather.timeseries import TimeSeries
 import weather.main as weather
 from predictor import Predictor
 import json
+from siteviewer.models import Site
 
 class ForecastMgr(object):
     def __init__(self, site, startDay = None, days=7):
@@ -67,4 +68,3 @@ class ForecastMgr(object):
         predictor = Predictor(awareTimes, seriesDict, self.site)
         seriesDict['flyability'] = predictor.flyability
         return (times, seriesDict, predictor)
-

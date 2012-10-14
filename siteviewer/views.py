@@ -9,6 +9,11 @@ import threading
 
 threadLock = threading.Lock()
 
+def index(request):
+    env = {}
+    return render_to_response('siteviewer/index.html', env,
+                              context_instance=RequestContext(request))
+
 def site(request, country, state, name):
     site = get_object_or_404(Site, pk=name)
     left, right = site.getTakeoffRange()
@@ -33,6 +38,13 @@ def country(request, country):
     sites = Site.objects.filter(country = country)
     env = {'sites' : sites, 'country' : country}
     return render_to_response('siteviewer/countrylist.html', env,
+                              context_instance=RequestContext(request))
+
+def allSiteNames(request):
+    sites = Site.objects.all()
+    names = [ "%s, %s, %s" % (s.name, s.state, s.country) for s in sites]
+    env = { 'names' : names }
+    return render_to_response('siteviewer/api/allsitenames.html', env,
                               context_instance=RequestContext(request))
 
 def windDir(request, wind, left, right, size):

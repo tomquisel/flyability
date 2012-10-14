@@ -12,6 +12,8 @@ urlpatterns = patterns('',
     url(r'^(?:flyability/)?sites/(?P<country>[^/]+)/?$', 'siteviewer.views.country'),
     url(r'^(?:flyability/)?wind/dir_(?P<wind>[-\d]+)_(?P<left>\d+)_(?P<right>\d+)_(?P<size>\d+).png$', 'siteviewer.views.windDir'),
     url(r'^(?:flyability/)?wind/arrow_(?P<wind>[-\d]+)_(?P<left>\d+)_(?P<right>\d+)_(?P<size>\d+).png$', 'siteviewer.views.windArrow'),
+    url(r'^(?:flyability/)?sites/allnames$', 'siteviewer.views.allSiteNames'),
+    url(r'^(?:flyability/|/)?$', 'siteviewer.views.index'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

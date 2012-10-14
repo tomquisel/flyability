@@ -1,5 +1,5 @@
 .daypill {
-    width: 70px;
+    width: 5em;
     color: #444;
     text-align: center;
 }
@@ -8,12 +8,16 @@
     display: inline;
 }
 
-.lpad {
-    padding-left: 20px;
+.bpad {
+    padding-bottom: 2em;
 }
 
-.bpad {
-    padding-bottom: 20px;
+.debug {
+    background: #0F0;
+}
+
+.navbar {
+    margin-bottom: 0px;
 }
 
 .textcenter {
