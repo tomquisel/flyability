@@ -1,7 +1,7 @@
 from django.db import models
 
 class Site(models.Model):
-    name = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255, db_index=True)
     state = models.CharField(max_length=255, default='')
     country = models.CharField(max_length=255, default='')
     continent = models.CharField(max_length=255, default='')

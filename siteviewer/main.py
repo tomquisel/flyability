@@ -55,7 +55,7 @@ class ForecastMgr(object):
         return (self.times, self.seriesDict)
 
     def getValues(self, name, times):
-        return self.seriesDict[name].interpolate(times, default=0.0)
+        return self.seriesDict[name].interpolate(times)
 
     def getValue(self, name, time):
         return self.seriesDict[name].interpolate([time])[0]

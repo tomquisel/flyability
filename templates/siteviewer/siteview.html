@@ -8,15 +8,33 @@
 {% endblock %}
 
 {% block content %}
-<h1 class="lpad"> {{site.name}}, {{site.state}} </h1>
-<div class="row lpad bpad">
+<ul class="breadcrumb">
+    <li><a href="/flyability/{{site.country}}">{{site.country}}</a> <span class="divider">/</span></li>
+    <li><a href="#">{{site.state}}</a> <span class="divider">/</span></li>
+    <li class="active">{{site.name}}</li>
+</ul>
+{% comment %}
+<div class="navbar navbar-inverse">
+<div class="navbar-inner">
+<a class="brand" href="#">Flyability</a>
+<ul class="nav">
+    <li><a href="#">United States</a></li>
+    <li class="divider-vertical textcenter">/</li>
+    <li><a href="#">{{site.state}}</a></li>
+    <li class="divider-vertical textcenter">/</li>
+    <li class="active"><a href="#">{{site.name}}</a></li>
+</ul>
+</div>
+</div>
+{% endcomment %}
+<div class="lpad bpad row">
     <div class="span3 textcenter">
-        <strong>Launch Direction</strong>
+        Launch Direction
         <img class="img-rounded orient" 
-             src="/flyability/wind/dir_-1_{{site.left}}_{{site.right}}_80.png" >
+             src="/flyability/wind/dir_-1_{{site.left}}_{{site.right}}_60.png" >
     </div>
     <div class="span3">
-        <strong class="textcenter" >Further Info</strong>
+        <span class="textcenter" >Further Info</span>
         <ul>
           <li><a href="{{site.website}}">{{site.name}} Website</a></li>
           <li><a href="{{site.pgearthSite}}">{{site.name}} Details on PG Earth</a></li>
@@ -25,7 +43,7 @@
 </div>
 
 <div class="lpad">
-<h1 class="inline"><small> Flyability Report </small></h1>
+<strong> Flyability Report </strong>
 (<a rel="popover"
     href=""
     title="What is a Flyability Report?"
@@ -44,10 +62,11 @@
             </a></li>
     {% endfor %}
 </ul>
+</div>
 
 <div class="tab-content">
     {% for day in days %}
-        <div class="tab-pane" id="{{day.name}}_details">
+        <div class="tab-pane daydetails" id="{{day.name}}_details">
             <div class="row">
                 <div class="span12" id="{{day.name}}_flyability">Loading...</div>
             </div>
@@ -66,7 +85,6 @@
             </div>
         </div>
     {% endfor %}
-</div>
 </div>
 
 {%comment%}
@@ -92,7 +110,7 @@
     {% for day in days %}
         plotSummary("{{day.name}}_mini", {{day.scores}});
     {% endfor %}
-    $(window).load(function () {
+    //$(window).load(function () {
         {% for day in days %}
             var times = {{day.times|safe}};
             plotter.plotFlyAndPrecip("{{day.name}}_flyability", times, {{day.scores}}, {{day.pop}});
@@ -103,6 +121,6 @@
                              {{site.right}});
             //plotter.plotPrecip("{{day.name}}_precip", times, {{day.pop}});
         {% endfor %}
-    });
+    //});
 </script>
 {% endblock %}

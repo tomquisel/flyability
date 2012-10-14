@@ -3,8 +3,10 @@
 <head>
 
 <title>{% block title %} My Title {% endblock %}</title>
-
+ 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" />
+<link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.css" />
 <link rel="stylesheet" href="{{ STATIC_URL }}style2.css" />
 <!--[if lt IE 9]>
 <script type="text/javascript" src="{{ STATIC_URL }}excanvas.js"></script>
@@ -12,10 +14,8 @@
 {% block head %}
 {% endblock %}
 
-{% include "siteviewer/google_analytics.inc" %}
 </head>
 <body>
-{% include "siteviewer/add_this.inc" %}
 
 	<div class="content">
 		{% block content %}
@@ -30,5 +30,9 @@
 {% block js %}
 {% endblock %}
 
+{% comment %}
+{% include "siteviewer/google_analytics.inc" %}
+{% include "siteviewer/add_this.inc" %}
+{% endcomment %}
 </body>
 </html>
