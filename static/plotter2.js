@@ -345,14 +345,17 @@ function makePlotBands() {
     return res;
 }
 
-function makeArrowUrl(dir, left, right) {
-    return 'url(/flyability/wind/arrow_' + dir + '_' + left + '_' + right + 
-            '_20.png)';
+function makeArrowUrl(dir, left, right, size) {
+    if (size === undefined) {
+        size = 30 
+    }
+    return 'url(/flyability/wind/dir_' + dir + '_' + left + '_' + right + 
+            '_' + size + '.png)';
 }
 
 function makeWindValues(dir, left, right, lim) {
     var values = [];
-    var y = lim / 15.0;
+    var y = lim / 5.0;
     left = Math.round(left);
     right = Math.round(right);
     for ( var i in dir ) {
@@ -409,7 +412,7 @@ Plotter2.prototype.plotWind = function(id, times, wind, gust, dir,
                 name: "Direction", 
                 data: dir, 
                 type: 'scatter', 
-                marker: { symbol: makeArrowUrl(215, 200, 220) } 
+                marker: { symbol: makeArrowUrl(215, 200, 300, 15) } 
             }
         ],
     });

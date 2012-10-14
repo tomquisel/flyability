@@ -11,7 +11,10 @@ from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 def drawWindDir(wind, left, right, size, showWind=True):
+    inner_rad = 0.6
+    circle_width = 0.3
     fig = plt.figure(figsize=(1,1), dpi=size, facecolor='w')
+    fig.patch.set_facecolor('none')
     X = getXComponents([wind], [1])
     Y = getYComponents([wind], [1])
     plt.xlim(-1,1)
@@ -19,7 +22,7 @@ def drawWindDir(wind, left, right, size, showWind=True):
     ax = fig.add_subplot(111)
     ax.set_axis_off()
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-    cir = plt.Circle( (0,0), radius=0.5, color='w', zorder=3)
+    cir = plt.Circle( (0,0), radius=inner_rad, color='w', zorder=3)
     fig.gca().add_patch(cir)
     if showWind:
         in_range = isInRange(wind, left, right)
@@ -27,15 +30,21 @@ def drawWindDir(wind, left, right, size, showWind=True):
             arrow_color = 'green'
         else:
             arrow_color = 'red'
+        arrow_color = 'black'
         Q = plt.quiver([-X[0]], [-Y[0]], [X[0]/2.0], [Y[0]/2.0], scale=1, 
-                       units='height', width = 0.05, zorder=4,
-                       headlength=4, headwidth=4, color=arrow_color)
+                       units='height', width = 0.07, zorder=4,
+                       headlength=3, headwidth=3, headaxislength=3, 
+                       color=arrow_color)
+        #Q = plt.quiver([-X[0]], [-Y[0]], [X[0]/2.0], [Y[0]/2.0], scale=1, 
+        #               units='height', width = 0.05, zorder=4,
+        #               headlength=4, headwidth=4, color=arrow_color)
     else:
         plt.axvline(color='black', zorder=4)
         plt.axhline(color='black', zorder=4)
 
-    drawArc(ax, left, right, 'green', 2)
-    drawArc(ax, right, left, 'red', 2)
+    arc_rad = inner_rad + circle_width
+    drawArc(ax, left, right, color='green', zorder=2, radius = arc_rad)
+    drawArc(ax, right, left, color='red', zorder=2, radius = arc_rad)
 
     canvas = FigureCanvas(fig)
     return canvas
@@ -51,14 +60,12 @@ def drawArrow(wind, left, right, size):
     ax.set_axis_off()
     ax.patch.set_facecolor('none')
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-    in_range = isInRange(wind, left, right)
-    if in_range:
-        arrow_color = 'green'
-    else:
-        arrow_color = 'red'
+    inRange, certainty = checkRange(wind, left, right)
+    arrowColor = certaintyToColor(inRange, certainty)
     Q = plt.quiver([-X[0]], [-Y[0]], [X[0]], [Y[0]], scale=1, 
                    units='height', width = 0.15, zorder=4,
-                   headlength=4, headwidth=4, headaxislength=3, color=arrow_color)
+                   headlength=4, headwidth=4, headaxislength=3, 
+                   color=arrowColor)
     canvas = FigureCanvas(fig)
     return canvas
 
@@ -66,11 +73,33 @@ def finish():
     plt.clf()
 
 def isInRange(wind, left, right):
-    if left < right:
-        return left < wind < right
-    return wind > left or wind < right
+    return checkRange(wind, left, right)[0]
 
-def drawArc(ax, left, right, color, zorder):
+def checkRange(wind, left, right):
+    inRange = False
+    if left < right:
+        inRange =  left < wind < right
+    else:
+        inRange = wind > left or wind < right
+    minDist = min(abs(wind-left), abs(wind-right))
+    certainty = minDist / 10.0
+    return (inRange, min(certainty, 1.0))
+
+def certaintyToColor(inRange, cert):
+    start = 1 / 3.0
+    if inRange:
+        lim = 0.5
+    else:
+        lim = 1.0
+    main = start + (lim-start) * cert
+    other = (1 - main) / 2.0
+    if inRange:
+        color = (other, main, other)
+    else:
+        color = (main, other, other)
+    return color
+
+def drawArc(ax, left, right, color='black', zorder=1, radius=1.0):
     if left < right:
         start = left
         end = right
@@ -78,11 +107,11 @@ def drawArc(ax, left, right, color, zorder):
         start = left
         end = right + 360
     theta = np.arange(start, end, 2.0)*np.pi/180.0
-    x = np.sin(theta)
-    y = np.cos(theta)
+    x = radius * np.sin(theta)
+    y = radius * np.cos(theta)
     x = np.append(x, 0)
     y = np.append(y, 0)
-    ax.fill(x, y, alpha=0.5, facecolor=color, linewidth=0, clip_on=False,
+    ax.fill(x, y, alpha=0.8, facecolor=color, linewidth=0, clip_on=False,
             zorder=zorder)
 
 def plot(t, timeseries, canvas = False):
