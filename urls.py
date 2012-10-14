@@ -7,7 +7,9 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'flyability.views.home', name='home'),
-    url(r'^(?:flyability/)?(?P<name>[^/]+)/?$', 'siteviewer.views.site'),
+    url(r'^(?:flyability/)?sites/(?P<country>[^/]+)/(?P<state>[^/]+)/(?P<name>[^/]+)/?$', 'siteviewer.views.site'),
+    url(r'^(?:flyability/)?sites/(?P<country>[^/]+)/(?P<state>[^/]+)/?$', 'siteviewer.views.state'),
+    url(r'^(?:flyability/)?sites/(?P<country>[^/]+)/?$', 'siteviewer.views.country'),
     url(r'^(?:flyability/)?wind/dir_(?P<wind>[-\d]+)_(?P<left>\d+)_(?P<right>\d+)_(?P<size>\d+).png$', 'siteviewer.views.windDir'),
     url(r'^(?:flyability/)?wind/arrow_(?P<wind>[-\d]+)_(?P<left>\d+)_(?P<right>\d+)_(?P<size>\d+).png$', 'siteviewer.views.windArrow'),
 

@@ -9,7 +9,7 @@ import threading
 
 threadLock = threading.Lock()
 
-def site(request, name):
+def site(request, country, state, name):
     site = get_object_or_404(Site, pk=name)
     left, right = site.getTakeoffRange()
     site.left = left
@@ -18,6 +18,21 @@ def site(request, name):
     days = mgr.getDays()
     env = {'site' : site, 'days': days}
     return render_to_response('siteviewer/siteview.html', env,
+                              context_instance=RequestContext(request))
+
+def state(request, country, state):
+    sites = Site.objects.filter(
+                             country = country
+                         ).filter(
+                             state = state
+                         )
+    env = {'sites' : sites, 'country' : country, 'state' : state}
+    return render_to_response('siteviewer/statelist.html', env,
+                              context_instance=RequestContext(request))
+def country(request, country):
+    sites = Site.objects.filter(country = country)
+    env = {'sites' : sites, 'country' : country}
+    return render_to_response('siteviewer/countrylist.html', env,
                               context_instance=RequestContext(request))
 
 def windDir(request, wind, left, right, size):

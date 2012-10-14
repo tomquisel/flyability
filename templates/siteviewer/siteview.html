@@ -9,8 +9,11 @@
 
 {% block content %}
 <ul class="breadcrumb">
-    <li><a href="/flyability/{{site.country}}">{{site.country}}</a> <span class="divider">/</span></li>
-    <li><a href="#">{{site.state}}</a> <span class="divider">/</span></li>
+    <li><a href="{% url siteviewer.views.country country=site.country%}">{{site.country}}</a> <span class="divider">/</span></li>
+    <li>
+        <a href="{% url siteviewer.views.state country=site.country state=site.state %}">{{site.state}}</a> 
+        <span class="divider">/</span>
+    </li>
     <li class="active">{{site.name}}</li>
 </ul>
 {% comment %}

@@ -1,0 +1,20 @@
+{% extends "siteviewer/base.html" %}
+
+{% block title %} 
+Paragliding Forecasts in {{ country }}
+{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<ul class="breadcrumb">
+    <li class="active">{{ country }}</li>
+</ul>
+<ul>
+    {% for site in sites %}
+        {% url siteviewer.views.site country=country state=site.state name=site.name as site_url %}
+        <li><a href="{{ site_url }}">{{ site.name }}, {{ site.state }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}
