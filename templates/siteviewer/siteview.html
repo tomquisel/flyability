@@ -1,7 +1,7 @@
 {% extends "siteviewer/base.html" %}
 
 {% block title %} 
-{{site.name}} Paragliding Forecast
+{{ site.name }} Paragliding Forecast
 {% endblock %}
 
 {% block head %}
@@ -9,27 +9,10 @@
 
 {% block content %}
 <ul class="breadcrumb">
-    <li><a href="{% url siteviewer.views.country country=site.country%}">{{site.country}}</a> <span class="divider">/</span></li>
-    <li>
-        <a href="{% url siteviewer.views.state country=site.country state=site.state %}">{{site.state}}</a> 
-        <span class="divider">/</span>
-    </li>
-    <li class="active">{{site.name}}</li>
+    <li> {{ site.country }} <span class="divider">/</span></li>
+    <li> {{ site.state }} <span class="divider">/</span> </li>
+    <li class="active">{{ site.name }}</li>
 </ul>
-{% comment %}
-<div class="navbar navbar-inverse">
-<div class="navbar-inner">
-<a class="brand" href="#">Flyability</a>
-<ul class="nav">
-    <li><a href="#">United States</a></li>
-    <li class="divider-vertical textcenter">/</li>
-    <li><a href="#">{{site.state}}</a></li>
-    <li class="divider-vertical textcenter">/</li>
-    <li class="active"><a href="#">{{site.name}}</a></li>
-</ul>
-</div>
-</div>
-{% endcomment %}
 <div class="bpad row">
     <div class="span3 textcenter">
         Launch Direction
