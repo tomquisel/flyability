@@ -170,10 +170,21 @@ function makePlotBands() {
     return res;
 }
 
+function discretize(v, unit) {
+    v = v / unit;
+    v = Math.round(v);
+    v = v * unit;
+    return v;
+}
+
 function makeArrowUrl(dir, left, right, size) {
     if (size === undefined) {
         size = 30 
     }
+    var unit = 5.0;
+    dir = discretize(dir, unit);
+    left = discretize(left, unit);
+    right = discretize(right, unit);
     return 'url(/flyability/wind/dir_' + dir + '_' + left + '_' + right + 
             '_' + size + '.png)';
 }

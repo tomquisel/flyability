@@ -2,6 +2,7 @@ import datetime
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, loader
+from django.views.decorators.cache import cache_control
 from siteviewer.models import Site
 import siteviewer.main as main
 import grapher, multigrapher
@@ -47,6 +48,7 @@ def allSiteNames(request):
     return render_to_response('siteviewer/api/allsitenames.html', env,
                               context_instance=RequestContext(request))
 
+@cache_control(public=True, max_age=3600*24*365)
 def windDir(request, wind, left, right, size):
     wind, left, right, size = int(wind), int(left), int(right), int(size)
     showWind = wind >= 0
