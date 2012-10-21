@@ -14,6 +14,9 @@ def index(request):
     return render_to_response('siteviewer/index.html', env,
                               context_instance=RequestContext(request))
 
+def shim(request):
+    return site(request, "United States", "New York", "Brace")
+
 def site(request, country, state, name):
     site = get_object_or_404(Site, pk=name)
     left, right = site.getTakeoffRange()

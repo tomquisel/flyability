@@ -111,3 +111,11 @@ class TimeSeries(object):
         newvalues.reverse()
         return newvalues
 
+    @classmethod
+    def substitute(cls, values, frm, to):
+        def sub(v):
+            if v == frm:
+                return to
+            return v
+        return map(sub, values)
+

@@ -46,7 +46,8 @@ class ForecastMgr(object):
                 day['hours'].append(hour)
             for name in names:
                 vals = self.getValues(name, flyabilityHours.times)
-                day[name] = TimeSeries.stripTrailingNones(vals)
+                vals = TimeSeries.stripTrailingNones(vals)
+                day[name] = TimeSeries.substitute(vals, None, 0.0)
             day['scores'] = flyabilityHours.values
             day['times'] = json.dumps([ h['name'] for h in day['hours'] ])
             days.append(day)
