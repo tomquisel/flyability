@@ -8,16 +8,49 @@ from geonames import GeonamesClient
 geoCli = GeonamesClient('flyability')
 
 def run():
-    toTry = range(0,20000)
+    finishedFile = '/tmp/finished.list'
+    base = 'www.paraglidingearth.com'
+    toTry = getValidIds(base, '/pgearth/index.php?accueil=monde')
+    finished = getFinished(finishedFile)
+    toTry = list(set(toTry) - set(finished))
+    print "Will scrape %s sites." % len(toTry)
     random.shuffle(toTry)
-    #toTry = [15103]
-    for i in toTry:
-        status = scrape('www.paraglidingearth.com', 
-                        '/pgearth/index.php?site=%s', 
-                        '/pgearth/orientation.php?site=%s', 
-                        i)
-        if status != 'hit':
-            time.sleep(random.randint(5, 30))
+    try:
+        for i in toTry:
+            try:
+                status = scrape(base,
+                                '/pgearth/index.php?site=%s', 
+                                '/pgearth/orientation.php?site=%s', 
+                                i)
+            except:
+                time.sleep(random.randint(60, 300))
+            else:
+                finished.append(i)
+                if status != 'hit':
+                    time.sleep(random.randint(5, 30))
+    finally:
+        out = open(finishedFile, 'wb')
+        for i in finished:
+            print >>out, i
+        out.close()
+
+def getValidIds(base, url):
+    res = []
+    print "Fetching entire list..."
+    data = cachingFetch((base, url), (), 365 * 86400)
+    print "Parsing list..."
+    soup = BeautifulSoup(data)
+    for a in soup.find_all("a"):
+        m = re.search("index.php\?site=(\d+)", a['href'])
+        if m:
+            res.append(int(m.group(1)))
+    print "Got %s sites." %(len(res))
+    return res
+
+def getFinished(f):
+    res = [ int(l.strip()) for l in open(f).readlines() ]
+    print "Read %s already finished sites" % len(res)
+    return res
 
 class MissingDataException(Exception):
     pass
