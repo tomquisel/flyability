@@ -1,4 +1,5 @@
 from django.db import models
+import json
 
 class Site(models.Model):
     name = models.CharField(max_length=255)
@@ -14,7 +15,17 @@ class Site(models.Model):
     pgearthSite = models.CharField(max_length=255, default='')
 
     def __unicode__(self):
-        return self.name
+        name = ", ".join((self.name, self.state, self.country, self.continent))
+        pos = "%s, %s @ %s ft, %s" % (self.lat, self.lon, self.altitude, 
+                                      self.timezone)
+        takeoff = "takeoff: %s" % self.takeoffObj
+        res = "++++++++++\n"
+        res += "\n".join((name, pos, takeoff, self.website, self.pgearthSite))
+        res += "\n----------"
+        return res
 
     def getTakeoffObj(self):
-        return json.loads(self.takeoffObj)
+        res = {}
+        if self.takeoffObj:
+            res = json.loads(self.takeoffObj)
+        return res
