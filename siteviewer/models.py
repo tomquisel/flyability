@@ -2,6 +2,7 @@ from django.db import models
 import json
 
 class Site(models.Model):
+    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=255)
     state = models.CharField(max_length=255, default='')
     country = models.CharField(max_length=255, default='')

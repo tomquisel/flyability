@@ -4,11 +4,12 @@ import hashlib
 
 hourlyWeather = ['forecast.weather.gov', '/MapClick.php?lat=%s&lon=%s&FcstType=digitalDWML']
 fourHourlyWeather = ['graphical.weather.gov', '/xml/SOAP_server/ndfdXMLclient.php?lat=%s&lon=%s&product=time-series&Unit=e&wgust=wgust&Submit=Submit']
+agent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.4 (KHTML, like Gecko) Chrome/22.0.1229.94 Safari/537.4"
 
 def fetch(url, params):
     print "Fetching %s%s" % (url[0],url[1] % params)
     conn = httplib.HTTPConnection(url[0])
-    conn.request("GET", url[1] % params)
+    conn.request("GET", url[1] % params, headers={'user-agent' : agent})
     r = conn.getresponse()
     print r.status, r.reason
     if r.status != httplib.OK:
@@ -18,7 +19,7 @@ def fetch(url, params):
     return data
 
 
-def cachingFetch(url, params, expiration=600):
+def cachingFetch(url, params, expiration=600, details={}):
     cacheDir = '/var/django/cache/'
     key = hashit( (url, params) )
     fn = cacheDir + key
@@ -27,12 +28,17 @@ def cachingFetch(url, params, expiration=600):
         if os.path.getmtime(fn) > (time.time() - expiration):
             data = open(fn).read()
             print " cache hit"
+            details['hit'] = True
+            details['success'] = True
             return data
     print " cache miss"
     data = fetch(url, params)
     if data is None:
+        details['success'] = False
         return None
     open(fn, "wb").write(data)
+    details['hit'] = False
+    details['success'] = True
     return data
 
 def hashit(arg):
