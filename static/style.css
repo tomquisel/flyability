@@ -1,3 +1,7 @@
+html { height: 100% }
+body { height: 100%; margin: 0; padding: 0 }
+#map_canvas { height: 100% }
+
 .daypill {
     width: 5em;
     color: #444;
@@ -52,4 +56,9 @@
     position: fixed;
     right: 0;
     width: 70px;
+}
+
+.searchrow {
+    margin-top: 20px;
+    text-align: center;
 }

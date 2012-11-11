@@ -5,11 +5,52 @@ Flyability Paragliding Forecasts
 {% endblock %}
 
 {% block head %}
+    <script type="text/javascript"
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDkKUq_1t9LiKJaAVmYSB-k2H8RP6j9VDk&sensor=false&libraries=places">
+    </script>
 {% endblock %}
 
 {% block content %}
-<div class="hero-unit">
-  <h1>Flyability</h1>
-  <p>Find out when your favorite paragliding sites will be flyable.</p>
-</div>
+    <div class="searchrow">
+        <form class="form-search">
+            <fieldset>
+                <input id="geocomplete" type="text" class="input-large search-query" placeholder="Enter a city" />
+                <button id="search" type="button" class="btn">Search</button>
+            </fieldset>
+        </form>
+    </div>
+    <div id="results">
+
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+      $(function(){
+        $("#geocomplete").geocomplete()
+          .bind("geocode:result", function(event, result){
+            var loc = result.geometry.location;
+            var lat = loc.Ya;
+            var lon = loc.Za;
+            $("#results").html("Fetching nearby sites...");
+            $.get("/flyability/search", {'lat' : lat, 'lon' : lon},
+                function(data, textStatus, jqXHR) {
+                    $("#results").html(data);
+            });
+          })
+          .bind("geocode:error", function(event, status){
+            alert(status);
+            $("#results").html("ERROR: " + status);
+          })
+          .bind("geocode:multiple", function(event, results){
+            $("#results").html("Multiple: " + results.length + " results found");
+          });
+        
+        $("#search").click(function(){
+            $("#geocomplete").trigger("geocode");
+            return false;
+        });
+      });
+    </script>
 {% endblock %}

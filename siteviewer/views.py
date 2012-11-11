@@ -48,6 +48,13 @@ def allSiteNames(request):
     return render_to_response('siteviewer/api/allsitenames.html', env,
                               context_instance=RequestContext(request))
 
+def search(request):
+    sites = Site.objects.all()
+    names = [ "%s, %s, %s" % (s.name, s.state, s.country) for s in sites]
+    env = { 'names' : names }
+    return render_to_response('siteviewer/search_res.html', env,
+                              context_instance=RequestContext(request))
+
 @cache_control(public=True, max_age=3600*24*365)
 def windDir(request, wind, left, right, size):
     wind, left, right, size = int(wind), int(left), int(right), int(size)
