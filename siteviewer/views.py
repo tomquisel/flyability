@@ -48,11 +48,22 @@ def allSiteNames(request):
     return render_to_response('siteviewer/api/allsitenames.html', env,
                               context_instance=RequestContext(request))
 
+def distCmp(s1, s2, lat, lon):
+    return cmp(dist(s1, lat, lon), dist(s2, lat, lon))
+
+def dist(s, lat, lon):
+    return ((s.lat-lat)**2 + (s.lon-lon)**2)**0.5
+
+
 def search(request):
-    sites = Site.objects.all()
-    names = [ "%s, %s, %s" % (s.name, s.state, s.country) for s in sites]
-    env = { 'names' : names }
-    return render_to_response('siteviewer/search_res.html', env,
+    lat = float(request.GET['lat'])
+    lon = float(request.GET['lon'])
+    sites = list(Site.objects.all())
+    sites.sort(lambda s1, s2: distCmp(s1, s2, lat, lon))
+    for s in sites:
+        setattr(s, 'dist', dist(s, lat, lon))
+    env = { 'sites' : sites[:20] }
+    return render_to_response('siteviewer/search.html', env,
                               context_instance=RequestContext(request))
 
 @cache_control(public=True, max_age=3600*24*365)
