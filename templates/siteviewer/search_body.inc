@@ -14,7 +14,7 @@
 <div id="results">
     <ul>
     {% for s in sites %}
-    <li><b>{{ s.name }}</b> ({{ s.dist }} mi)</li>   
+    <li><b>{{ s.name }}</b> {{ s.dist_mi }} mi / {{ s.dist_km }} km away</li>   
     {% endfor %}
     </ul>
 </div>
