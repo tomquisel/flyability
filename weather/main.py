@@ -35,9 +35,16 @@ def isValid(values):
                 return False
     return True
 
+class NoWeatherDataException(Exception):
+    pass
+
 def getWeatherData(site, start):
+    forecasts = Forecast.objects.filter(site=site).order_by('-fetch_time')
+    if len(forecasts) == 0:
+        raise NoWeatherDataException
     # the most recently fetched forecast for this site
-    forecast = Forecast.objects.filter(site=site).order_by('-fetch_time')[0]
+    forecast = forecasts[0]
+
     et = pytz.timezone("US/Eastern")
     fft = et.normalize(forecast.fetch_time.astimezone(et))
     print "Forecast fetch time:", fft

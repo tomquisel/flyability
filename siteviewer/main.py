@@ -19,6 +19,7 @@ class ForecastMgr(object):
 
         (times, seriesDict, predictor) = \
                 self.fetchSeries(start = self.startTime, hours = self.days * 24)
+
         self.times = times
         self.seriesDict = seriesDict
         self.predictor = predictor

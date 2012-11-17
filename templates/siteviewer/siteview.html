@@ -18,7 +18,7 @@
     <div class="span3 textcenter">
         Launch Direction
         <img class="img-rounded orient" 
-             src="/flyability/wind/dir_-1_{{site.left}}_{{site.right}}_60.png" >
+        src="{% url 'windDir' -1 site.id  60 %}" >
     </div>
     <div class="span3">
         <span class="textcenter" >Further Info</span>
@@ -37,6 +37,9 @@
     >?</a>)
 
 <ul class="nav nav-pills">
+    {% if not days %}
+    <div class="alert">No weather data available at this time.</div>
+    {% endif %}
     {% for day in days %}
         <li><a href="#{{day.name}}_details" data-toggle="pill" 
                 id="{{day.name}}_tab">
@@ -94,6 +97,18 @@
     });
     var plotter = new Plotter2();
     plotter.setOptions();
+    function arrowMaker(dir, size) {
+        if (size === undefined) {
+            size = 30 
+        }
+        var unit = 5.0;
+        dir = discretize(dir, unit);
+        res = 'url({% url 'windDir' 123456 site.id 234567 %})';
+        res = res.replace(/123456/, dir);
+        res = res.replace(/234567/, size);
+        return res;
+    }
+
     {% for day in days %}
         plotSummary("{{day.name}}_mini", {{day.scores}});
     {% endfor %}
@@ -102,8 +117,7 @@
             var times = {{day.times|safe}};
             plotter.plotFlyAndPrecip("{{day.name}}_flyability", times, {{day.scores}}, {{day.pop}});
             plotter.plotWind("{{day.name}}_wind", times, {{day.wind}}, 
-                             {{day.gust}}, {{day.dir}}, {{site.left}}, 
-                             {{site.right}});
+                             {{day.gust}}, {{day.dir}}, arrowMaker);
         {% endfor %}
     });
 </script>

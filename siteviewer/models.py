@@ -26,7 +26,10 @@ class Site(models.Model):
         return res
 
     def getTakeoffObj(self):
-        res = {}
+        if getattr(self, 'takeoffCache', None):
+            return self.takeoffCache
+
+        self.takeoffCache = {}
         if self.takeoffObj:
-            res = json.loads(self.takeoffObj)
-        return res
+            self.takeoffCache = json.loads(self.takeoffObj)
+        return self.takeoffCache

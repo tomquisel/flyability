@@ -5,6 +5,7 @@
         var loc = result.geometry.location;
         $("#searchLat").val(loc.Ya);
         $("#searchLon").val(loc.Za);
+        $("#search-form").submit();
         /* $("#results").html("Fetching nearby sites...");
         $.get("/flyability/search", {'lat' : lat, 'lon' : lon},
             function(data, textStatus, jqXHR) {
@@ -21,7 +22,7 @@
     
     $("#search").click(function(){
         $("#geocomplete").trigger("geocode");
-        return true;
+        return false;
     });
   });
 </script>

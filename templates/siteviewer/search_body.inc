@@ -1,5 +1,5 @@
 <div class="searchrow">
-    <form class="form-search" method="GET" action="search">
+    <form class="form-search" id="search-form" method="GET" action="{% url 'search' %}">
         <fieldset>
             <input id="geocomplete" type="text" name="query" 
                 value="{{ request.GET.query }}"
@@ -14,7 +14,8 @@
 <div id="results">
     <ul>
     {% for s in sites %}
-    <li><b>{{ s.name }}</b> {{ s.dist_mi }} mi / {{ s.dist_km }} km away</li>   
+    <li><b><a href={% url 'site' s.country s.state s.name %}>{{ s.name }}, {{s.state}}</a></b> 
+    {{ s.dist_mi }} mi / {{ s.dist_km }} km away</li>   
     {% endfor %}
     </ul>
 </div>

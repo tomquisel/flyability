@@ -4,20 +4,6 @@ import urllib2
 import json
 import logging
 
-
-class GeonamesError(Exception):
-    
-    def __init__(self, status):
-        Exception.__init__(self, status)        # Exception is an old-school class
-        self.status = status
-    
-    def __str__(self):
-        return self.status
-    
-    def __unicode__(self):
-        return unicode(self.__str__())
-
-
 class GeonamesClient(object):
     BASE_URL = 'http://api.geonames.org/'
 
@@ -51,3 +37,16 @@ class GeonamesClient(object):
     # http://api.geonames.org/timezoneJSON?lat=47.01&lng=10.2&username=demo
     def find_timezone(self, params):
         return self.call('timezoneJSON', params)
+
+class GeonamesError(Exception):
+    def __init__(self, status):
+        Exception.__init__(self, status)
+        self.status = status
+    
+    def __str__(self):
+        return self.status
+    
+    def __unicode__(self):
+        return unicode(self.__str__())
+
+

@@ -86,9 +86,9 @@ class Predictor(object):
 
 
 def getWindDirChances(site, dir):
-    left, right = site.getTakeoffRange()
-    inRange = isInRange(dir, left, right)
-    dist = boundaryDist(dir, left, right)
+    takeoff = site.getTakeoffObj()
+    inRange = isInRange(dir, takeoff)
+    dist = boundaryDist(dir, takeoff)
     diff = dist
     if not inRange:
         diff = -dist
@@ -101,19 +101,22 @@ def getWindSpeedChances(speed):
 def getRainChances(pop):
     return 1 - pop/100.0
 
-def isInRange(dir, left, right):
-    if left < right:
-        return left <= dir <= right
-    else:
-        return dir >= left or dir <= right
+def isInRange(dir, takeoff):
+    for left,right,good in takeoff:
+        if left <= dir <= right:
+            return good == "yes"
 
-def boundaryDist(dir, left, right):
-    # fixup broken ranges
-    if left > right:
-        if dir < right:
-            dir += 360
-        right += 360
-    return min(abs(dir-left),abs(dir-right))
+def boundaryDist(dir, takeoff):
+    dist = 360
+    for left,right,good in takeoff:
+        if good == "yes":
+            dl = abs(dir-left)
+            dr = abs(dir-right)
+            if dl < dist:
+                dist = dl
+            if dr < dist:
+                dist = dr
+    return dist
 
 # negative values are worse than 50%, positive are better
 def normSmooth(val, sd):

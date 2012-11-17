@@ -9,8 +9,9 @@ import matplotlib.transforms as transforms
 from matplotlib.font_manager import FontProperties
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import predictor
 
-def drawWindDir(wind, left, right, size, showWind=True):
+def drawWindDir(wind, takeoff, size, showWind=True):
     inner_rad = 0.6
     circle_width = 0.3
     fig = plt.figure(figsize=(1,1), dpi=size, facecolor='w')
@@ -25,7 +26,7 @@ def drawWindDir(wind, left, right, size, showWind=True):
     cir = plt.Circle( (0,0), radius=inner_rad, color='w', zorder=3)
     fig.gca().add_patch(cir)
     if showWind:
-        in_range = isInRange(wind, left, right)
+        in_range = predictor.isInRange(wind, takeoff)
         if in_range:
             arrow_color = 'green'
         else:
@@ -43,8 +44,10 @@ def drawWindDir(wind, left, right, size, showWind=True):
         plt.axhline(color='black', zorder=4)
 
     arc_rad = inner_rad + circle_width
-    drawArc(ax, left, right, color='green', zorder=2, radius = arc_rad)
-    drawArc(ax, right, left, color='red', zorder=2, radius = arc_rad)
+    for left,right,good in takeoff:
+        color_map = {"yes":"green", "maybe":"yellow", "no":"red"}
+        drawArc(ax, left, right, color=color_map[good], zorder=2, 
+                radius = arc_rad)
 
     canvas = FigureCanvas(fig)
     return canvas
@@ -71,9 +74,6 @@ def drawArrow(wind, left, right, size):
 
 def finish():
     plt.clf()
-
-def isInRange(wind, left, right):
-    return checkRange(wind, left, right)[0]
 
 def checkRange(wind, left, right):
     inRange = False
