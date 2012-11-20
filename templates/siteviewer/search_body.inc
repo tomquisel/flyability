@@ -11,11 +11,15 @@
         </fieldset>
     </form>
 </div>
-<div id="results">
+<div class="row">
+<div id="results" class="span3">
     <ul>
     {% for s in sites %}
     <li><b><a href={% url 'site' s.country s.state s.name %}>{{ s.name }}, {{s.state}}</a></b> 
     {{ s.dist_mi }} mi / {{ s.dist_km }} km away</li>   
     {% endfor %}
     </ul>
+</div>
+<div id="mapdiv" class="span9 map">
+</div>
 </div>

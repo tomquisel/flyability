@@ -1,4 +1,5 @@
 import datetime
+import json
 from django.http import HttpResponse, Http404 
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, loader
@@ -10,7 +11,7 @@ from math import sin, cos, atan2, pi
 import weather.main as weather
 
 def index(request):
-    env = {}
+    env = { 'sitesobj' : [] , 'lat' : 40, 'lon' : 45 }
     return render_to_response('siteviewer/index.html', env,
                               context_instance=RequestContext(request))
 
@@ -74,7 +75,18 @@ def search(request):
         dkm = int(round(dkm))
         setattr(s, 'dist_mi', dmi)
         setattr(s, 'dist_km', dkm)
-    env = { 'sites' : sites[:20] }
+
+    res = sites[:1000]
+    sitesobj = []
+    for i,s in enumerate(res):
+        out = {}
+        out['lat'] = s.lat
+        out['lon'] = s.lon
+        out['name'] = s.name
+        out['pos'] = i
+        sitesobj.append(out)
+
+    env = { 'sites' : res[:20] , 'sitesobj' : json.dumps(sitesobj) }
     return render_to_response('siteviewer/search.html', env,
                               context_instance=RequestContext(request))
 

@@ -106,7 +106,7 @@ def drawArc(ax, left, right, color='black', zorder=1, radius=1.0):
     else:
         start = left
         end = right + 360
-    theta = np.arange(start, end, 2.0)*np.pi/180.0
+    theta = np.arange(start, end+1.0, 1.0)*np.pi/180.0
     x = radius * np.sin(theta)
     y = radius * np.cos(theta)
     x = np.append(x, 0)

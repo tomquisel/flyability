@@ -1,6 +1,6 @@
 <script>
   $(function(){
-    $("#geocomplete").geocomplete()
+      $("#geocomplete").geocomplete()
       .bind("geocode:result", function(event, result){
         var loc = result.geometry.location;
         $("#searchLat").val(loc.Ya);
@@ -24,5 +24,8 @@
         $("#geocomplete").trigger("geocode");
         return false;
     });
+
+    // draw the map
+    drawMap($("#mapdiv"), {{ request.GET.lat }}, {{ request.GET.lon }}, {{ sitesobj|safe }} );
   });
 </script>
