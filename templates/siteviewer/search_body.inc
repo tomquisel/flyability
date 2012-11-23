@@ -1,25 +1,12 @@
-<div class="searchrow">
-    <form class="form-search" id="search-form" method="GET" action="{% url 'search' %}">
-        <fieldset>
-            <input id="geocomplete" type="text" name="query" 
-                value="{{ request.GET.query }}"
-                class="input-large search-query" 
-                placeholder="Enter a city" />
-            <input id="searchLat" type="hidden" name="lat" value="" />
-            <input id="searchLon" type="hidden" name="lon" value="" />
-            <button id="search" type="submit" class="btn">Search</button>
-        </fieldset>
-    </form>
-</div>
-<div class="row">
-<div id="results" class="span3">
     <ul>
     {% for s in sites %}
-    <li><b><a href={% url 'site' s.country s.state s.name %}>{{ s.name }}, {{s.state}}</a></b> 
-    {{ s.dist_mi }} mi / {{ s.dist_km }} km away</li>   
+        <li><b><div><a id="site_{{ s.id }}" href={% url 'site' s.country s.state s.name %}>{{ s.name }}, {{s.statecode}}</a></b> 
+            {{ s.dist_mi }} mi away </div>
+        {% for day in s.days %}
+            <div class="prediction" id="fly_{{s.date}}">
+                <strong>{{ day.flyability|floatformat:0 }}</strong>
+            </div>
+        {% endfor %}
+        </li>   
     {% endfor %}
     </ul>
-</div>
-<div id="mapdiv" class="span9 map">
-</div>
-</div>

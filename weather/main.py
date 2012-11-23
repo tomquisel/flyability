@@ -54,6 +54,8 @@ def getWeatherData(site, start):
 
     # get observation data
     observations = Observation.objects.filter(
+            site=site
+        ).filter(
             time__gt=start
         ).order_by(
             '-fetch_time'
@@ -61,6 +63,8 @@ def getWeatherData(site, start):
     for o in observations:
         values = ObservationValue.objects.filter(observation=o)
         for v in values:
+            if not v.name in seriesDict:
+                raise NoWeatherDataException
             seriesDict[v.name].add(o.time, v.value)
 
     return seriesDict
@@ -75,6 +79,8 @@ def modelsToTimeSeries(values, tz):
         valuesDict[n] = l
     for n,vlist in valuesDict.items():
         seriesDict[n] = TimeSeries.fromModels(vlist, tz)
+    if 'gust' not in seriesDict:
+        raise NoWeatherDataException
     # do some unit conversions
     TSKnotsToMPH(seriesDict['gust'])
     return seriesDict

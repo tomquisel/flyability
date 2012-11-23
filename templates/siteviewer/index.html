@@ -9,7 +9,25 @@ Flyability Paragliding Forecasts
 {% endblock %}
 
 {% block content %}
-    {% include "siteviewer/search_body.inc" %}
+<div class="searchrow">
+    <form class="form-search" id="search-form" method="GET" action="{% url 'search' %}">
+        <fieldset>
+            <input id="geocomplete" type="text" name="query" 
+                value="{{ request.GET.query }}"
+                class="input-large search-query" 
+                placeholder="Enter a city" />
+            
+            <button id="search" type="submit" class="btn">Search</button>
+        </fieldset>
+    </form>
+</div>
+<div class="row">
+<div id="results" class="span3">
+</div>
+<div id="mapdiv" class="span9 map">
+</div>
+</div>
+
 {% endblock %}
 
 {% block js %}

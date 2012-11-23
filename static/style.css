@@ -70,3 +70,24 @@ body { height: 100%; margin: 0; padding: 0 }
 .map img {
     max-width: none;
 }
+
+#results ul {
+    list-style: none;
+}
+
+#results li {
+    padding-left: 30px;
+    background-repeat: no-repeat;
+    display: block;
+}
+
+.prediction {
+    display: inline-block;
+    background-color: #CCF;
+    text-align: center;
+    width: 2em;
+    margin: 2px;
+    -webkit-border-radius: 2px;
+       -moz-border-radius: 2px;
+            border-radius: 2px;
+}

@@ -9,9 +9,22 @@ import siteviewer.main as main
 import grapher, multigrapher
 from math import sin, cos, atan2, pi
 import weather.main as weather
+import siteviewer.mapstate as mapstate
 
 def index(request):
-    env = { 'sitesobj' : [] , 'lat' : 40, 'lon' : 45 }
+    sites = main.getAllSites();
+
+    sitesobj = []
+    for i,s in enumerate(sites):
+        out = {}
+        out['lat'] = s.lat
+        out['lon'] = s.lon
+        out['name'] = s.name
+        out['pos'] = i
+        out['id'] = s.id
+        sitesobj.append(out)
+
+    env = { 'sitesobj' : json.dumps(sitesobj) }
     return render_to_response('siteviewer/index.html', env,
                               context_instance=RequestContext(request))
 
@@ -63,31 +76,26 @@ def dist(s, lat, lon):
 def search(request):
     lat = float(request.GET['lat'])
     lon = float(request.GET['lon'])
-    query = Site.objects.all().exclude(
-                takeoffObj='[[0, 360, "no"]]'
-            )
-    sites = list(query)
+    sites = main.getAllSites()
     sites.sort(lambda s1, s2: distCmp(s1, s2, lat, lon))
-    for s in sites:
+    res = sites[:10]
+    for s in res:
         dmi = dist(s, lat, lon)
         dkm = mi2km(dmi)
         dmi = int(round(dmi))
         dkm = int(round(dkm))
         setattr(s, 'dist_mi', dmi)
         setattr(s, 'dist_km', dkm)
+        setattr(s, 'statecode', mapstate.getCode(s.state))
+        try:
+            mgr = main.ForecastMgr(s)
+            days = mgr.getDays(False)
+            setattr(s, 'days', days)
+        except weather.NoWeatherDataException: 
+            setattr(s, 'days', [])
 
-    res = sites[:1000]
-    sitesobj = []
-    for i,s in enumerate(res):
-        out = {}
-        out['lat'] = s.lat
-        out['lon'] = s.lon
-        out['name'] = s.name
-        out['pos'] = i
-        sitesobj.append(out)
-
-    env = { 'sites' : res[:20] , 'sitesobj' : json.dumps(sitesobj) }
-    return render_to_response('siteviewer/search.html', env,
+    env = { 'sites' : res }
+    return render_to_response('siteviewer/search_body.inc', env,
                               context_instance=RequestContext(request))
 
 @cache_control(public=True, max_age=3600*24*365)

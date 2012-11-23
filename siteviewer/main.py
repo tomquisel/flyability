@@ -5,6 +5,18 @@ from predictor import Predictor
 import json
 from siteviewer.models import Site
 
+def getAllSites():
+    query = Site.objects.filter(
+                country="United States"
+            ).exclude(
+                    takeoffObj='[[0, 360, "no"]]'
+            ).exclude(
+                name__contains="PPG"
+            )
+    sites = list(query)
+    return sites
+
+
 class ForecastMgr(object):
     def __init__(self, site, startDay = None, days=7):
         self.site = site
@@ -24,7 +36,7 @@ class ForecastMgr(object):
         self.seriesDict = seriesDict
         self.predictor = predictor
 
-    def getDays(self):
+    def getDays(self, includeHours=True):
         inc = dt.timedelta(days=1)
         days = []
         for n in range(0, self.days):
@@ -37,20 +49,21 @@ class ForecastMgr(object):
             day['flyability'] = flyability
             day['hours'] = []
             names = ['wind', 'gust', 'dir', 'pop', 'clouds', 'temp']
-            for i,t in enumerate(flyabilityHours.times):
-                hour = {}
-                hour['name'] = t.strftime("%l %P").strip()
-                hour['hour'] = t.hour
-                hour['flyability'] = flyabilityHours.values[i]
+            if includeHours:
+                for i,t in enumerate(flyabilityHours.times):
+                    hour = {}
+                    hour['name'] = t.strftime("%l %P").strip()
+                    hour['hour'] = t.hour
+                    hour['flyability'] = flyabilityHours.values[i]
+                    for name in names:
+                        hour[name] = self.getValue(name, t)
+                    day['hours'].append(hour)
                 for name in names:
-                    hour[name] = self.getValue(name, t)
-                day['hours'].append(hour)
-            for name in names:
-                vals = self.getValues(name, flyabilityHours.times)
-                vals = TimeSeries.stripTrailingNones(vals)
-                day[name] = TimeSeries.substitute(vals, None, 0.0)
-            day['scores'] = flyabilityHours.values
-            day['times'] = json.dumps([ h['name'] for h in day['hours'] ])
+                    vals = self.getValues(name, flyabilityHours.times)
+                    vals = TimeSeries.stripTrailingNones(vals)
+                    day[name] = TimeSeries.substitute(vals, None, 0.0)
+                day['scores'] = flyabilityHours.values
+                day['times'] = json.dumps([ h['name'] for h in day['hours'] ])
             days.append(day)
         return days
 

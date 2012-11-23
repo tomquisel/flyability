@@ -5,6 +5,13 @@ window.plotColors = [
     '#4572A7',
 ];
 
+function getMarker(i) {
+    var urlstart = "http://maps.google.com/mapfiles/marker";
+    var start = "A".charCodeAt(0);
+    var ind = String.fromCharCode(Number(start) + Number(i));
+    return urlstart + ind + ".png";
+}
+
 function plotSummary(id, data) {
     $("#"+id).sparkline(toint(data), {
         type:"bar", 
@@ -25,14 +32,23 @@ function drawMap(div, lat, lon, sites) {
         center: center,
         mapTypeId: google.maps.MapTypeId.ROADMAP
     }
-    var map = new google.maps.Map(document.getElementById('mapdiv'), mapOptions);
+    $.fly.map = new google.maps.Map($('#mapdiv')[0], mapOptions);
 
+    console.log("Markers initialized");
+    $.fly.markers = {};
     for (var i in sites) {
         var site = sites[i];
         var marker = new google.maps.Marker({
             position: new google.maps.LatLng(site.lat, site.lon),
-            map: map,
-            title: site.name
+            map: $.fly.map,
+            title: site.name,
         });
+        $.fly.markers[site.id] = marker;
+    }
+    console.log("Checking for markers callback...");
+    if ('markers_callback' in $.fly) {
+        console.log("Running deferred callback");
+        $.fly.markers_callback();
+        delete $.fly.markers_callback;
     }
 }
