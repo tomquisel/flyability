@@ -4,6 +4,7 @@ import weather.main as weather
 from predictor import Predictor
 import json
 from siteviewer.models import Site
+import mapstate
 
 def getAllSites():
     query = Site.objects.filter(
@@ -15,6 +16,15 @@ def getAllSites():
             )
     sites = list(query)
     return sites
+
+def addSiteDetails(site):
+    setattr(site, 'statecode', mapstate.getCode(site.state))
+    try:
+        mgr = ForecastMgr(site)
+        days = mgr.getDays(False)
+        setattr(site, 'days', days)
+    except weather.NoWeatherDataException: 
+        setattr(site, 'days', [])
 
 
 class ForecastMgr(object):
@@ -36,6 +46,30 @@ class ForecastMgr(object):
         self.seriesDict = seriesDict
         self.predictor = predictor
 
+    @classmethod
+    def shortDay(cls, i):
+        return ['Su','M', 'T', 'W', 'Th', 'F', 'Sa'][int(i)]
+
+    @classmethod 
+    def interpolateColor(cls, start, end, magnitude):
+        res = []
+        for i in range(len(start)):
+            s = start[i]
+            e = end[i]
+            col = s + (e-s) * magnitude
+            res.append(int(col))
+        return tuple(res)
+
+    @classmethod
+    def getColor(cls, fly):
+        magnitude = fly / 100
+        s = "rgb(%s,%s,%s)"
+        start = (230, 230, 230)
+        end = (78, 165, 78)
+        color = cls.interpolateColor(start, end, magnitude)
+        return s % color
+
+
     def getDays(self, includeHours=True):
         inc = dt.timedelta(days=1)
         days = []
@@ -44,9 +78,11 @@ class ForecastMgr(object):
             dayStart = self.startTime + inc * n
             day['start'] = dayStart
             day['name'] = dayStart.strftime("%A") 
+            day['short'] = self.shortDay(dayStart.strftime("%w"))
             day['date'] = dayStart.strftime("%Y-%m-%d") 
             flyabilityHours, flyability = self.predictor.getDay(dayStart)
             day['flyability'] = flyability
+            day['color'] = self.getColor(flyability)
             day['hours'] = []
             names = ['wind', 'gust', 'dir', 'pop', 'clouds', 'temp']
             if includeHours:

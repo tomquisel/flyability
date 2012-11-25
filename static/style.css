@@ -1,6 +1,9 @@
 html { height: 100% }
 body { height: 100%; margin: 0; padding: 0 }
 #map_canvas { height: 100% }
+#results {
+    overflow: hidden;
+}
 
 .daypill {
     width: 5em;
@@ -59,16 +62,20 @@ body { height: 100%; margin: 0; padding: 0 }
 }
 
 .searchrow {
-    margin-top: 20px;
-    text-align: center;
+    margin-top: 1em;
 }
 
 .map {
-    height: 500px;
+    height: 100%;
 }
 
 .map img {
     max-width: none;
+}
+
+#results {
+    height: 100%;
+    overflow: auto;
 }
 
 #results ul {
@@ -78,16 +85,33 @@ body { height: 100%; margin: 0; padding: 0 }
 #results li {
     padding-left: 30px;
     background-repeat: no-repeat;
+    background-position: left center;
     display: block;
+}
+
+.right {
+    float: right;
+}
+
+.resitem {
+    width: 100%;
+    padding: 0.5em 0;
 }
 
 .prediction {
     display: inline-block;
-    background-color: #CCF;
     text-align: center;
     width: 2em;
-    margin: 2px;
+    margin: 0.5em 0 0 0;
     -webkit-border-radius: 2px;
        -moz-border-radius: 2px;
             border-radius: 2px;
+}
+
+.input-large {
+    width: 400px;
+}
+
+.form-search {
+    margin: 0 0 1em;
 }

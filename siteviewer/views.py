@@ -39,7 +39,6 @@ def site(request, country, state, name):
         raise Http404
     assert(len(sites) == 1)
     site = sites[0]
-    takeoff = site.getTakeoffObj()
     env = {'site' : site}
     try:
         mgr = main.ForecastMgr(site)
@@ -49,6 +48,15 @@ def site(request, country, state, name):
         pass
     return render_to_response('siteviewer/siteview.html', env,
                               context_instance=RequestContext(request))
+
+def summary(request):
+    id = int(request.GET['id'])
+    site = get_object_or_404(Site, pk=id)
+    main.addSiteDetails(site)
+    env = {'site' : site}
+    return render_to_response('siteviewer/sitesummary.html', env,
+                              context_instance=RequestContext(request))
+
 
 def distCmp(s1, s2, lat, lon):
     return cmp(dist(s1, lat, lon), dist(s2, lat, lon))
@@ -86,13 +94,7 @@ def search(request):
         dkm = int(round(dkm))
         setattr(s, 'dist_mi', dmi)
         setattr(s, 'dist_km', dkm)
-        setattr(s, 'statecode', mapstate.getCode(s.state))
-        try:
-            mgr = main.ForecastMgr(s)
-            days = mgr.getDays(False)
-            setattr(s, 'days', days)
-        except weather.NoWeatherDataException: 
-            setattr(s, 'days', [])
+        main.addSiteDetails(s)
 
     env = { 'sites' : res }
     return render_to_response('siteviewer/search_body.inc', env,

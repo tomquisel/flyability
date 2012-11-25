@@ -1,12 +1,20 @@
     <ul>
     {% for s in sites %}
-        <li><b><div><a id="site_{{ s.id }}" href={% url 'site' s.country s.state s.name %}>{{ s.name }}, {{s.statecode}}</a></b> 
-            {{ s.dist_mi }} mi away </div>
-        {% for day in s.days %}
-            <div class="prediction" id="fly_{{s.date}}">
-                <strong>{{ day.flyability|floatformat:0 }}</strong>
+    <li>
+        <div class="resitem">
+            <div style="width:100%">
+                <b><a id="site_{{ s.id }}" target="_blank"
+                    href={% url 'site' s.country s.state s.name %}
+                >{{ s.name }}, {{s.statecode}}</a></b> 
+                <span class="right"><b>{{ s.dist_mi }}</b> mi </span>
             </div>
-        {% endfor %}
-        </li>   
+            {% for day in s.days %}
+                <div class="prediction" id="fly_{{s.date}}"
+                    style="background:{{ day.color }}">
+                    <strong>{{ day.short }}</strong>
+                </div>
+            {% endfor %}
+        </div>
+    </li>   
     {% endfor %}
     </ul>

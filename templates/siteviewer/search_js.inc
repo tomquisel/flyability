@@ -1,11 +1,12 @@
 <script>
     function doSearch(lat, lon) {
-        $("#results").html("Fetching nearby sites...");
+        $.fly.jsp.getContentPane().html("Fetching nearby sites...");
         $.get("/flyability/search", {lat : lat, lon : lon}, renderResults)
             .error(function () {alert("Fail!"); });
     }
     function renderResults(data) {
-        $("#results").html(data);
+        $.fly.jsp.getContentPane().html(data);
+        $.fly.jsp.reinitialise();
         var ids = [];
         var regex = /site_(.+)/;
         var atags = $("#results a");
@@ -21,31 +22,33 @@
             $(lis[i]).css('background-image', 'url(' + getMarker(i) + ')');
             console.log("I: " + i);
         }
-        if (!('markers' in $.fly)) {
-            console.log("Running callback later");
-            $.fly.markers_callback = function() { updateMarkers(ids); };
-        } else {
-            console.log("Running callback now");
-            updateMarkers(ids);
-        }
+        $.fly.mapper.updateMarkersWhenReady(ids);
     }
-    function updateMarkers(ids) {
-        console.log("Markers: " +$.fly.markers + " " + typeof($.fly.markers));
-        $.each($.fly.markers, function(k, v) {
-            //var m = $.fly.markers[i];
-            //m.setIcon(null);
-        });
-        for (var i in ids) {
-            var marker = $.fly.markers[ids[i]];
-            marker.setIcon(getMarker(i));
-        }
+    function doResize() {
+        var resultsrow = $("#resultsrow");
+        var desired = $(window).height() - resultsrow.offset().top;
+        resultsrow.css({'height':desired+'px'});
     }
     $(function(){
+        $.fly = {};
+
+        doResize();
+        $(window).resize(doResize);
+
+        $.fly.jsp = $('.scroll-pane').jScrollPane().data('jsp');
+
+        $(".resitem").live("mouseover", function()
+        {
+                $(this).css("background-color", "#F3F7FD");
+        }).live("mouseout", function()
+        {
+                $(this).css("background-color", "white");
+        });
         $("#geocomplete").geocomplete()
         .bind("geocode:result", function(event, result){
             var loc = result.geometry.location;
             doSearch(loc.lat(), loc.lng());
-            $.fly.map.panTo(new google.maps.LatLng(loc.lat(), loc.lng()));
+            $.fly.mapper.update(loc.lat(), loc.lng());
         })
         .bind("geocode:error", function(event, status){
             console.log(status);
@@ -60,7 +63,6 @@
             return false;
         });
 
-        $.fly = {};
         $.fly.lat = 40;
         $.fly.lon = -80;
         $.get("http://freegeoip.net/json/{{ request.META.REMOTE_ADDR }}", 
@@ -70,10 +72,16 @@
                     $.fly.lat = dict.latitude;
                     $.fly.lon = dict.longitude;
                 }
-        }).complete ( function() {
+            }
+        ).complete ( function() {
+            $.fly.mapper = new Mapper({
+                div: $("#mapdiv")[0], 
+                spinner: "{{ STATIC_URL }}/spinner.gif",
+                infoURL: "{% url 'summary' %}"
+            });
             // draw the map
-            drawMap($("#mapdiv"), $.fly.lat, $.fly.lon, {{ sitesobj|safe }} );
+            $.fly.mapper.draw($.fly.lat, $.fly.lon, {{ sitesobj|safe }});
             doSearch($.fly.lat, $.fly.lon);
         });
     });
-</script>
+    </script>

@@ -63,10 +63,9 @@ def getWeatherData(site, start):
     for o in observations:
         values = ObservationValue.objects.filter(observation=o)
         for v in values:
-            if not v.name in seriesDict:
-                raise NoWeatherDataException
+            if v.name not in seriesDict:
+                ts = TimeSeries(v.name, [], [], site.timezone)
             seriesDict[v.name].add(o.time, v.value)
-
     return seriesDict
 
 def modelsToTimeSeries(values, tz):
@@ -79,11 +78,16 @@ def modelsToTimeSeries(values, tz):
         valuesDict[n] = l
     for n,vlist in valuesDict.items():
         seriesDict[n] = TimeSeries.fromModels(vlist, tz)
-    if 'gust' not in seriesDict:
-        raise NoWeatherDataException
+    validateSeries(seriesDict)
     # do some unit conversions
     TSKnotsToMPH(seriesDict['gust'])
     return seriesDict
+
+def validateSeries(seriesDict):
+    names = ['pop', 'wind', 'gust', 'dir']
+    for name in names:
+        if name not in seriesDict:
+            raise NoWeatherDataException
 
 def TSKnotsToMPH(ts):
     ts.values = [ knotsToMPH(v) for v in ts.values ]
