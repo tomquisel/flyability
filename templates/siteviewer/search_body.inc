@@ -1,9 +1,9 @@
     <ul>
     {% for s in sites %}
     <li>
-        <div class="resitem">
+        <div id="site_{{ s.id }}" class="resitem">
             <div style="width:100%">
-                <b><a id="site_{{ s.id }}" target="_blank"
+                <b><a target="_blank"
                     href={% url 'site' s.country s.state s.name %}
                 >{{ s.name }}, {{s.statecode}}</a></b> 
                 <span class="right"><b>{{ s.dist_mi }}</b> mi </span>

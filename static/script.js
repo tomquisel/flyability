@@ -5,13 +5,6 @@ window.plotColors = [
     '#4572A7',
 ];
 
-function getMarker(i) {
-    var urlstart = "http://maps.google.com/mapfiles/marker";
-    var start = "A".charCodeAt(0);
-    var ind = String.fromCharCode(Number(start) + Number(i));
-    return urlstart + ind + ".png";
-}
-
 function plotSummary(id, data) {
     $("#"+id).sparkline(toint(data), {
         type:"bar", 
@@ -43,18 +36,18 @@ function Mapper(args) {
         this.map = new google.maps.Map(this.div, mapOptions);
         this.setCenterMarker(center);
         
-        console.log("Markers initialized");
         this.sites = {};
         for (var i in sites) {
             (function() {
                 var site = sites[i];
+                var sitePos = new google.maps.LatLng(site.lat, site.lon);
                 var marker = new google.maps.Marker({
-                    position: new google.maps.LatLng(site.lat, site.lon),
+                    position: sitePos,
                     map: this.map,
                     title: site.name,
                 });
                 var infoWindow = new google.maps.InfoWindow({
-                    content: '<img src="' + this.spinner + '"/>'
+                    content: '<img class="cimg" src="' + this.spinner + '"/>'
                 });
                 var listener = google.maps.event.addListener(marker, 'click', 
                     function() { 
@@ -64,16 +57,38 @@ function Mapper(args) {
                 this.sites[site.id] = { 
                     marker : marker,
                     listener : listener,
-                    loaded : false
+                    loaded : false,
                 }
             }.call(this));
         }
-        console.log("Checking for markers callback...");
         if ('markers_callback' in this) {
-            console.log("Running deferred callback");
             this.markers_callback();
             delete this.markers_callback;
         }
+    }
+
+    this.getMarker = function (i) {
+        var urlstart = "http://maps.google.com/mapfiles/marker";
+        var start = "A".charCodeAt(0);
+        var ind = String.fromCharCode(Number(start) + Number(i));
+        return urlstart + ind + ".png";
+    }
+
+    this.getIcon = function(which) {
+        var url, anchor;
+        if (which == "arrow") {
+            url = "//www.google.com/mapfiles/arrow.png";
+            anchor = new google.maps.Point(12, 34);
+        } else if (which == "arrowshadow") {
+            url = "//www.google.com/mapfiles/arrowshadow.png";
+            anchor = new google.maps.Point(12, 34);
+        } else if (which == "shadow") {
+            url = "//www.google.com/mapfiles/shadow50.png";
+            anchor = new google.maps.Point(11, 34);
+        } else {
+            alert("Mapper.getIcon FAIL");
+        }
+        return new google.maps.MarkerImage(url, undefined, undefined, anchor);
     }
 
     this.drawInfo = function(info, marker, id) {
@@ -100,24 +115,38 @@ function Mapper(args) {
     this.setCenterMarker = function(latlng) {
         if (this.centerMarker) {
             this.centerMarker.setMap(null);
-            delete this.centerMarker;
-        }
+            delete this.centerMarker; }
         this.centerMarker = new google.maps.Marker({
             position: latlng,
             map: this.map,
-            icon: "http://www.google.com/mapfiles/arrow.png"
+            icon: this.getIcon("arrow"),
+            shadow: this.getIcon("arrowshadow")
         });
     }
 
     this.updateMarkers = function(ids) {
-        var me = this;
-        $.each(this.sites, function(k, v) {
-            //var m = me.markers[i];
-            //m.setIcon(null);
-        });
+        for (var i in this.sites) {
+            var site = this.sites[i];
+            site.marker.setIcon(null);
+            if (site.line) {
+                site.line.setMap(null);
+                delete site.line;
+            }
+        }
         for (var i in ids) {
-            var marker = this.sites[ids[i]].marker;
-            marker.setIcon(getMarker(i));
+            var site = this.sites[ids[i]];
+            site.marker.setIcon(this.getMarker(i));
+            site.marker.setShadow(this.getIcon("shadow"));
+
+            var line = new google.maps.Polyline({
+              path: [this.map.getCenter(), site.marker.getPosition()],
+              strokeColor: '#00F',
+              strokeOpacity: 0.5,
+              strokeWeight: 2,
+              visible: false,
+              map: this.map
+            });
+            site.line = line;
         }
     }
 

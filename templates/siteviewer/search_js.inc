@@ -1,27 +1,38 @@
 <script>
     function doSearch(lat, lon) {
-        $.fly.jsp.getContentPane().html("Fetching nearby sites...");
+        $.fly.jsp.getContentPane().html(
+        "{% filter escapejs %}{% include "siteviewer/search_loading.inc" %}{% endfilter %}"
+        );
         $.get("/flyability/search", {lat : lat, lon : lon}, renderResults)
             .error(function () {alert("Fail!"); });
     }
+    
+    function getId(resitem) {
+        var regex = /site_(.+)/;
+        var match = regex.exec(resitem.id);
+        if (match) { 
+            return +match[1];
+        }
+        console.log(resitem);
+        return null;
+    }
+
     function renderResults(data) {
+        var data = "<h4>Paragliding Sites near <br/>" + $.fly.city + ", " + 
+            $.fly.region + "</h4>" + data;
         $.fly.jsp.getContentPane().html(data);
         $.fly.jsp.reinitialise();
         var ids = [];
-        var regex = /site_(.+)/;
-        var atags = $("#results a");
-        for (var i in atags) {
-            var link = atags[i];
-            var match = regex.exec(link.id);
-            if (match) { 
-                ids.push(match[1]);
-            }
-        }
-        var lis = $.makeArray($("#results li"));
-        for ( var i in lis) {
-            $(lis[i]).css('background-image', 'url(' + getMarker(i) + ')');
+        var items = $("#results .resitem");
+        items.each(function (i, item) {
+            ids.push(getId(item));
+        });
+        var lis = $("#results li");
+        lis.each(function (i, li) {
+            var marker = 'url(' + $.fly.mapper.getMarker(i) + ')';
+            $(li).css('background-image', marker);
             console.log("I: " + i);
-        }
+        });
         $.fly.mapper.updateMarkersWhenReady(ids);
     }
     function doResize() {
@@ -35,18 +46,26 @@
         doResize();
         $(window).resize(doResize);
 
-        $.fly.jsp = $('.scroll-pane').jScrollPane().data('jsp');
+        $.fly.jsp = $('.scroll-pane').jScrollPane( 
+            { hideFocus: true } 
+        ).data('jsp');
 
         $(".resitem").live("mouseover", function()
         {
-                $(this).css("background-color", "#F3F7FD");
+            $.fly.mapper.sites[getId(this)].line.setVisible(true);
+            $(this).css("background-color", "#F3F7FD");
         }).live("mouseout", function()
         {
-                $(this).css("background-color", "white");
+            $.fly.mapper.sites[getId(this)].line.setVisible(false);
+            $(this).css("background-color", "white");
         });
         $("#geocomplete").geocomplete()
         .bind("geocode:result", function(event, result){
             var loc = result.geometry.location;
+            $.fly.lat = loc.lat();
+            $.fly.lon = loc.lng();
+            $.fly.city = result.address_components[0].long_name;
+            $.fly.region = result.address_components[1].short_name;
             doSearch(loc.lat(), loc.lng());
             $.fly.mapper.update(loc.lat(), loc.lng());
         })
@@ -65,12 +84,16 @@
 
         $.fly.lat = 40;
         $.fly.lon = -80;
+        $.fly.city = "Testville";
+        $.fly.region = "Test";
         $.get("http://freegeoip.net/json/{{ request.META.REMOTE_ADDR }}", 
             function (data) {
                 dict = $.parseJSON(data);
                 if (dict) {
                     $.fly.lat = dict.latitude;
                     $.fly.lon = dict.longitude;
+                    $.fly.city = dict.city;
+                    $.fly.region= dict.region_code;
                 }
             }
         ).complete ( function() {
