@@ -1,10 +1,11 @@
-import pytz, datetime
+import pytz, datetime, time
 import forecast_parser as fparser
 import forecast_fetcher as fetcher
 from timeseries import TimeSeries
 from weather.models import Forecast, ForecastValue
 from weather.models import Observation, ObservationValue
 from siteviewer.models import Site
+import email.utils
 
 def fetchForecast(site):
     forecast = Forecast(site = site, lat = site.lat, lon = site.lon)
@@ -16,23 +17,9 @@ def fetchForecast(site):
     values.extend(fourvalues)
     if not isValid(values):
         return None
-    for v in values:
-        v.forecast = forecast
     return forecast, values
 
 def isValid(values):
-    counts = {}
-    for v in values:
-        counts[v.name] = counts.get(v.name,0) + 1
-    for name,count in counts.items():
-        if name == 'gust':
-            if count < 18:
-                print "Error: %s has %d values" % (name, count)
-                return False
-        else:
-            if count < 166:
-                print "Error: %s has %d values" % (name, count)
-                return False
     return True
 
 class NoWeatherDataException(Exception):
@@ -101,6 +88,11 @@ def debug():
     print forecast
     for v in values:
         print v
+
+def grabTime(s):
+    tup = email.utils.parsedate_tz(s)
+    ts = email.utils.mktime_tz(tup)
+    return ts
 
 if __name__ == "__main__":
     debug()

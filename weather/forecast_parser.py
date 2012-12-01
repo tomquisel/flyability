@@ -1,7 +1,6 @@
 ## {{{ http://code.activestate.com/recipes/577494/ (r2)
 from lxml import etree
 import datetime
-from weather.models import ForecastValue
 
 def parseHourlyData(data):
     dataMap = { 
@@ -26,16 +25,24 @@ def parseData(data, dataMap):
     tree = etree.fromstring(data)
     times = tree.xpath("//time-layout/start-valid-time/text()")
     times = readTimes(times)
+    #print "Times len: %s" % (len(times))
     
     values = []
     for internalName,tag in dataMap.items():
         typeStr = ""
         if len(tag) > 1:
             typeStr = "[@type='%s']" % tag[1]
-        vals = tree.xpath("//%s%s/value/text()" % (tag[0], typeStr))
-        for i,v in enumerate(vals):
-            values.append(ForecastValue(name = internalName, value = float(v),
-                                        time = times[i]))
+        vals = tree.xpath("//%s%s/value" % (tag[0], typeStr))
+        assert(len(vals) == len(times))
+        count = 0
+        for i,vtag in enumerate(vals):
+            txt = vtag.text
+            if txt:
+                val = { 'name' : internalName, 'value': float(txt),
+                        'time' : times[i]}
+                values.append(val)
+            count += 1
+        #print internalName, " : ", count
     return values
 
 def readTimes(times):
