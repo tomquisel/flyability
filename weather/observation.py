@@ -1,7 +1,7 @@
 from lxml import etree
-from weather.models import Observation
+from weather.models import Observation, ObservationValue
 import datetime, pytz
-from weather.main import grabTime
+from weather.utils import grabTime
 
 class ObservationObj(object):
     def __init__(self, data):
@@ -50,13 +50,13 @@ class ObservationObj(object):
             name = v[0]
             if name in skip:
                 continue
-            o = {'name' : name, 'value' : getattr(self, name) }
+            o = ObservationValue( name, getattr(self, name) )
             values.append(o)
         pop = conditionMgr.getPOP(self.weather)
         if pop is None:
             print "WARNING: unknown weather type '%s'" % self.weather
             pop = 0
-        o = { 'name' : "pop", 'value' : pop }
+        o = ObservationValue( "pop", pop )
         values.append(o)
         return (obs, values)
 

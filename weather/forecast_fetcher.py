@@ -2,7 +2,8 @@ import sys, os, time
 import httplib
 import hashlib
 
-hourlyWeather = ['forecast.weather.gov', '/MapClick.php?lat=%s&lon=%s&FcstType=digitalDWML']
+hourlyWeather = ['forecast.weather.gov', '/MapClick.php?lat=%s&lon=%s&FcstType=digitalDWML&w0=t&w1=td&w2=sfcwind&w2u=1&w3=sky&w4=pop&w5=rh']
+
 fourHourlyWeather = ['graphical.weather.gov', '/xml/SOAP_server/ndfdXMLclient.php?lat=%s&lon=%s&product=time-series&Unit=e&wgust=wgust&Submit=Submit']
 agent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.4 (KHTML, like Gecko) Chrome/22.0.1229.94 Safari/537.4"
 

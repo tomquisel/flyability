@@ -2,10 +2,9 @@ import pytz, datetime, time
 import forecast_parser as fparser
 import forecast_fetcher as fetcher
 from timeseries import TimeSeries
-from weather.models import Forecast, ForecastValue
-from weather.models import Observation, ObservationValue
+from weather.models import Forecast, ForecastData
+from weather.models import Observation, ObservationData
 from siteviewer.models import Site
-import email.utils
 
 def fetchForecast(site):
     forecast = Forecast(site = site, lat = site.lat, lon = site.lon)
@@ -35,8 +34,8 @@ def getWeatherData(site, start):
     et = pytz.timezone("US/Eastern")
     fft = et.normalize(forecast.fetch_time.astimezone(et))
     print "Forecast fetch time:", fft
-    query = ForecastValue.objects.filter(forecast=forecast)
-    values = query.order_by('name','time')
+    query = ForecastData.objects.filter(forecast=forecast)
+    values = query[0].getData()
     seriesDict = modelsToTimeSeries(values, site.timezone)
 
     # get observation data
@@ -48,7 +47,10 @@ def getWeatherData(site, start):
             '-fetch_time'
         )
     for o in observations:
-        values = ObservationValue.objects.filter(observation=o)
+        obsdata = ObservationData.objects.filter(observation=o)
+        if len(obsdata) == 0:
+            continue
+        values = obsdata[0].getData()
         for v in values:
             if v.name not in seriesDict:
                 ts = TimeSeries(v.name, [], [], site.timezone)
@@ -88,11 +90,6 @@ def debug():
     print forecast
     for v in values:
         print v
-
-def grabTime(s):
-    tup = email.utils.parsedate_tz(s)
-    ts = email.utils.mktime_tz(tup)
-    return ts
 
 if __name__ == "__main__":
     debug()

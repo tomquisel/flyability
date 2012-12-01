@@ -1,6 +1,7 @@
 ## {{{ http://code.activestate.com/recipes/577494/ (r2)
 from lxml import etree
 import datetime
+from weather.models import ForecastValue
 
 def parseHourlyData(data):
     dataMap = { 
@@ -38,8 +39,7 @@ def parseData(data, dataMap):
         for i,vtag in enumerate(vals):
             txt = vtag.text
             if txt:
-                val = { 'name' : internalName, 'value': float(txt),
-                        'time' : times[i]}
+                val = ForecastValue(internalName, float(txt), times[i])
                 values.append(val)
             count += 1
         #print internalName, " : ", count
