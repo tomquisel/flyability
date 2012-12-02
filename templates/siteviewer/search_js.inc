@@ -89,12 +89,11 @@
         $.fly.region = "Test";
         $.get("http://freegeoip.net/json/{{ request.META.REMOTE_ADDR }}", 
             function (data) {
-                dict = $.parseJSON(data);
-                if (dict) {
-                    $.fly.lat = dict.latitude;
-                    $.fly.lon = dict.longitude;
-                    $.fly.city = dict.city;
-                    $.fly.region= dict.region_code;
+                if (data) {
+                    $.fly.lat = data.latitude;
+                    $.fly.lon = data.longitude;
+                    $.fly.city = data.city;
+                    $.fly.region= data.region_code;
                 }
             }
         ).complete ( function() {
