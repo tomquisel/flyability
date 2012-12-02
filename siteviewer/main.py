@@ -8,11 +8,13 @@ import mapstate
 
 def getAllSites():
     query = Site.objects.filter(
-                country="United States"
+                country = "United States"
             ).exclude(
-                    takeoffObj='[[0, 360, "no"]]'
+                    takeoffObj = '[[0, 360, "no"]]'
             ).exclude(
-                name__contains="PPG"
+                website = ""       
+            ).exclude(
+                name__contains = "PPG"
             )
     sites = list(query)
     return sites

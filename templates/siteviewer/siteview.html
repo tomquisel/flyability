@@ -23,29 +23,32 @@
     <div class="span3">
         <span class="textcenter" >Further Info</span>
         <ul>
-          <li><a href="{{site.website}}">{{site.name}} Website</a></li>
-          <li><a href="{{site.pgearthSite}}">{{site.name}} Details on PG Earth</a></li>
+          <li><a href="{{site.website}}" target="_blank">{{site.name}} Website</a></li>
+          <li><a href="{{site.pgearthSite}}" target="_blank">{{site.name}} Details on PG Earth</a></li>
         </ul>
     </div>
 </div>
 
-<strong> {{ site.name }} Flyability Report </strong>
-(<a rel="popover"
+<div class="page-header">
+    <span class="lead"> {{ site.name }} Flyability Report
+<a rel="popover"
     href=""
     title="What is a Flyability Report?"
     data-content="It's like a weather forecast for paragliding. It shows your hourly chances of a successful takeoff on a scale from 0 to 100. Click on a day to see forecast details."
-    >?</a>)
+    >?</a> </span>
+</div>
 
-<ul class="nav nav-pills">
+<ul class="nav nav-pills daynav">
     {% if not days %}
     <div class="alert">No weather data available at this time.</div>
     {% endif %}
     {% for day in days %}
         <li><a href="#{{day.name}}_details" data-toggle="pill" 
-                id="{{day.name}}_tab">
-            <div class="daypill">
+                style="border-color:{{day.color}}"
+                class="daylink" id="{{day.name}}_tab">
+                <div class="daypill" >
             <p>{{ day.name }}</p>
-            <h1>{{ day.flyability|floatformat:0 }}</h1>
+            <h2>{{ day.flyability|floatformat:0 }}<small>%</small></h2>
             <span id="{{day.name}}_mini" class="miniwrap">Loading...</span>
             </div>
             </a></li>

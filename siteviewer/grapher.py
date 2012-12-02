@@ -26,11 +26,6 @@ def drawWindDir(wind, takeoff, size, showWind=True):
     cir = plt.Circle( (0,0), radius=inner_rad, color='w', zorder=3)
     fig.gca().add_patch(cir)
     if showWind:
-        in_range = predictor.isInRange(wind, takeoff)
-        if in_range:
-            arrow_color = 'green'
-        else:
-            arrow_color = 'red'
         arrow_color = 'black'
         Q = plt.quiver([-X[0]], [-Y[0]], [X[0]/2.0], [Y[0]/2.0], scale=1, 
                        units='height', width = 0.07, zorder=4,

@@ -1,4 +1,4 @@
-import datetime, json
+import datetime, time, json
 from django.db import models
 from siteviewer.models import Site
 from weather.utils import parseTime
@@ -20,8 +20,8 @@ class ForecastData(models.Model):
     forecast = models.ForeignKey(Forecast)
     data = models.TextField()
 
-    def getData(self):
-        vals = self.decode(self.data)
+    def getData(self, tz):
+        vals = self.decode(self.data, tz)
         vals.sort(lambda a,b: self.forecastCmp(a,b))
         return vals
 
@@ -29,11 +29,12 @@ class ForecastData(models.Model):
         self.data = self.encode(vals)
 
     @classmethod
-    def decode(cls, data):
+    def decode(cls, data, tz):
         vals = json.loads(data)
         converted = []
         for v in vals:
-            named = ForecastValue(v[0], v[1], parseTime(v[2]))
+            named = ForecastValue(v[0], v[1], 
+                        datetime.datetime.fromtimestamp(v[2], tz))
             converted.append(named)
         return converted
 
@@ -41,7 +42,7 @@ class ForecastData(models.Model):
     def encode(cls, vals):
         converted = []
         for v in vals:
-            v2 = [v.name, v.value, v.time.isoformat()]
+            v2 = [v.name, v.value, int(time.mktime(v.time.timetuple()))]
             converted.append(v2)
         return json.dumps(converted)
 

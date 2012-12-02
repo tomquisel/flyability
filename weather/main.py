@@ -35,7 +35,8 @@ def getWeatherData(site, start):
     fft = et.normalize(forecast.fetch_time.astimezone(et))
     print "Forecast fetch time:", fft
     query = ForecastData.objects.filter(forecast=forecast)
-    values = query[0].getData()
+    # the timezone doesn't matter, we just need something
+    values = query[0].getData(et)
     seriesDict = modelsToTimeSeries(values, site.timezone)
 
     # get observation data

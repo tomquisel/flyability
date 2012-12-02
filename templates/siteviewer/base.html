@@ -21,18 +21,19 @@
 </head>
 <body>
     <div class="navbar navbar-inverse">
-        <div class="navbar-inner">
-        <div class="container">
-            <a class="brand" href="/flyability/">Flyability</a>
-            <ul class="nav">
-            </ul>
-{% comment %}
-            <form class="navbar-search">
-                <input type="text" class="search-query" placeholder="Find a site">
-            </form>
-{% endcomment %}
-        </div>
-        </div>
+    <div class="navbar-inner">
+    <div class="container">
+        <a class="brand" href="{% url 'index' %}">Flyability</a>
+        <ul class="nav">
+            <li class="{% block searchnavstate %}{% endblock %}">
+                <a href="{% url 'index' %}">Search for Paragliding Sites</a>
+            </li>
+            <li class="{% block listnavstate %}{% endblock %}">
+                <a href="{% url 'sitelist' %}">Site List</a>
+            </li>
+        </ul>
+    </div>
+    </div>
     </div>
     <div class="container main">
         {% block content %}

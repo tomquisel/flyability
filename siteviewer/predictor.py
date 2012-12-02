@@ -3,6 +3,7 @@ import datetime
 from scipy.stats import norm
 from weather.timeseries import TimeSeries
 import bisect
+import numpy as np
 
 class Predictor(object):
 
@@ -84,22 +85,58 @@ class Predictor(object):
 
 ################## HELPERS ##########################
 
+class Smoother(object):
+    def __init__(self, sd, n, inc):
+        self.xs = np.linspace(-n*inc, n*inc, 2*n+1)
+        self.weights = norm.pdf(self.xs, scale = sd)
+
+    def smooth(self, vals):
+        return np.average(vals, weights=self.weights)
+
+smoothSD = 20
+smoothN = 5
+smoothInc = 6
+
+smoother = Smoother(smoothSD, smoothN, smoothInc)
 
 def getWindDirChances(site, dir):
     takeoff = site.getTakeoffObj()
-    inRange = isInRange(dir, takeoff)
-    dist = boundaryDist(dir, takeoff)
-    diff = dist
-    if not inRange:
-        diff = -dist
-    prob = normSmooth(diff, 15)
-    return prob
+    samples = getSamples(dir, takeoff, smoothN, smoothInc)
+    res = smoother.smooth(samples)
+    #print dir, takeoff
+    #print res, samples
+    return res
 
 def getWindSpeedChances(speed):
     return normSmooth(12-speed, 1)
 
 def getRainChances(pop):
     return 1 - pop/100.0
+
+def getTakeoffScore(dir, takeoff):
+    if dir < 0:
+        dir += 360
+    if dir >= 360: 
+        dir -= 360
+    for left,right,good in takeoff:
+        if left <= dir <= right:
+            return getScore(good)
+
+def getSamples(dir, takeoff, n, inc):
+    samples = []
+    points = computeSamplePoints(dir, n, inc)
+    takeoffScores = np.vectorize(lambda x: getTakeoffScore(x, takeoff))
+    scores = takeoffScores(points)
+    return scores
+
+def computeSamplePoints(dir, n, inc):
+    start = dir - n*inc
+    end = dir + n*inc
+    points = np.linspace(start, end, 2*n + 1)
+    return points
+
+def getScore(good):
+    return {'yes' : 1.0, 'maybe' : 0.65, 'no' : 0.0}[good]
 
 def isInRange(dir, takeoff):
     for left,right,good in takeoff:
@@ -121,3 +158,4 @@ def boundaryDist(dir, takeoff):
 # negative values are worse than 50%, positive are better
 def normSmooth(val, sd):
     return norm.cdf(val, scale = sd)
+

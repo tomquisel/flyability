@@ -3,7 +3,8 @@
         $.fly.jsp.getContentPane().html(
         "{% filter escapejs %}{% include "siteviewer/search_loading.inc" %}{% endfilter %}"
         );
-        $.get("/flyability/search", {lat : lat, lon : lon}, renderResults)
+        $.fly.jsp.reinitialise();
+        $.get("{% url 'search' %}", {lat : lat, lon : lon}, renderResults)
             .error(function () {alert("Fail!"); });
     }
     
@@ -65,7 +66,7 @@
             $.fly.lat = loc.lat();
             $.fly.lon = loc.lng();
             $.fly.city = result.address_components[0].long_name;
-            $.fly.region = result.address_components[1].short_name;
+            $.fly.region = result.address_components[2].short_name;
             doSearch(loc.lat(), loc.lng());
             $.fly.mapper.update(loc.lat(), loc.lng());
         })

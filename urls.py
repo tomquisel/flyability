@@ -6,14 +6,14 @@ admin.autodiscover()
 
 urlpatterns = patterns('siteviewer.views',
     # Examples:
-    url(r'^flyability/?$', 'index', name='index'),
-    url(r'^flyability/search/?$', 'search', name='search'),
-    url(r'^flyability/site/(?P<country>[^/]+)/(?P<state>[^/]+)/(?P<name>[^/]+)/?$', 
+    url(r'^$', 'index', name='index'),
+    url(r'^search/?$', 'search', name='search'),
+    url(r'^site/(?P<country>[^/]+)/(?P<state>[^/]+)/(?P<name>[^/]+)/?$', 
         'site', name='site'),
-    url(r'^flyability/site/summary$', 'summary', name='summary'),
-    url(r'^flyability/wind/dir_(?P<wind>[-\d]+)_(?P<siteid>\d+)_(?P<size>\d+).png$', 
+    url(r'^site/summary$', 'summary', name='summary'),
+    url(r'^wind/dir_(?P<wind>[-\d]+)_(?P<siteid>\d+)_(?P<size>\d+).png$', 
         'windDir', name='windDir'),
-    url(r'^flyability/Brace$', 'shim'),
+    url(r'^sitelist$', 'sitelist', name='sitelist'),
 
     # unused
     #url(r'^flyability/wind/arrow_(?P<wind>[-\d]+)_(?P<left>\d+)_(?P<right>\d+)_(?P<size>\d+).png$', 'windArrow'),

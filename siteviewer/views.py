@@ -1,4 +1,4 @@
-import datetime
+import datetime, time
 import json
 from django.http import HttpResponse, Http404 
 from django.shortcuts import render_to_response, get_object_or_404
@@ -10,6 +10,7 @@ import grapher, multigrapher
 from math import sin, cos, atan2, pi
 import weather.main as weather
 import siteviewer.mapstate as mapstate
+from profiler import profile
 
 def index(request):
     sites = main.getAllSites();
@@ -27,9 +28,33 @@ def index(request):
     env = { 'sitesobj' : json.dumps(sitesobj) }
     return render_to_response('siteviewer/index.html', env,
                               context_instance=RequestContext(request))
+def sitelist(request):
+    sites = main.getAllSites();
 
-def shim(request):
-    return site(request, "United States", "New York", "Brace")
+    def siteCmp(a,b):
+        scmp = cmp(a.state, b.state)
+        if scmp != 0:
+            return scmp
+        return cmp(a.name,b.name)
+    sites.sort(siteCmp)
+
+    states = []
+    sitesobj = []
+    lastState = None
+    for s in sites:
+        if lastState != s.state:
+            sitesobj.append({'state' : s.state})
+            states.append(s.state)
+            lastState = s.state
+        out = {}
+        out['name'] = s.name
+        out['state'] = s.state
+        out['country'] = s.country
+        sitesobj.append(out)
+
+    env = { 'sites' : sitesobj , 'states' : states }
+    return render_to_response('siteviewer/sitelist.html', env,
+                              context_instance=RequestContext(request))
 
 def site(request, country, state, name):
     sites = Site.objects.filter(name=name).\
@@ -81,11 +106,15 @@ def dist(s, lat, lon):
     return atan2((n1 + n2)** 0.5, d) * 3963.1676
 
 
+#@profile("search.prof")
 def search(request):
     lat = float(request.GET['lat'])
     lon = float(request.GET['lon'])
+    t1 = time.time()
     sites = main.getAllSites()
+    t2 = time.time()
     sites.sort(lambda s1, s2: distCmp(s1, s2, lat, lon))
+    t3 = time.time()
     res = sites[:10]
     for s in res:
         dmi = dist(s, lat, lon)
@@ -95,6 +124,9 @@ def search(request):
         setattr(s, 'dist_mi', dmi)
         setattr(s, 'dist_km', dkm)
         main.addSiteDetails(s)
+    t4 = time.time()
+
+    print "Times: %s %s %s" % (t2-t1, t3-t2, t4-t3)
 
     env = { 'sites' : res }
     return render_to_response('siteviewer/search_body.inc', env,

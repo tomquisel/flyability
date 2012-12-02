@@ -8,6 +8,8 @@ Flyability Paragliding Forecasts
     {% include "siteviewer/maps_js.inc" %}
 {% endblock %}
 
+{% block searchnavstate %}active{% endblock %}
+
 {% block content %}
 <div class="searchrow">
     <form class="form-search" id="search-form" method="GET" action="{% url 'search' %}">
@@ -15,7 +17,7 @@ Flyability Paragliding Forecasts
             <input id="geocomplete" type="text" name="query" 
                 value="{{ request.GET.query }}"
                 class="input-large search-query" 
-                placeholder="Enter your city" />
+                placeholder="Enter your city / town" />
             
             <button id="search" type="submit" class="btn">Search</button>
         </fieldset>
