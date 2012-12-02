@@ -1,33 +1,27 @@
 {% extends "siteviewer/base.html" %}
 
 {% block title %} 
-{% if state %} 
-Paragliding Forecasts in {{ state }}, {{ country }}
-{% else %} 
-Paragliding Forecasts in {{ country }}
-{% endif %} 
+    Paragliding Site Forecasts
 {% endblock %}
 
 {% block head %}
 {% endblock %}
 
+{% block listnavstate %}active{% endblock %}
+
 {% block content %}
-<ul class="breadcrumb">
-{% if state %} 
-    {% url siteviewer.views.country country=country as country_url %}
-    <li>
-        <a href="{{ country_url }}">{{country}}</a> 
-        <span class="divider">/</span>
-    </li>
-    <li class="active">{{ state }}</li>
-{% else %} 
-    <li class="active">{{ country }}</li>
-{% endif %} 
-</ul>
+<h2>List of U.S. Paragliding Sites</h2>
+{% for s in states %}
+<a href="#{{ s }}">{{ s }}</a>
+{% endfor %}
 <ul>
-    {% for site in sites %}
-        {% url siteviewer.views.site country=country as country_url %}
-        <li><a href="{{ site_url }}">{{ site.name }}</a></li>
+    {% for s in sites %}
+        {% if s.name %}
+            {% url 'site' s.country s.state s.name as siteurl %}
+            <li><a href="{{ siteurl }}">{{ s.name }}</a></li>
+        {% else %}
+            <h3 id="{{s.state}}">{{ s.state }}</h3>
+        {% endif %}
     {% endfor %}
 </ul>
 {% endblock %}

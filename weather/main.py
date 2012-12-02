@@ -1,9 +1,9 @@
-import pytz, datetime
+import pytz, datetime, time
 import forecast_parser as fparser
 import forecast_fetcher as fetcher
 from timeseries import TimeSeries
-from weather.models import Forecast, ForecastValue
-from weather.models import Observation, ObservationValue
+from weather.models import Forecast, ForecastData
+from weather.models import Observation, ObservationData
 from siteviewer.models import Site
 
 def fetchForecast(site):
@@ -16,46 +16,46 @@ def fetchForecast(site):
     values.extend(fourvalues)
     if not isValid(values):
         return None
-    for v in values:
-        v.forecast = forecast
     return forecast, values
 
 def isValid(values):
-    counts = {}
-    for v in values:
-        counts[v.name] = counts.get(v.name,0) + 1
-    for name,count in counts.items():
-        if name == 'gust':
-            if count < 18:
-                print "Error: %s has %d values" % (name, count)
-                return False
-        else:
-            if count < 166:
-                print "Error: %s has %d values" % (name, count)
-                return False
     return True
 
+class NoWeatherDataException(Exception):
+    pass
+
 def getWeatherData(site, start):
+    forecasts = Forecast.objects.filter(site=site).order_by('-fetch_time')
+    if len(forecasts) == 0:
+        raise NoWeatherDataException
     # the most recently fetched forecast for this site
-    forecast = Forecast.objects.filter(site=site).order_by('-fetch_time')[0]
+    forecast = forecasts[0]
+
     et = pytz.timezone("US/Eastern")
     fft = et.normalize(forecast.fetch_time.astimezone(et))
     print "Forecast fetch time:", fft
-    query = ForecastValue.objects.filter(forecast=forecast)
-    values = query.order_by('name','time')
+    query = ForecastData.objects.filter(forecast=forecast)
+    # the timezone doesn't matter, we just need something
+    values = query[0].getData(et)
     seriesDict = modelsToTimeSeries(values, site.timezone)
 
     # get observation data
     observations = Observation.objects.filter(
+            site=site
+        ).filter(
             time__gt=start
         ).order_by(
             '-fetch_time'
         )
     for o in observations:
-        values = ObservationValue.objects.filter(observation=o)
+        obsdata = ObservationData.objects.filter(observation=o)
+        if len(obsdata) == 0:
+            continue
+        values = obsdata[0].getData()
         for v in values:
+            if v.name not in seriesDict:
+                ts = TimeSeries(v.name, [], [], site.timezone)
             seriesDict[v.name].add(o.time, v.value)
-
     return seriesDict
 
 def modelsToTimeSeries(values, tz):
@@ -68,9 +68,16 @@ def modelsToTimeSeries(values, tz):
         valuesDict[n] = l
     for n,vlist in valuesDict.items():
         seriesDict[n] = TimeSeries.fromModels(vlist, tz)
+    validateSeries(seriesDict)
     # do some unit conversions
     TSKnotsToMPH(seriesDict['gust'])
     return seriesDict
+
+def validateSeries(seriesDict):
+    names = ['pop', 'wind', 'gust', 'dir']
+    for name in names:
+        if name not in seriesDict:
+            raise NoWeatherDataException
 
 def TSKnotsToMPH(ts):
     ts.values = [ knotsToMPH(v) for v in ts.values ]

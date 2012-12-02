@@ -26,11 +26,13 @@ class TimeSeries(object):
         return res
 
     def add(self, time, value):
+        ind = 0
         for i,t in enumerate(self.times):
             if time < t:
-                self.times.insert(i, time)
-                self.values.insert(i, value)
+                ind = i
                 break
+        self.times.insert(ind, time)
+        self.values.insert(ind, value)
 
     def interpolate(self, tslist, default=None):
         """Returns the value of the series at each timestamp in tslist.

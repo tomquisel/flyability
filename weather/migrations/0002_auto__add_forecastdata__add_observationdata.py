@@ -8,59 +8,29 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'Forecast'
-        db.create_table(u'weather_forecast', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('site', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['siteviewer.Site'])),
-            ('lat', self.gf('django.db.models.fields.FloatField')()),
-            ('lon', self.gf('django.db.models.fields.FloatField')()),
-            ('fetch_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, db_index=True, blank=True)),
-        ))
-        db.send_create_signal(u'weather', ['Forecast'])
-
-        # Adding model 'ForecastValue'
-        db.create_table(u'weather_forecastvalue', (
+        # Adding model 'ForecastData'
+        db.create_table(u'weather_forecastdata', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('forecast', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['weather.Forecast'])),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('value', self.gf('django.db.models.fields.FloatField')()),
-            ('time', self.gf('django.db.models.fields.DateTimeField')()),
+            ('data', self.gf('django.db.models.fields.TextField')()),
         ))
-        db.send_create_signal(u'weather', ['ForecastValue'])
+        db.send_create_signal(u'weather', ['ForecastData'])
 
-        # Adding model 'Observation'
-        db.create_table(u'weather_observation', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('site', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['siteviewer.Site'])),
-            ('lat', self.gf('django.db.models.fields.FloatField')()),
-            ('lon', self.gf('django.db.models.fields.FloatField')()),
-            ('fetch_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('time', self.gf('django.db.models.fields.DateTimeField')()),
-        ))
-        db.send_create_signal(u'weather', ['Observation'])
-
-        # Adding model 'ObservationValue'
-        db.create_table(u'weather_observationvalue', (
+        # Adding model 'ObservationData'
+        db.create_table(u'weather_observationdata', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('observation', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['weather.Observation'])),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('value', self.gf('django.db.models.fields.FloatField')()),
+            ('data', self.gf('django.db.models.fields.TextField')()),
         ))
-        db.send_create_signal(u'weather', ['ObservationValue'])
+        db.send_create_signal(u'weather', ['ObservationData'])
 
 
     def backwards(self, orm):
-        # Deleting model 'Forecast'
-        db.delete_table(u'weather_forecast')
+        # Deleting model 'ForecastData'
+        db.delete_table(u'weather_forecastdata')
 
-        # Deleting model 'ForecastValue'
-        db.delete_table(u'weather_forecastvalue')
-
-        # Deleting model 'Observation'
-        db.delete_table(u'weather_observation')
-
-        # Deleting model 'ObservationValue'
-        db.delete_table(u'weather_observationvalue')
+        # Deleting model 'ObservationData'
+        db.delete_table(u'weather_observationdata')
 
 
     models = {
@@ -87,6 +57,12 @@ class Migration(SchemaMigration):
             'lon': ('django.db.models.fields.FloatField', [], {}),
             'site': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['siteviewer.Site']"})
         },
+        u'weather.forecastdata': {
+            'Meta': {'object_name': 'ForecastData'},
+            'data': ('django.db.models.fields.TextField', [], {}),
+            'forecast': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['weather.Forecast']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+        },
         u'weather.forecastvalue': {
             'Meta': {'object_name': 'ForecastValue'},
             'forecast': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['weather.Forecast']"}),
@@ -103,6 +79,12 @@ class Migration(SchemaMigration):
             'lon': ('django.db.models.fields.FloatField', [], {}),
             'site': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['siteviewer.Site']"}),
             'time': ('django.db.models.fields.DateTimeField', [], {})
+        },
+        u'weather.observationdata': {
+            'Meta': {'object_name': 'ObservationData'},
+            'data': ('django.db.models.fields.TextField', [], {}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'observation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['weather.Observation']"})
         },
         u'weather.observationvalue': {
             'Meta': {'object_name': 'ObservationValue'},

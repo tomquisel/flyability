@@ -5,11 +5,33 @@ Flyability Paragliding Forecasts
 {% endblock %}
 
 {% block head %}
+    {% include "siteviewer/maps_js.inc" %}
 {% endblock %}
 
+{% block searchnavstate %}active{% endblock %}
+
 {% block content %}
-<div class="hero-unit">
-  <h1>Flyability</h1>
-  <p>Find out when your favorite paragliding sites will be flyable.</p>
+<div class="searchrow">
+    <form class="form-search" id="search-form" method="GET" action="{% url 'search' %}">
+        <fieldset>
+            <input id="geocomplete" type="text" name="query" 
+                value="{{ request.GET.query }}"
+                class="input-large search-query" 
+                placeholder="Enter your city / town" />
+            
+            <button id="search" type="submit" class="btn">Search</button>
+        </fieldset>
+    </form>
 </div>
+<div id="resultsrow">
+<div id="results" class="scroll-pane">
+</div>
+<div id="mapdiv" class="map">
+</div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+    {% include "siteviewer/search_js.inc" %}
 {% endblock %}

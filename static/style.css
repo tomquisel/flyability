@@ -1,7 +1,25 @@
+html { height: 100% }
+body { height: 100%; margin: 0; padding: 0 }
+#map_canvas { height: 100% }
+#results {
+    overflow: hidden;
+}
+
 .daypill {
     width: 5em;
     color: #444;
     text-align: center;
+}
+
+.daylink {
+    border-style: solid;
+    border-width: 5px;
+    -webkit-border-radius: 15px !important;
+       -moz-border-radius: 15px !important;
+            border-radius: 15px !important;
+}
+
+.daynav {
 }
 
 .inline {
@@ -30,6 +48,17 @@
     text-align: center;
 }
 
+.cimg {
+    display: block;
+    margin: auto;
+}
+
+.loading {
+    margin: auto;
+    width: 10em;
+    text-align: center;
+}
+
 .orient {
     display: block;
     margin: auto;
@@ -53,3 +82,84 @@
     right: 0;
     width: 70px;
 }
+
+.searchrow {
+    margin-top: 1em;
+}
+
+.map {
+    height: 100%;
+}
+
+.map img {
+    max-width: none;
+}
+
+#results {
+    height: 100%;
+    overflow: auto;
+    width: 20em;
+    float: left;
+    margin-right: 10px;
+}
+
+#results ul {
+    list-style: none;
+    margin: 0;
+}
+
+#results li {
+    padding-left: 30px;
+    background-repeat: no-repeat;
+    background-position: left center;
+    display: block;
+}
+
+.right {
+    float: right;
+}
+
+.resitem {
+    width: 100%;
+    padding: 0.5em 0;
+}
+
+.prediction {
+    display: inline-block;
+    text-align: center;
+    width: 2em;
+    margin: 0.5em 0 0 0;
+    -webkit-border-radius: 2px;
+       -moz-border-radius: 2px;
+            border-radius: 2px;
+}
+
+.input-large {
+    width: 400px;
+}
+
+.form-search {
+    margin: 0 0 1em;
+}
+
+/* Scrollbar styling */
+.jspVerticalBar {
+    width: 8px;
+}
+
+.jspTrack {
+    background: #EEE;
+}
+
+.jspDrag {
+    background: #BBB;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.jspDrag:hover {
+    background: #AAA;
+}
+
+/* End Scrollbar styling */
