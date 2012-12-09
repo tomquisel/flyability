@@ -1,4 +1,5 @@
 import datetime as dt, pytz
+from django.http import Http404 
 from weather.timeseries import TimeSeries
 import weather.main as weather
 from predictor import Predictor
@@ -18,6 +19,12 @@ def getAllSites():
             )
     sites = list(query)
     return sites
+
+def getOr404(d, s):
+    res = d.get(s)
+    if res is None:
+        raise Http404
+    return res
 
 def addSiteDetails(site):
     setattr(site, 'statecode', mapstate.getCode(site.state))

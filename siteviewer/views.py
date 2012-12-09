@@ -75,7 +75,7 @@ def site(request, country, state, name):
                               context_instance=RequestContext(request))
 
 def summary(request):
-    id = int(request.GET['id'])
+    id = int(main.getOr404(request.GET, 'id'))
     site = get_object_or_404(Site, pk=id)
     main.addSiteDetails(site)
     env = {'site' : site}
@@ -108,8 +108,8 @@ def dist(s, lat, lon):
 
 #@profile("search.prof")
 def search(request):
-    lat = float(request.GET['lat'])
-    lon = float(request.GET['lon'])
+    lat = float(main.getOr404(request.GET, 'lat'))
+    lon = float(main.getOr404(request.GET, 'lon'))
     t1 = time.time()
     sites = main.getAllSites()
     t2 = time.time()
