@@ -13,6 +13,8 @@ def fetchForecast(site):
     fourhourly = fetcher.cachingFetch(fetcher.fourHourlyWeather, 
                                       (site.lat, site.lon))
     fourvalues = fparser.parseFourHourlyData(fourhourly)
+    if values is None or fourvalues is None:
+        return None
     values.extend(fourvalues)
     if not isValid(values):
         return None

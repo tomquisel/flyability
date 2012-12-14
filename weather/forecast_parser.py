@@ -23,7 +23,11 @@ def parseFourHourlyData(data):
 
 def parseData(data, dataMap):
 
-    tree = etree.fromstring(data)
+    try:
+        tree = etree.fromstring(data)
+    except:
+        print "Failed to parse forecast data as XML!"
+        return None
     times = tree.xpath("//time-layout/start-valid-time/text()")
     times = readTimes(times)
     #print "Times len: %s" % (len(times))

@@ -20,7 +20,12 @@ class ObservationObj(object):
         self.readFromData(data)
 
     def readFromData(self, data):
-        tree = etree.fromstring(data)
+        try:
+            tree = etree.fromstring(data)
+        except:
+            print "Failed to parse data as XML!"
+            self.failed = True
+            return
         for tag, (name, conv, minv, maxv) in self.mapping.items():
             v = tree.xpath("/current_observation/%s/text()" % tag)
             if len(v) < 1:
