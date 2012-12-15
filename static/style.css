@@ -84,11 +84,14 @@ body { height: 100%; margin: 0; padding: 0 }
 }
 
 .searchrow {
-    margin-top: 1em;
+    padding-top: 1em;
 }
 
 .map {
     height: 100%;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #AAA;
 }
 
 .map img {

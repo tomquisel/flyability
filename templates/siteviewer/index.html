@@ -15,7 +15,7 @@ Flyability Paragliding Forecasts
     <form class="form-search" id="search-form" method="GET" action="{% url 'search' %}">
         <fieldset>
             <input id="geocomplete" type="text" name="query" 
-                value="{{ request.GET.query }}"
+                value="{{ request.session.query }}"
                 class="input-large search-query" 
                 placeholder="Enter your city / town" />
             

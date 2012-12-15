@@ -1,10 +1,10 @@
 <script>
-    function doSearch(lat, lon) {
+    function doSearch(lat, lon, query) {
         $.fly.jsp.getContentPane().html(
         "{% filter escapejs %}{% include "siteviewer/search_loading.inc" %}{% endfilter %}"
         );
         $.fly.jsp.reinitialise();
-        $.get("{% url 'search' %}", {lat : lat, lon : lon}, renderResults)
+        $.get("{% url 'search' %}", {lat : lat, lon : lon, query : query}, renderResults)
             .error(function () {alert("Fail!"); });
     }
     
@@ -19,8 +19,8 @@
     }
 
     function renderResults(data) {
-        var data = "<h4>Paragliding Sites near <br/>" + $.fly.city + ", " + 
-            $.fly.region + "</h4>" + data;
+        var data = "<h4>Paragliding Sites near <br/>" + $.fly.address + 
+            "</h4>" + data;
         $.fly.jsp.getContentPane().html(data);
         $.fly.jsp.reinitialise();
         var ids = [];
@@ -36,11 +36,40 @@
         });
         $.fly.mapper.updateMarkersWhenReady(ids);
     }
+
     function doResize() {
         var resultsrow = $("#resultsrow");
         var desired = $(window).height() - resultsrow.offset().top;
         resultsrow.css({'height':desired+'px'});
     }
+
+    function drawAndSearch() {
+        if (!$.fly.mapper) {
+            $.fly.mapper = new Mapper({
+                div: $("#mapdiv")[0], 
+                spinner: "{{ STATIC_URL }}/spinner.gif",
+                infoURL: "{% url 'summary' %}"
+            });
+            $.fly.mapper.draw($.fly.lat, $.fly.lon, {{ sitesobj|safe }});
+        }
+        doSearch($.fly.lat, $.fly.lon, $.fly.address);
+        $.fly.mapper.update($.fly.lat, $.fly.lon);
+    }
+    
+    function geoipLookup(cb) {
+        $.get("http://freegeoip.net/json/{{ request.META.REMOTE_ADDR }}", 
+            function (data) {
+                if (data && data.latitude != "0" && data.longitude != "0") {
+                    $.fly.lat = data.latitude;
+                    $.fly.lon = data.longitude;
+                    $.fly.address = data.city + ", " + data.region_code;
+                }
+            }
+        ).complete ( function() {
+            cb();
+        });
+    }
+
     $(function(){
         $.fly = {};
 
@@ -65,17 +94,16 @@
             var loc = result.geometry.location;
             $.fly.lat = loc.lat();
             $.fly.lon = loc.lng();
-            $.fly.city = result.address_components[0].long_name;
-            $.fly.region = result.address_components[2].short_name;
-            doSearch(loc.lat(), loc.lng());
-            $.fly.mapper.update(loc.lat(), loc.lng());
+            $.fly.address = result.formatted_address;
+            console.log(result);
+            drawAndSearch();
         })
         .bind("geocode:error", function(event, status){
             console.log(status);
             $("#results").html("ERROR: " + status);
         })
         .bind("geocode:multiple", function(event, results){
-            $("#results").html("Multiple: " + results.length + " results found");
+            $.fly.jsp.getContentPane().html(results.length + " results found");
         });
 
         $("#search").click(function(){
@@ -83,28 +111,13 @@
             return false;
         });
 
-        $.fly.lat = 40;
-        $.fly.lon = -80;
-        $.fly.city = "Testville";
-        $.fly.region = "Test";
-        $.get("http://freegeoip.net/json/{{ request.META.REMOTE_ADDR }}", 
-            function (data) {
-                if (data) {
-                    $.fly.lat = data.latitude;
-                    $.fly.lon = data.longitude;
-                    $.fly.city = data.city;
-                    $.fly.region= data.region_code;
-                }
-            }
-        ).complete ( function() {
-            $.fly.mapper = new Mapper({
-                div: $("#mapdiv")[0], 
-                spinner: "{{ STATIC_URL }}/spinner.gif",
-                infoURL: "{% url 'summary' %}"
-            });
-            // draw the map
-            $.fly.mapper.draw($.fly.lat, $.fly.lon, {{ sitesobj|safe }});
-            doSearch($.fly.lat, $.fly.lon);
-        });
+        $.fly.lat = 40.7142;
+        $.fly.lon = -74.0064;
+        $.fly.address = "NYC, NY";
+        if ($('#geocomplete').val() != "") {
+            $('#geocomplete').trigger("geocode");
+        } else {
+            geoipLookup(drawAndSearch);
+        }
     });
     </script>

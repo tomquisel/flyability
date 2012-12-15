@@ -110,6 +110,8 @@ def dist(s, lat, lon):
 def search(request):
     lat = float(main.getOr404(request.GET, 'lat'))
     lon = float(main.getOr404(request.GET, 'lon'))
+    query = main.getOr404(request.GET, 'query')
+    request.session['query'] = query
     t1 = time.time()
     sites = main.getAllSites()
     t2 = time.time()
