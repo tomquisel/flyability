@@ -4,6 +4,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, loader
 from django.views.decorators.cache import cache_control
+import django.utils.timezone as djtz
 from siteviewer.models import Site
 import siteviewer.main as main
 import grapher, multigrapher
@@ -20,7 +21,7 @@ def index(request):
         out = {}
         out['lat'] = s.lat
         out['lon'] = s.lon
-        out['name'] = s.name
+        out['name'] = s.shortname
         out['pos'] = i
         out['id'] = s.id
         sitesobj.append(out)
@@ -65,10 +66,12 @@ def site(request, country, state, name):
     assert(len(sites) == 1)
     site = sites[0]
     env = {'site' : site}
+    djtz.activate(site.timezone)
     try:
         mgr = main.ForecastMgr(site)
         days = mgr.getDays()
         env['days'] = days
+        env['fetchTime'] = mgr.fetchTime
     except weather.NoWeatherDataException: 
         pass
     return render_to_response('siteviewer/siteview.html', env,
@@ -77,6 +80,7 @@ def site(request, country, state, name):
 def summary(request):
     id = int(main.getOr404(request.GET, 'id'))
     site = get_object_or_404(Site, pk=id)
+    djtz.activate(site.timezone)
     main.addSiteDetails(site)
     env = {'site' : site}
     return render_to_response('siteviewer/sitesummary.html', env,

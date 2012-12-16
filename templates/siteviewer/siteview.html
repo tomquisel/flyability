@@ -5,6 +5,10 @@
 {{ site.name }} Paragliding Forecast
 {% endblock %}
 
+{% block meta_desc %}
+<meta name="description" content="{{ site.shortname }} wind and weather forecast for paragliders" />
+{% endblock %}
+
 {% block head %}
 {% endblock %}
 
@@ -35,6 +39,10 @@
             data-content="It's like a weather forecast for paragliding. It shows your hourly chances of a successful takeoff on a scale from 0 to 100. Click on a day to see forecast details."
             >?</a>
         {% endcomment %}
+
+        <div class="alert alert-info">
+            National Weather Service forecast for {{ site.shortname }} last updated at {{ fetchTime|date:"f a e" }} on {{ fetchTime|date:"N j" }}
+        </div>
 
         <ul class="nav nav-pills daynav">
             {% if not days %}

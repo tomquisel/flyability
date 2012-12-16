@@ -1,4 +1,5 @@
 import pytz, datetime, time
+from collections import namedtuple
 import forecast_parser as fparser
 import forecast_fetcher as fetcher
 from timeseries import TimeSeries
@@ -26,6 +27,8 @@ def isValid(values):
 class NoWeatherDataException(Exception):
     pass
 
+WeatherData = namedtuple('WeatherData', ['fetchTime', 'seriesDict'])
+
 def getWeatherData(site, start):
     forecasts = Forecast.objects.filter(site=site).order_by('-fetch_time')
     if len(forecasts) == 0:
@@ -33,12 +36,11 @@ def getWeatherData(site, start):
     # the most recently fetched forecast for this site
     forecast = forecasts[0]
 
-    et = pytz.timezone("US/Eastern")
-    fft = et.normalize(forecast.fetch_time.astimezone(et))
-    print "Forecast fetch time:", fft
     query = ForecastData.objects.filter(forecast=forecast)
-    # the timezone doesn't matter, we just need something
-    values = query[0].getData(et)
+    tz = pytz.timezone(site.timezone)
+    values = query[0].getData(tz)
+    fetchTime = tz.normalize(forecast.fetch_time.astimezone(tz))
+    print forecast.fetch_time, site.timezone, tz, fetchTime
     seriesDict = modelsToTimeSeries(values, site.timezone)
 
     # get observation data
@@ -58,7 +60,7 @@ def getWeatherData(site, start):
             if v.name not in seriesDict:
                 ts = TimeSeries(v.name, [], [], site.timezone)
             seriesDict[v.name].add(o.time, v.value)
-    return seriesDict
+    return WeatherData(fetchTime, seriesDict)
 
 def modelsToTimeSeries(values, tz):
     seriesDict = {}

@@ -16,6 +16,8 @@ def getAllSites():
                 website = ""       
             ).exclude(
                 name__contains = "PPG"
+            ).exclude(
+                name__contains = "no PG"
             )
     sites = list(query)
     return sites
@@ -48,12 +50,13 @@ class ForecastMgr(object):
         self.startTime = dt.datetime.combine(self.startDay, 
                                              dt.time(tzinfo=self.tz))
 
-        (times, seriesDict, predictor) = \
+        (times, seriesDict, predictor, fetchTime) = \
                 self.fetchSeries(start = self.startTime, hours = self.days * 24)
 
         self.times = times
         self.seriesDict = seriesDict
         self.predictor = predictor
+        self.fetchTime = fetchTime
 
     @classmethod
     def shortDay(cls, i):
@@ -122,9 +125,9 @@ class ForecastMgr(object):
         return self.seriesDict[name].interpolate([time])[0]
 
     def fetchSeries(self, start=dt.datetime.now(), hours=168):
-        seriesDict = weather.getWeatherData(self.site, start)
+        wdata = weather.getWeatherData(self.site, start)
         times = TimeSeries.range(start, hours, TimeSeries.hour)
         awareTimes = TimeSeries.makeAware(times, self.tz)
-        predictor = Predictor(awareTimes, seriesDict, self.site)
-        seriesDict['flyability'] = predictor.flyability
-        return (times, seriesDict, predictor)
+        predictor = Predictor(awareTimes, wdata.seriesDict, self.site)
+        wdata.seriesDict['flyability'] = predictor.flyability
+        return (times, wdata.seriesDict, predictor, wdata.fetchTime)

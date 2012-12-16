@@ -1,3 +1,4 @@
+{% if request.META.REMOTE_ADDR != "69.203.0.38" %}
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
@@ -11,3 +12,4 @@
   })();
 
 </script>
+{% endif %}

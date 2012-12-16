@@ -1,7 +1,7 @@
 <div style="width:100%">
     <b><a id="site_{{ site.id }}" target="_blank"
         href={% url 'site' site.country site.state site.name %}
-    >{{ site.name }}, {{site.statecode}}</a></b> 
+    >{{ site.shortname }}, {{site.statecode}}</a></b> 
 </div>
 {% for day in site.days %}
     <div class="prediction" id="fly_{{site.date}}"
