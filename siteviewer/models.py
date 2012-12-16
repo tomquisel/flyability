@@ -1,5 +1,5 @@
 from django.db import models
-import json
+import json, re
 
 class Site(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -14,6 +14,12 @@ class Site(models.Model):
     timezone = models.CharField(max_length=255)
     website = models.CharField(max_length=255, default='')
     pgearthSite = models.CharField(max_length=255, default='')
+
+    def getShortName(self): 
+        m = re.match("[^,(-]+", self.name)
+        return m.group(0).strip().title()
+
+    shortname = property(getShortName)
 
     def __unicode__(self):
         name = ", ".join((self.name, self.state, self.country, self.continent))

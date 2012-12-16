@@ -2,7 +2,6 @@
 
 function Plotter() { }
 
-Plotter.prototype.chartWidth=800;
 Plotter.prototype.chartHeight=200;
 Plotter.prototype.percYAxis = {
     title: { text : null },
@@ -41,7 +40,7 @@ Plotter2.prototype.setOptions = function() {
             type: 'spline', 
             height: this.chartHeight,
             //width: chartWidth,
-            marginLeft: 50
+            //marginLeft: 50
         },
         legend: { enabled: false },
         credits: { enabled: false },

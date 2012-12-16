@@ -5,7 +5,7 @@
         );
         $.fly.jsp.reinitialise();
         $.get("{% url 'search' %}", {lat : lat, lon : lon, query : query}, renderResults)
-            .error(function () {alert("Fail!"); });
+            .error(function () {console.log("AJAX fail."); });
     }
     
     function getId(resitem) {

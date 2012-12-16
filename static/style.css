@@ -19,6 +19,11 @@ body { height: 100%; margin: 0; padding: 0 }
             border-radius: 15px !important;
 }
 
+.nomargin {
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
 .daynav {
 }
 
@@ -59,9 +64,15 @@ body { height: 100%; margin: 0; padding: 0 }
     text-align: center;
 }
 
-.orient {
-    display: block;
-    margin: auto;
+.bline {
+    border-bottom-style: solid;
+    border-width: 1px;
+    border-color: #CCC;
+    margin-bottom: 0.5em;
+}
+
+.sideimg {
+    margin-bottom: 1em;
 }
 
 .nav > .active * {
@@ -145,7 +156,17 @@ body { height: 100%; margin: 0; padding: 0 }
     margin: 0 0 1em;
 }
 
-/* Scrollbar styling */
+.sidebar {
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-width: 1px;
+    border-color: #CCC;
+}
+
+/********************* 
+ * Scrollbar styling *
+ *********************/
+
 .jspVerticalBar {
     width: 8px;
 }
@@ -165,4 +186,6 @@ body { height: 100%; margin: 0; padding: 0 }
     background: #AAA;
 }
 
-/* End Scrollbar styling */
+/*************************
+ * End Scrollbar styling *
+ *************************/

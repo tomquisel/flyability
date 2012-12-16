@@ -143,6 +143,8 @@ def windDir(request, wind, siteid, size):
             lambda : grapher.drawWindDir(wind, site.getTakeoffObj(), size, 
                                          showWind)
     )
+    if isinstance(response, Exception):
+        raise response
     return response
 
 # unused

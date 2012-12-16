@@ -5,7 +5,7 @@
             <div style="width:100%">
                 <b><a target="_blank"
                     href={% url 'site' s.country s.state s.name %}
-                >{{ s.name }}, {{s.statecode}}</a></b> 
+                >{{ s.shortname }}, {{s.statecode}}</a></b> 
                 <span class="right"><b>{{ s.dist_mi }}</b> mi </span>
             </div>
             {% for day in s.days %}

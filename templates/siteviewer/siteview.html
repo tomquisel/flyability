@@ -9,77 +9,70 @@
 {% endblock %}
 
 {% block content %}
-<ul class="breadcrumb">
-    <li> {{ site.country }} <span class="divider">/</span></li>
-    <li> {{ site.state }} <span class="divider">/</span> </li>
-    <li class="active">{{ site.name }}</li>
-</ul>
-<div class="bpad row">
-    <div class="span3 textcenter">
-        Launch Direction
-        <img class="img-rounded orient" 
-        src="{% url 'windDir' -1 site.id  60 %}" >
-    </div>
-    <div class="span3">
-        <span class="textcenter" >Further Info</span>
+<div class="row">
+    <div class="span2">
+    <div class="sidebar">
+        <div class="bline">
+        <h3>{{ site.shortname }}</h3>
+        </div>
+        <p>Launch Direction</p>
+        <img class="sideimg" src="{% url 'windDir' -1 site.id 100 %}">
+        <a href="http://maps.google.com/?q={{ site.lat }},{{ site.lon }}&z=9" 
+            target="_blank" ><img class="sideimg"
+            src="http://maps.googleapis.com/maps/api/staticmap?center={{ site.lat }},{{ site.lon }}&markers={{ site.lat }},{{ site.lon }}&zoom=9&size=150x150&sensor=false"></a>
         <ul>
-          <li><a href="{{site.website}}" target="_blank">{{site.name}} Website</a></li>
-          <li><a href="{{site.pgearthSite}}" target="_blank">{{site.name}} Details on PG Earth</a></li>
+          <li><a href="{{site.website}}" target="_blank">{{site.shortname}} Website</a></li>
+          <li><a href="{{site.pgearthSite}}" target="_blank">Details on PG Earth</a></li>
         </ul>
     </div>
-</div>
+    </div>
 
-<div class="page-header">
-    <span class="lead"> {{ site.name }} Flyability Report
-<a rel="popover"
-    href=""
-    title="What is a Flyability Report?"
-    data-content="It's like a weather forecast for paragliding. It shows your hourly chances of a successful takeoff on a scale from 0 to 100. Click on a day to see forecast details."
-    >?</a> </span>
-</div>
+    <div class="span10">
+        {% comment %}
+        <a rel="popover"
+            href=""
+            title="What is a Flyability Report?"
+            data-content="It's like a weather forecast for paragliding. It shows your hourly chances of a successful takeoff on a scale from 0 to 100. Click on a day to see forecast details."
+            >?</a>
+        {% endcomment %}
 
-<ul class="nav nav-pills daynav">
-    {% if not days %}
-    <div class="alert">No weather data available at this time.</div>
-    {% endif %}
-    {% for day in days %}
-        <li><a href="#{{day.name}}_details" data-toggle="pill" 
-                style="border-color:{{day.color}}"
-                class="daylink" id="{{day.name}}_tab">
-                <div class="daypill" >
-            <p>{{ day.name }}</p>
-            <h2>{{ day.flyability|floatformat:0 }}<small>%</small></h2>
-            <span id="{{day.name}}_mini" class="miniwrap">Loading...</span>
-            </div>
-            </a></li>
-    {% endfor %}
-</ul>
+        <ul class="nav nav-pills daynav">
+            {% if not days %}
+            <div class="alert">No weather data available at this time.</div>
+            {% endif %}
+            {% for day in days %}
+                <li><a href="#{{day.name}}_details" data-toggle="pill" 
+                        style="border-color:{{day.color}}"
+                        class="daylink" id="{{day.name}}_tab">
+                        <div class="daypill" >
+                    <p>{{ day.name }}</p>
+                    <h2>{{ day.flyability|floatformat:0 }}<small>%</small></h2>
+                    <span id="{{day.name}}_mini" class="miniwrap">Loading...</span>
+                    </div>
+                    </a></li>
+            {% endfor %}
+        </ul>
 
-<div class="tab-content">
-    {% for day in days %}
-        <div class="tab-pane daydetails" id="{{day.name}}_details">
-            <div class="row">
-                <div class="span12" id="{{day.name}}_flyability">Loading...</div>
-            </div>
-            {% comment %}
-            <div class="row">
-                <div class="span12" id="{{day.name}}_dir">Loading...</div>
-            </div>
-            {% endcomment %}
-            <div class="row">
-                <div class="span12" id="{{day.name}}_wind">Loading...</div>
-            {% comment %}
-                Cloud Cover (%)
-                <div id="{{day.name}}_clouds">Loading...</div>
-                Chance of Precipitation
-            {% endcomment %}
-            </div>
+        <div class="tab-content">
+            {% for day in days %}
+                <div class="tab-pane" id="{{day.name}}_details">
+                    <div class="span10 nomargin" id="{{day.name}}_flyability">Loading...</div>
+                    {% comment %}
+                    <div class="row">
+                        <div class="span12" id="{{day.name}}_dir">Loading...</div>
+                    </div>
+                    {% endcomment %}
+                    <div class="span10 nomargin" id="{{day.name}}_wind">Loading...</div>
+                    {% comment %}
+                        Cloud Cover (%)
+                        <div id="{{day.name}}_clouds">Loading...</div>
+                        Chance of Precipitation
+                    {% endcomment %}
+                </div>
+            {% endfor %}
         </div>
-    {% endfor %}
+    </div>
 </div>
-
-{%comment%}
-{%endcomment%}
 
 {% endblock %}
 
@@ -91,37 +84,34 @@
 {% endcompress %}
 
 <script type="text/javascript">
-    $(document).ready(function() {
+    $(function() {
         $("a[rel=popover]")
             .popover()
             .click(function(e) {
                 e.preventDefault();
-            })
-    });
-    var plotter = new Plotter2();
-    plotter.setOptions();
-    function arrowMaker(dir, size) {
-        if (size === undefined) {
-            size = 30 
+        });
+        var plotter = new Plotter2();
+        plotter.setOptions();
+        function arrowMaker(dir, size) {
+            if (size === undefined) {
+                size = 30 
+            }
+            var unit = 5.0;
+            dir = discretize(dir, unit);
+            res = 'url({% url 'windDir' 123456 site.id 234567 %})';
+            res = res.replace(/123456/, dir);
+            res = res.replace(/234567/, size);
+            return res;
         }
-        var unit = 5.0;
-        dir = discretize(dir, unit);
-        res = 'url({% url 'windDir' 123456 site.id 234567 %})';
-        res = res.replace(/123456/, dir);
-        res = res.replace(/234567/, size);
-        return res;
-    }
 
-    {% for day in days %}
-        plotSummary("{{day.name}}_mini", {{day.scores}});
-    {% endfor %}
-    $(window).load(function () {
         {% for day in days %}
+            plotSummary("{{day.name}}_mini", {{day.scores}});
             var times = {{day.times|safe}};
             plotter.plotFlyAndPrecip("{{day.name}}_flyability", times, {{day.scores}}, {{day.pop}});
             plotter.plotWind("{{day.name}}_wind", times, {{day.wind}}, 
                              {{day.gust}}, {{day.dir}}, arrowMaker);
         {% endfor %}
+        $('#{{ days.1.name }}_tab').tab('show');
     });
 </script>
 {% endblock %}

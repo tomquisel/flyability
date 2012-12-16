@@ -9,9 +9,55 @@ import matplotlib.transforms as transforms
 from matplotlib.font_manager import FontProperties
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.patches import Rectangle
 import predictor
 
 def drawWindDir(wind, takeoff, size, showWind=True):
+    if showWind:
+        return drawTakeoffWithArrow(wind, takeoff, size)
+    else:
+        return drawTakeoff(takeoff, size)
+
+def drawTakeoff(takeoff, size):
+    inner_rad = 0.6
+    circle_width = 0.3
+    outer_rad = inner_rad + circle_width
+    fig = plt.figure(figsize=(1.22,2), dpi=size, facecolor='w')
+    fig.patch.set_facecolor('none')
+    plt.xlim(-1.22,1.22)
+    plt.ylim(-2.8,1.2)
+    ax = fig.add_subplot(111)
+    ax.set_axis_off()
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    cir = plt.Circle( (0,0), radius=inner_rad, color='w', zorder=3)
+    fig.gca().add_patch(cir)
+    lnclr = (0.2, 0.2, 0.2)
+    plt.vlines(0, color=lnclr, zorder=4, ymin=-outer_rad, ymax=outer_rad)
+    plt.hlines(0, color=lnclr, zorder=4, xmin=-outer_rad, xmax=outer_rad)
+    def rect(c):
+        return Rectangle((0, 0), 1, 1, linewidth=0, fc=c, alpha=0.8)
+    plt.legend((rect("g"), rect("yellow"), rect("r")), 
+               ('good','caution','bad'), 
+               prop={'size':'x-small'}, loc='lower center',
+               fancybox=True)
+    def txt(x, y, s):
+        plt.text(x, y, s, horizontalalignment='center', 
+                 verticalalignment='center')
+    txt(0, 1.1, "N")
+    txt(0, -1.1, "S")
+    txt(1.03, 0, "E")
+    txt(-1.1, 0, "W")
+
+    arc_rad = inner_rad + circle_width
+    for left,right,good in takeoff:
+        color_map = {"yes":"green", "maybe":"yellow", "no":"red"}
+        drawArc(ax, left, right, color=color_map[good], zorder=2, 
+                radius = arc_rad)
+
+    canvas = FigureCanvas(fig)
+    return canvas
+
+def drawTakeoffWithArrow(wind, takeoff, size):
     inner_rad = 0.6
     circle_width = 0.3
     fig = plt.figure(figsize=(1,1), dpi=size, facecolor='w')
@@ -25,18 +71,14 @@ def drawWindDir(wind, takeoff, size, showWind=True):
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     cir = plt.Circle( (0,0), radius=inner_rad, color='w', zorder=3)
     fig.gca().add_patch(cir)
-    if showWind:
-        arrow_color = 'black'
-        Q = plt.quiver([-X[0]], [-Y[0]], [X[0]/2.0], [Y[0]/2.0], scale=1, 
-                       units='height', width = 0.07, zorder=4,
-                       headlength=3, headwidth=3, headaxislength=3, 
-                       color=arrow_color)
-        #Q = plt.quiver([-X[0]], [-Y[0]], [X[0]/2.0], [Y[0]/2.0], scale=1, 
-        #               units='height', width = 0.05, zorder=4,
-        #               headlength=4, headwidth=4, color=arrow_color)
-    else:
-        plt.axvline(color='black', zorder=4)
-        plt.axhline(color='black', zorder=4)
+    arrow_color = 'black'
+    Q = plt.quiver([-X[0]], [-Y[0]], [X[0]/2.0], [Y[0]/2.0], scale=1, 
+                   units='height', width = 0.07, zorder=4,
+                   headlength=3, headwidth=3, headaxislength=3, 
+                   color=arrow_color)
+    #Q = plt.quiver([-X[0]], [-Y[0]], [X[0]/2.0], [Y[0]/2.0], scale=1, 
+    #               units='height', width = 0.05, zorder=4,
+    #               headlength=4, headwidth=4, color=arrow_color)
 
     arc_rad = inner_rad + circle_width
     for left,right,good in takeoff:
