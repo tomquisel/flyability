@@ -40,7 +40,7 @@ Plotter2.prototype.setOptions = function() {
             type: 'spline', 
             height: this.chartHeight,
             //width: chartWidth,
-            //marginLeft: 50
+            marginLeft: 50
         },
         legend: { enabled: false },
         credits: { enabled: false },
@@ -143,26 +143,23 @@ function makePlotBands() {
         {
             from: 12,
             to: 15,
-            color: 'rgba(255,0,0, 0.2)',
+            color: 'rgb(255, 220, 220)',
             label: {
                 text: 'P2 wind unsafe',
-                style: { color: '#606060' }
             }
         }, {
             from: 15,
             to: 18,
-            color: 'rgba(255,0,0, 0.3)',
+            color: 'rgb(255, 185, 185)',
             label: {
                 text: 'P3 wind / P2 gust unsafe',
-                style: { color: '#606060' }
             }
         }, {
             from: 18,
             to: 2000,
-            color: 'rgba(255,0,0, 0.4)',
+            color: 'rgb(255, 150, 150)',
             label: {
                 text: 'P3 gust unsafe',
-                style: { color: '#606060' }
             }
         }, 
     ];
@@ -178,7 +175,7 @@ function discretize(v, unit) {
 
 function makeWindValues(dir, lim, arrowMaker) {
     var values = [];
-    var y = lim / 5.0;
+    var y = -lim / 8.0;
     for ( var i in dir ) {
         var d = Math.round(dir[i]);
         var url = arrowMaker(d);
@@ -191,7 +188,8 @@ Plotter2.prototype.plotWind = function(id, times, wind, gust, dir, arrowMaker)
 {
     var gustMax = Math.max.apply(Math, gust);
     var windMax = Math.max.apply(Math, wind);
-    var chartMax = Math.max(gustMax, windMax, 20);
+    var chartMax = Math.round(Math.max(gustMax + 2, windMax + 2, 20));
+    var chartMin = Math.round(- 1/4 * chartMax);
     dir = makeWindValues(dir, chartMax, arrowMaker);
     var series = [];
     var myColors = plotColors;
@@ -211,10 +209,10 @@ Plotter2.prototype.plotWind = function(id, times, wind, gust, dir, arrowMaker)
     this.chartWind = new Highcharts.Chart({
         chart: {
             renderTo: id,
-            //height: 300,
+            height: Plotter2.prototype.chartHeight * 5 / 4,
         },
         title: { text: null },
-        legend: { 
+        legend: {
             enabled: true,
             verticalAlign: "top"    
         },
@@ -224,13 +222,20 @@ Plotter2.prototype.plotWind = function(id, times, wind, gust, dir, arrowMaker)
             title: { text : null },
             labels : {
                 formatter: function() {
-                    return '' + this.value + 'mph';
+                    if (this.value >= 0) {
+                        return '' + this.value + 'mph';
+                    } else {
+                        return '';
+                    }
                 }
             },
-            tickInterval : 5,
-            min: 0,
+            tickPositioner: function() {
+                return [chartMin, 0, 5, 10, chartMax];
+            },
+            min: chartMin,
             max: chartMax,
             plotBands : makePlotBands(),
+            plotLines : [ { value: 0, width: 2, color: '#000'} ]
         },
         tooltip: {
             borderColor : '#4572A7',
