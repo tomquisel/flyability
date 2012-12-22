@@ -5,26 +5,74 @@ body { height: 100%; margin: 0; padding: 0 }
     overflow: hidden;
 }
 
-.daypill {
-    width: 5em;
-    color: #444;
-    text-align: center;
+.daytab {
+    width: 6em;
+    color: #333;
+    position: relative;
 }
 
 .daylink {
-    border-style: solid;
-    border-width: 5px;
-    -webkit-border-radius: 15px !important;
-       -moz-border-radius: 15px !important;
-            border-radius: 15px !important;
+}
+
+.daybarback, .daybarfront {
+    bottom: 7px;
+    left: 0px;
+    position: absolute;
+    background: #ddd;
+    width: 7px;
+    height: 42px;
+}
+
+.daybarfront {
+    background: #4ea54e;
+    z-index: 1;
+}
+
+.daytextwrap {
+    padding-left: 14px;
+}
+
+.daycontent {
+    padding-top: 7px;
+    border-left: solid;
+    border-right: solid;
+    border-width: 1px;
+    border-color: #ddd;
+    position: relative;
+}
+
+.graph {
+    width: 100%;
+}
+
+.daytop {
+    margin-left: 7px;
+    font-size: 21px;
+}
+
+/*.daycontent {
+    border-top: solid;
+    border-width: 1px;
+    border-color: #333;
+}*/
+
+.daylink h2, .daylink p {
+    margin: 0px;
+}
+
+.dayperc {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 28px;
+    line-height: 35px;
 }
 
 .nomargin {
-    margin: 0px !important;
-    padding: 0px !important;
+    margin: 0px;
+    padding: 0px;
 }
 
 .daynav {
+    margin-bottom: 0px;
 }
 
 .inline {
@@ -40,7 +88,7 @@ body { height: 100%; margin: 0; padding: 0 }
 }
 
 .navbar {
-    margin-bottom: 0px !important;
+    margin-bottom: 0px;
 }
 
 .navbar-inner {
@@ -73,10 +121,6 @@ body { height: 100%; margin: 0; padding: 0 }
 
 .sideimg {
     margin-bottom: 1em;
-}
-
-.nav > .active * {
-    color: #fff;
 }
 
 .miniwrap {

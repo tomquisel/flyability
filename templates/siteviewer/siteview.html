@@ -10,6 +10,7 @@
 {% endblock %}
 
 {% block head %}
+<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300' rel='stylesheet' type='text/css'>
 {% endblock %}
 
 {% block content %}
@@ -44,33 +45,40 @@
             National Weather Service forecast for {{ site.shortname }} last updated at {{ fetchTime|date:"f a e" }} on {{ fetchTime|date:"N j" }}
         </div>
 
-        <ul class="nav nav-pills daynav">
+        <ul class="nav nav-tabs daynav">
             {% if not days %}
             <div class="alert">No weather data available at this time.</div>
             {% endif %}
             {% for day in days %}
-                <li><a href="#{{day.name}}_details" data-toggle="pill" 
-                        style="border-color:{{day.color}}"
+                <li><a href="#{{day.name}}_details" data-toggle="tab" 
                         class="daylink" id="{{day.name}}_tab">
-                        <div class="daypill" >
-                    <p>{{ day.name }}</p>
-                    <h2>{{ day.flyability|floatformat:0 }}<small>%</small></h2>
-                    <span id="{{day.name}}_mini" class="miniwrap">Loading...</span>
+                    <div class="daytab" >
+                        <div class="daybarback"></div>
+                        <div class="daybarfront" style="height:{{ day.barheight }}px"></div>
+                        <div class="daytextwrap">
+                            <p>{{ day.name }}</p>
+                            <div class="dayperc">
+                                {{ day.flyability|floatformat:0 }}%
+                            </div>
+                        </div>
                     </div>
-                    </a></li>
+                </a></li>
             {% endfor %}
         </ul>
 
-        <div class="tab-content">
+        <div class="tab-content daycontent">
             {% for day in days %}
                 <div class="tab-pane" id="{{day.name}}_details">
-                    <div class="span10 nomargin" id="{{day.name}}_flyability">Loading...</div>
+                    <div class="daytop">
+                        {{ day.name }}
+                    </div>
+                    <div id="{{day.name}}_flyability">Loading...</div>
                     {% comment %}
                     <div class="row">
                         <div class="span12" id="{{day.name}}_dir">Loading...</div>
                     </div>
                     {% endcomment %}
-                    <div class="span10 nomargin" id="{{day.name}}_wind">Loading...</div>
+                    <div id="{{day.name}}_wind">Loading...</div>
                     {% comment %}
                         Cloud Cover (%)
                         <div id="{{day.name}}_clouds">Loading...</div>
@@ -112,10 +120,15 @@
             return res;
         }
 
+        var daywidth = $(".daycontent").width();
+
         {% for day in days %}
-            plotSummary("{{day.name}}_mini", {{day.scores}});
+            //plotSummary("{{day.name}}_mini", {{day.scores}});
             var times = {{day.times|safe}};
-            plotter.plotFlyAndPrecip("{{day.name}}_flyability", times, {{day.scores}}, {{day.pop}});
+            $("#{{day.name}}_flyability").width(daywidth);
+            $("#{{day.name}}_wind").width(daywidth);
+            plotter.plotFlyAndPrecip("{{day.name}}_flyability", times, 
+                                     {{day.scores}}, {{day.pop}});
             plotter.plotWind("{{day.name}}_wind", times, {{day.wind}}, 
                              {{day.gust}}, {{day.dir}}, arrowMaker);
         {% endfor %}

@@ -94,6 +94,8 @@ class ForecastMgr(object):
             day['date'] = dayStart.strftime("%Y-%m-%d") 
             flyabilityHours, flyability = self.predictor.getDay(dayStart)
             day['flyability'] = flyability
+            # horrible that this isn't in the template 
+            day['barheight'] = 42 * flyability / 100
             day['color'] = self.getColor(flyability)
             day['hours'] = []
             names = ['wind', 'gust', 'dir', 'pop', 'clouds', 'temp']
