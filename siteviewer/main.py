@@ -91,7 +91,7 @@ class ForecastMgr(object):
             day['start'] = dayStart
             day['name'] = dayStart.strftime("%A") 
             day['short'] = self.shortDay(dayStart.strftime("%w"))
-            day['date'] = dayStart.strftime("%Y-%m-%d") 
+            day['date'] = dayStart
             flyabilityHours, flyability = self.predictor.getDay(dayStart)
             day['flyability'] = flyability
             # horrible that this isn't in the template 

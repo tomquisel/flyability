@@ -33,12 +33,14 @@ body { height: 100%; margin: 0; padding: 0 }
 }
 
 .daycontent {
-    padding-top: 7px;
-    border-left: solid;
-    border-right: solid;
+    border-style: none solid solid;
     border-width: 1px;
     border-color: #ddd;
     position: relative;
+}
+
+.daycontent .navbar {
+    margin: 7px;
 }
 
 .graph {
@@ -47,7 +49,16 @@ body { height: 100%; margin: 0; padding: 0 }
 
 .daytop {
     margin-left: 7px;
-    font-size: 21px;
+    font-size: 35px;
+    display: inline-block;
+}
+
+.daymenu {
+    display: inline-block;
+}
+
+.daymenu .nav {
+    margin: 0;
 }
 
 /*.daycontent {

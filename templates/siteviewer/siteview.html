@@ -69,21 +69,37 @@
         <div class="tab-content daycontent">
             {% for day in days %}
                 <div class="tab-pane" id="{{day.name}}_details">
-                    <div class="daytop">
-                        {{ day.name }}
+                    <div class="navbar">
+                        <div class="navbar-inner">
+                            <span class="brand">{{ day.name }}, {{ day.date|date:"N j" }} </span>
+                            <ul class="nav">
+                                <li class="active"><a href="#{{day.name}}_graph_tab" data-toggle="tab">Graphs</a></li>
+                                <li><a href="#{{day.name}}_map_tab" data-toggle="tab">Maps</a></li>
+                                {% comment %}
+                                <li><a href="#{{day.name}}_social_tab">Discuss</a></li>
+                                {% endcomment %}
+                            </ul>
+                        </div>
                     </div>
-                    <div id="{{day.name}}_flyability">Loading...</div>
-                    {% comment %}
-                    <div class="row">
-                        <div class="span12" id="{{day.name}}_dir">Loading...</div>
+                    <div class="tab-content">
+                        <div id="{{day.name}}_graph_tab" class="tab-pane active">
+                            <div id="{{day.name}}_flyability">Loading...</div>
+                            {% comment %}
+                            <div class="row">
+                                <div class="span12" id="{{day.name}}_dir">Loading...</div>
+                            </div>
+                            {% endcomment %}
+                            <div id="{{day.name}}_wind">Loading...</div>
+                            {% comment %}
+                                Cloud Cover (%)
+                                <div id="{{day.name}}_clouds">Loading...</div>
+                                Chance of Precipitation
+                            {% endcomment %}
+                        </div>
+                        <div id="{{day.name}}_map_tab" class="tab-pane">
+                            Maps go here
+                        </div>
                     </div>
-                    {% endcomment %}
-                    <div id="{{day.name}}_wind">Loading...</div>
-                    {% comment %}
-                        Cloud Cover (%)
-                        <div id="{{day.name}}_clouds">Loading...</div>
-                        Chance of Precipitation
-                    {% endcomment %}
                 </div>
             {% endfor %}
         </div>
@@ -101,11 +117,6 @@
 
 <script type="text/javascript">
     $(function() {
-        $("a[rel=popover]")
-            .popover()
-            .click(function(e) {
-                e.preventDefault();
-        });
         var plotter = new Plotter2();
         plotter.setOptions();
         function arrowMaker(dir, size) {
