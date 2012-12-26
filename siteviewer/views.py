@@ -70,6 +70,7 @@ def site(request, country, state, name):
     try:
         mgr = main.ForecastMgr(site)
         days = mgr.getDays()
+        env['highlightedDay'] = mgr.computeHighlightDay(days)
         env['days'] = days
         env['fetchTime'] = mgr.fetchTime
     except weather.NoWeatherDataException: 

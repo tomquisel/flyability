@@ -74,17 +74,8 @@
                     <div class="tab-content">
                         <div id="{{day.name}}_graph_tab" class="tab-pane active">
                             <div id="{{day.name}}_flyability">Loading...</div>
-                            {% comment %}
-                            <div class="row">
-                                <div class="span12" id="{{day.name}}_dir">Loading...</div>
-                            </div>
-                            {% endcomment %}
                             <div id="{{day.name}}_wind">Loading...</div>
-                            {% comment %}
-                                Cloud Cover (%)
-                                <div id="{{day.name}}_clouds">Loading...</div>
-                                Chance of Precipitation
-                            {% endcomment %}
+                            <div id="{{day.name}}_pop">Loading...</div>
                         </div>
                         <div id="{{day.name}}_map_tab" class="tab-pane">
                             Maps go here
@@ -123,8 +114,6 @@
         var daywidth = $(".daycontent").width();
 
         {% for day in days %}
-            $("#{{day.name}}_flyability").width(daywidth);
-            $("#{{day.name}}_wind").width(daywidth);
 
             var plotter = new Plotter2();
             plotters.{{ day.name }} = plotter;
@@ -138,12 +127,17 @@
             plotter.flyDetails = {{ day.flyDetails|safe }};
             plotter.setOptions();
 
-            plotter.plotFly("{{day.name}}_flyability");
-            //plotter.plotFlyAndPrecip("{{day.name}}_flyability", times, 
-            //                         {{day.scores}}, {{day.pop}});
-            plotter.plotWind("{{day.name}}_wind", arrowMaker);
+            var flyId = "{{day.name}}_flyability";
+            $("#" + flyId).width(daywidth);
+            plotter.plotFly(flyId);
+            var windId = "{{day.name}}_wind";
+            $("#" + windId).width(daywidth);
+            plotter.plotWind(windId, arrowMaker);
+            var popId = "{{day.name}}_pop";
+            $("#" + popId).width(daywidth);
+            plotter.plotPop(popId);
         {% endfor %}
-        $('#{{ days.1.name }}_tab').tab('show');
+        $('#{{ highlightedDay }}_tab').tab('show');
     });
 </script>
 {% endblock %}

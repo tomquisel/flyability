@@ -118,6 +118,18 @@ class ForecastMgr(object):
             days.append(day)
         return days
 
+    def computeHighlightDay(self, days):
+        day = 1
+        bestScore = 1
+        for i,d in enumerate(days):
+            if i == 0:
+                continue
+            score = d['flyability'] * 1.0 / (i+1)
+            if score > bestScore:
+                day = i
+                bestScore = score
+        return days[day]['name']
+
     def getValues(self, name, times):
         return self.seriesDict[name].interpolate(times)
 

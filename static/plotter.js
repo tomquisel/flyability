@@ -157,8 +157,34 @@ Plotter2.prototype.plotFly = function(id) {
             }
         },
         series: [{ 
-                name: "Flyability at " + this.site, 
+                name: "Flyability for P2 pilots", 
                 data: this.flyability
+        }],
+    });
+};
+
+Plotter2.prototype.plotPop = function(id) {
+    this.chartFlyability = new Highcharts.Chart({
+        chart: {
+            renderTo: id,
+        },
+        title: { text: null },
+        legend: { 
+            enabled: true,
+            verticalAlign: "top"    
+        },
+        xAxis: { categories: this.times },
+        yAxis: this.percYAxis,
+        tooltip: { 
+            crosshairs: true,
+            shared : true,     
+            formatter: function() {
+                return Plotter2.prototype.listFormatter(this, "%");
+            },
+        },
+        series: [{ 
+                name: "Chance of Precipitation",
+                data: this.pop
         }],
     });
 };
