@@ -1,9 +1,10 @@
-import astral
 import datetime
-from scipy.stats import norm
-from weather.timeseries import TimeSeries
 import bisect
+from collections import defaultdict
 import numpy as np
+from scipy.stats import norm
+import astral
+from weather.timeseries import TimeSeries
 
 class Predictor(object):
 
@@ -14,8 +15,6 @@ class Predictor(object):
 
         self.dayIntervals = self.getDayIntervals()
         self.values = self.computeFlyability()
-        self.flyability = TimeSeries("flyability", self.times, self.values, 
-                                     self.site.timezone)
 
     def getDay(self, start):
         end = start + datetime.timedelta(days=1)
@@ -30,14 +29,13 @@ class Predictor(object):
                 endInd = i
                 break
             i += 1
-        res = TimeSeries("flyability", self.times[startInd:endInd],
-                         self.values[startInd:endInd],
-                         self.site.timezone)
-        scores = list(res.values)
+        times = self.times[startInd:endInd]
+        values = self.getValuesInRange(startInd, endInd)
+        scores = list(values['flyability'])
         scores.sort()
-        # take the top 30th percentile as the score
+        # take the top 33rd percentile as the score
         summary = scores[len(scores) * 2 / 3]
-        return (res, summary)
+        return (summary, times, values)
 
     def computeFlyability(self):
         times = self.times
@@ -45,17 +43,24 @@ class Predictor(object):
         site = self.site
         pop = timeseries['pop'].interpolate(times, 0.0)
         wind = timeseries['wind'].interpolate(times, 0.0)
+        gust = timeseries['gust'].interpolate(times, 0.0)
         dir = timeseries['dir'].interpolate(times, 0.0)
 
-        values = []
+        values = defaultdict(list)
         for i,t in enumerate(times):
             prob = 0
             if self.isDay(t):
                 prob = 1.0
-            prob *= getWindDirChances(site, dir[i])
-            prob *= getWindSpeedChances(wind[i])
-            prob *= getRainChances(pop[i])
-            values.append(100 * prob)
+            dirProb = getWindDirChances(site, dir[i])
+            windProb = getWindSpeedChances(wind[i])
+            gustProb = getGustSpeedChances(gust[i])
+            popProb = getRainChances(pop[i])
+            prob *= dirProb * windProb * gustProb * popProb
+            values['dir'].append(int(round(100 * dirProb)))
+            values['wind'].append(int(round(100 * windProb)))
+            values['gust'].append(int(round(100 * gustProb)))
+            values['pop'].append(int(round(100 * popProb)))
+            values['flyability'].append(int(round(100 * prob)))
 
         return values
 
@@ -83,6 +88,12 @@ class Predictor(object):
                 return True
         return False
 
+    def getValuesInRange(self, start, end):
+        res = {}
+        for k,v in self.values.items():
+            res[k] = v[start:end]
+        return res
+
 ################## HELPERS ##########################
 
 class Smoother(object):
@@ -108,7 +119,10 @@ def getWindDirChances(site, dir):
     return res
 
 def getWindSpeedChances(speed):
-    return normSmooth(12-speed, 1)
+    return normSmooth(12-speed, 3)
+
+def getGustSpeedChances(speed):
+    return normSmooth(15-speed, 3)
 
 def getRainChances(pop):
     return 1 - pop/100.0

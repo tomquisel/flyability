@@ -74,7 +74,7 @@ class ForecastMgr(object):
 
     @classmethod
     def getColor(cls, fly):
-        magnitude = fly / 100
+        magnitude = fly / 100.0
         s = "rgb(%s,%s,%s)"
         start = (230, 230, 230)
         end = (78, 165, 78)
@@ -92,33 +92,31 @@ class ForecastMgr(object):
             day['name'] = dayStart.strftime("%A") 
             day['short'] = self.shortDay(dayStart.strftime("%w"))
             day['date'] = dayStart
-            flyabilityHours, flyability = self.predictor.getDay(dayStart)
-            day['flyability'] = flyability
+            fly, flyTimes, flyValues = self.predictor.getDay(dayStart)
+            day['flyability'] = fly
             # horrible that this isn't in the template 
-            day['barheight'] = 42 * flyability / 100
-            day['color'] = self.getColor(flyability)
+            day['barheight'] = int(round(44 * fly / 100))
+            day['color'] = self.getColor(fly)
             day['hours'] = []
             names = ['wind', 'gust', 'dir', 'pop', 'clouds', 'temp']
             if includeHours:
-                for i,t in enumerate(flyabilityHours.times):
+                for i,t in enumerate(flyTimes):
                     hour = {}
                     hour['name'] = t.strftime("%l %P").strip()
                     hour['hour'] = t.hour
-                    hour['flyability'] = flyabilityHours.values[i]
+                    hour['flyability'] = flyValues['flyability'][i]
                     for name in names:
                         hour[name] = self.getValue(name, t)
                     day['hours'].append(hour)
                 for name in names:
-                    vals = self.getValues(name, flyabilityHours.times)
+                    vals = self.getValues(name, flyTimes)
                     vals = TimeSeries.stripTrailingNones(vals)
                     day[name] = TimeSeries.substitute(vals, None, 0.0)
-                day['scores'] = flyabilityHours.values
+                day['scores'] = flyValues['flyability']
+                day['flyDetails'] = json.dumps(flyValues)
                 day['times'] = json.dumps([ h['name'] for h in day['hours'] ])
             days.append(day)
         return days
-
-    def getSeries(self):
-        return (self.times, self.seriesDict)
 
     def getValues(self, name, times):
         return self.seriesDict[name].interpolate(times)
@@ -131,5 +129,4 @@ class ForecastMgr(object):
         times = TimeSeries.range(start, hours, TimeSeries.hour)
         awareTimes = TimeSeries.makeAware(times, self.tz)
         predictor = Predictor(awareTimes, wdata.seriesDict, self.site)
-        wdata.seriesDict['flyability'] = predictor.flyability
         return (times, wdata.seriesDict, predictor, wdata.fetchTime)

@@ -76,34 +76,67 @@ Plotter2.prototype.listFormatter = function(obj, suffix, skip) {
         var y = Math.round(p.y);
         if (ser.name == skip) { continue; }
         s += '<span style="color:' + ser.color + '">' + 
-             ser.name + '</span>: <b>'+ y +'</b>' + suffix + '<br/>';
+             ser.name + '</span>:<b>'+ y +'</b>' + suffix + '<br/>';
     };
     
     return s;
 }
-Plotter2.prototype.plotFlyAndPrecip = function(id, times, flyability, precip) {
-    //var flColor = '#4EA54E';
-    //var prColor = '#4572A7';
-    //var dataLabels = {
-    //    enabled: true,
-    //    formatter: function() { 
-    //        return Plotter2.prototype.dataLabel(this, "%"); 
-    //    },
-    //    backgroundColor: '#FFF',
-    //    borderRadius: 5,
-    //    borderWidth: 1,
-    //    shadow: true,
-    //    padding: 2,
-    //    y: -10
-    //}
-    //var flDataLabels = jQuery.extend({}, dataLabels);
-    //flDataLabels.align = 'left';
-    //flDataLabels.x = 2;
-    //flDataLabels.borderColor = flColor;
-    //var prDataLabels = jQuery.extend({}, dataLabels);
-    //prDataLabels.align = 'right';
-    //prDataLabels.x = -2;
-    //prDataLabels.borderColor = prColor;
+
+Plotter2.prototype.getFlyDetails = function (time) {
+    if (!this.times) {
+        console.log("Plotter2 times not initialized!!");
+    }
+    var ind = this.times.indexOf(time);
+    console.log(this.flyDetails);
+    var res = {
+        pop : this.pop[ind],
+        popProb : this.flyDetails.pop[ind],
+        wind : this.wind[ind],
+        windProb : this.flyDetails.wind[ind],
+        dir : this.dir[ind],
+        dirProb : this.flyDetails.dir[ind]
+    }
+    if (this.gust.length > ind) {
+        res.gust = this.gust[ind];
+        res.gustProb = this.flyDetails.gust[ind];
+    }
+    return res;
+}
+
+Plotter2.prototype.probToSymbol = function(prob) {
+    console.log(prob);
+    if (prob <= 50) {
+        return '<span style="color:#f00">\u2717</span>';
+    } else if ( prob < 70) {
+        return '\u2013';
+    }
+    return '<span style="color:' + window.plotColors[0] +'">\u2713</span>';
+}
+
+Plotter2.prototype.flyFormatter = function (plotter) {
+   var details = plotter.getFlyDetails(this.x);
+   var p = this.points[0];
+   var ser = p.series;
+   var s = ''; 
+   var sfm = '<span style="font-size:medium">';
+   var es = '</span>';
+   s += '<span style="font-weight:bold; font-size:medium">';
+   s += Math.round(p.y) + es + sfm + '% Flyable ' + es + '<br>';
+   s += plotter.probToSymbol(details.popProb) + ' ';
+   s += 'chance of precipitation:<b>' + details.pop + '</b>%<br>';
+   s += plotter.probToSymbol(details.windProb) + ' ';
+   s += 'wind speed:<b>' + Math.round(details.wind) + '</b>mph<br>';
+   if ('gust' in details) {
+       s += plotter.probToSymbol(details.gustProb) + ' ';
+       s += 'gust speed:<b>' + Math.round(details.gust) + '</b>mph<br>';
+   }
+   s += plotter.probToSymbol(details.dirProb) + ' ';
+   s += 'wind direction:<b>' + dir2str(details.dir) + '</b><br>';
+   return s;
+}
+
+Plotter2.prototype.plotFly = function(id) {
+    var plotter = this;
 
     this.chartFlyability = new Highcharts.Chart({
         chart: {
@@ -114,26 +147,18 @@ Plotter2.prototype.plotFlyAndPrecip = function(id, times, flyability, precip) {
             enabled: true,
             verticalAlign: "top"    
         },
-        colors: plotColors,
-        xAxis: { categories: times },
+        xAxis: { categories: this.times },
         yAxis: this.percYAxis,
         tooltip: { 
             crosshairs: true,
             shared : true,     
             formatter: function() {
-                return Plotter2.prototype.listFormatter(this, "%");
-            },
+                return plotter.flyFormatter.call(this, plotter);
+            }
         },
         series: [{ 
-                name: "Flyability", 
-                data: flyability, 
-                lineWidth: 5,
-                marker: { radius: 5 },
-                //dataLabels: flDataLabels
-            }, { 
-                name: "Chance of Precipitation", 
-                data: precip,
-                //dataLabels: prDataLabels
+                name: "Flyability at " + this.site, 
+                data: this.flyability
         }],
     });
 };
@@ -175,7 +200,7 @@ function discretize(v, unit) {
 
 function makeWindValues(dir, lim, arrowMaker) {
     var values = [];
-    var y = -lim / 8.0;
+    var y = -lim * 0.13;
     for ( var i in dir ) {
         var d = Math.round(dir[i]);
         var url = arrowMaker(d);
@@ -184,21 +209,21 @@ function makeWindValues(dir, lim, arrowMaker) {
     return values;
 }
 
-Plotter2.prototype.plotWind = function(id, times, wind, gust, dir, arrowMaker)
+Plotter2.prototype.plotWind = function(id, arrowMaker)
 {
-    var gustMax = Math.max.apply(Math, gust);
-    var windMax = Math.max.apply(Math, wind);
+    var gustMax = Math.max.apply(Math, this.gust);
+    var windMax = Math.max.apply(Math, this.wind);
     var chartMax = Math.round(Math.max(gustMax + 2, windMax + 2, 20));
     var chartMin = Math.round(- 1/4 * chartMax);
-    dir = makeWindValues(dir, chartMax, arrowMaker);
+    var dir = makeWindValues(this.dir, chartMax, arrowMaker);
     var series = [];
     var myColors = plotColors;
-    if (gust.length) {
-        series.push({ name: "Gust", data: gust });
+    if (this.gust.length) {
+        series.push({ name: "Gust", data: this.gust });
     } else {
         myColors = [plotColors[1]];
     }
-    series.push({ name: "Wind", data: wind });
+    series.push({ name: "Wind", data: this.wind });
     series.push(
         { 
             name: "Direction", 
@@ -206,6 +231,7 @@ Plotter2.prototype.plotWind = function(id, times, wind, gust, dir, arrowMaker)
             type: 'scatter', 
             marker: { symbol: arrowMaker(215, 15) } 
         });
+
     this.chartWind = new Highcharts.Chart({
         chart: {
             renderTo: id,
@@ -217,7 +243,7 @@ Plotter2.prototype.plotWind = function(id, times, wind, gust, dir, arrowMaker)
             verticalAlign: "top"    
         },
         colors: myColors,
-        xAxis: { categories: times },
+        xAxis: { categories: this.times },
         yAxis: {
             title: { text : null },
             labels : {

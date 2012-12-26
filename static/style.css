@@ -5,6 +5,10 @@ body { height: 100%; margin: 0; padding: 0 }
     overflow: hidden;
 }
 
+.site-main {
+    margin-top: 1px;
+}
+
 .daytab {
     width: 6em;
     color: #333;
@@ -20,7 +24,7 @@ body { height: 100%; margin: 0; padding: 0 }
     position: absolute;
     background: #ddd;
     width: 7px;
-    height: 42px;
+    height: 44px;
 }
 
 .daybarfront {
@@ -40,35 +44,26 @@ body { height: 100%; margin: 0; padding: 0 }
 }
 
 .daycontent .navbar {
-    margin: 7px;
+    margin: 7px 214px 7px 7px;
 }
-
-.graph {
-    width: 100%;
-}
-
-.daytop {
-    margin-left: 7px;
-    font-size: 35px;
-    display: inline-block;
-}
-
-.daymenu {
-    display: inline-block;
-}
-
-.daymenu .nav {
-    margin: 0;
-}
-
-/*.daycontent {
-    border-top: solid;
-    border-width: 1px;
-    border-color: #333;
-}*/
 
 .daylink h2, .daylink p {
     margin: 0px;
+}
+
+.updated {
+    float:right;
+    width: 200px;
+    height: 39px;
+    background: #eef;
+    padding-left: 7px;
+    border-style: solid;
+    border-width: 1px 0 1px 1px;
+    border-color: #ddd;
+    -webkit-border-radius: 5px 0 0 5px;
+       -moz-border-radius: 5px 0 0 5px;
+            border-radius: 5px 0 0 5px;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .3);
 }
 
 .dayperc {
@@ -98,14 +93,14 @@ body { height: 100%; margin: 0; padding: 0 }
     background: #0F0;
 }
 
-.navbar {
+.mainnav {
     margin-bottom: 0px;
 }
 
-.navbar-inner {
-    -webkit-border-radius: 0px !important;
-       -moz-border-radius: 0px !important;
-            border-radius: 0px !important;
+.mainnav-inner {
+    -webkit-border-radius: 0px;
+       -moz-border-radius: 0px;
+            border-radius: 0px;
 }
 
 .textcenter {

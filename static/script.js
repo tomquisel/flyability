@@ -19,6 +19,43 @@ function toint(vals) {
     return $.map(vals, function(val, i) { return Math.round(val); });
 }
 
+function dir2str(dir) {
+    if (typeof(dir2str.mapping) == 'undefined') {
+        dir2str.mapping = {
+            0 : 'N',
+            22.5 : 'NNE',
+            45 : 'NE',
+            77.5 : 'ENE',
+            90 : 'E',
+            112.5 : 'ESE',
+            135 : 'SE',
+            157.5 : 'SSE',
+            180 : 'S',
+            202.5 : 'SSW',
+            225 : 'SW',
+            247.5 : 'WSW',
+            270 : 'W',
+            292.5 : 'WNW',
+            315 : 'NW',
+            337.5 : 'NNW',
+            360 : 'N'
+        };
+    }
+    var best = 'BAD';
+    var bestdist = 1000;
+    for (var d in dir2str.mapping) {
+        if (!dir2str.mapping.hasOwnProperty(d)) {
+            continue;
+        }
+        var dist = Math.abs(d - dir);
+        if (dist < bestdist) {
+            best = dir2str.mapping[d];
+            bestdist = dist;
+        }
+    }
+    return best;
+}
+
 function Mapper(args) {
     
     this.div = args.div;
@@ -39,6 +76,8 @@ function Mapper(args) {
         this.sites = {};
         for (var i in sites) {
             (function() {
+                // this craziness allows for local scoping so objects are 
+                // created afresh and not all references to the same thing
                 var site = sites[i];
                 var sitePos = new google.maps.LatLng(site.lat, site.lon);
                 var marker = new google.maps.Marker({
@@ -152,10 +191,8 @@ function Mapper(args) {
 
     this.updateMarkersWhenReady = function(ids) {
         if (!('sites' in this)) {
-            console.log("Running callback later");
             this.markers_callback = function() { this.updateMarkers(ids); };
         } else {
-            console.log("Running callback now");
             this.updateMarkers(ids);
         }
     }

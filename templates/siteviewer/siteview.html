@@ -32,19 +32,7 @@
     </div>
     </div>
 
-    <div class="span10">
-        {% comment %}
-        <a rel="popover"
-            href=""
-            title="What is a Flyability Report?"
-            data-content="It's like a weather forecast for paragliding. It shows your hourly chances of a successful takeoff on a scale from 0 to 100. Click on a day to see forecast details."
-            >?</a>
-        {% endcomment %}
-
-        <div class="alert alert-info">
-            National Weather Service forecast for {{ site.shortname }} last updated at {{ fetchTime|date:"f a e" }} on {{ fetchTime|date:"N j" }}
-        </div>
-
+    <div class="span10 site-main">
         <ul class="nav nav-tabs daynav">
             {% if not days %}
             <div class="alert">No weather data available at this time.</div>
@@ -69,16 +57,18 @@
         <div class="tab-content daycontent">
             {% for day in days %}
                 <div class="tab-pane" id="{{day.name}}_details">
+                    <div class="updated">
+                        <a href="http://graphical.weather.gov/" target="_blank">NWS forecast</a> last updated <br> {{ fetchTime|date:"f a e" }} on {{ fetchTime|date:"N j" }}</div>
                     <div class="navbar">
                         <div class="navbar-inner">
                             <span class="brand">{{ day.name }}, {{ day.date|date:"N j" }} </span>
+                            {% comment %}
                             <ul class="nav">
                                 <li class="active"><a href="#{{day.name}}_graph_tab" data-toggle="tab">Graphs</a></li>
                                 <li><a href="#{{day.name}}_map_tab" data-toggle="tab">Maps</a></li>
-                                {% comment %}
                                 <li><a href="#{{day.name}}_social_tab">Discuss</a></li>
-                                {% endcomment %}
                             </ul>
+                            {% endcomment %}
                         </div>
                     </div>
                     <div class="tab-content">
@@ -116,32 +106,42 @@
 {% endcompress %}
 
 <script type="text/javascript">
-    $(function() {
-        var plotter = new Plotter2();
-        plotter.setOptions();
-        function arrowMaker(dir, size) {
-            if (size === undefined) {
-                size = 30 
-            }
-            var unit = 5.0;
-            dir = discretize(dir, unit);
-            res = 'url({% url 'windDir' 123456 site.id 234567 %})';
-            res = res.replace(/123456/, dir);
-            res = res.replace(/234567/, size);
-            return res;
+    function arrowMaker(dir, size) {
+        if (size === undefined) {
+            size = 30 
         }
+        var unit = 5.0;
+        dir = discretize(dir, unit);
+        res = 'url({% url 'windDir' 123456 site.id 234567 %})';
+        res = res.replace(/123456/, dir);
+        res = res.replace(/234567/, size);
+        return res;
+    }
 
+    $(function() {
+        var plotters = {};
         var daywidth = $(".daycontent").width();
 
         {% for day in days %}
-            //plotSummary("{{day.name}}_mini", {{day.scores}});
-            var times = {{day.times|safe}};
             $("#{{day.name}}_flyability").width(daywidth);
             $("#{{day.name}}_wind").width(daywidth);
-            plotter.plotFlyAndPrecip("{{day.name}}_flyability", times, 
-                                     {{day.scores}}, {{day.pop}});
-            plotter.plotWind("{{day.name}}_wind", times, {{day.wind}}, 
-                             {{day.gust}}, {{day.dir}}, arrowMaker);
+
+            var plotter = new Plotter2();
+            plotters.{{ day.name }} = plotter;
+            plotter.site = "{{ site.shortname }}";
+            plotter.times = {{ day.times|safe }};
+            plotter.flyability = {{ day.scores }};
+            plotter.pop = {{ day.pop }};
+            plotter.wind = {{ day.wind }};
+            plotter.gust = {{ day.gust }};
+            plotter.dir = {{ day.dir }};
+            plotter.flyDetails = {{ day.flyDetails|safe }};
+            plotter.setOptions();
+
+            plotter.plotFly("{{day.name}}_flyability");
+            //plotter.plotFlyAndPrecip("{{day.name}}_flyability", times, 
+            //                         {{day.scores}}, {{day.pop}});
+            plotter.plotWind("{{day.name}}_wind", arrowMaker);
         {% endfor %}
         $('#{{ days.1.name }}_tab').tab('show');
     });
