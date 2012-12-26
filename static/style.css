@@ -18,6 +18,10 @@ body { height: 100%; margin: 0; padding: 0 }
 .daylink {
 }
 
+.clickdiv {
+    cursor: pointer;
+}
+
 .daybarback, .daybarfront {
     bottom: 7px;
     left: 0px;

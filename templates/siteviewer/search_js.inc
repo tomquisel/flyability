@@ -89,6 +89,10 @@
             $.fly.mapper.sites[getId(this)].line.setVisible(false);
             $(this).css("background-color", "white");
         });
+        $(".clickdiv").live("click", function(e) {
+            e.preventDefault();
+            window.open($(this).find('a:first').attr('href'), '');
+        });
         $("#geocomplete").geocomplete()
         .bind("geocode:result", function(event, result){
             var loc = result.geometry.location;
