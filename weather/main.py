@@ -75,6 +75,10 @@ def modelsToTimeSeries(values, tz):
     validateSeries(seriesDict)
     # do some unit conversions
     TSKnotsToMPH(seriesDict['gust'])
+    # since we get gust and wind from two different data sources, they 
+    # sometimes disagree. I trust the wind source more, so I fix up gust to 
+    # be consistent with it.
+    fixupGust(seriesDict['gust'], seriesDict['wind'])
     return seriesDict
 
 def validateSeries(seriesDict):
@@ -88,6 +92,16 @@ def TSKnotsToMPH(ts):
 
 def knotsToMPH(knots):
     return knots * 1.15078
+
+def fixupGust(gust, wind):
+    newValues = []
+    for i,v in enumerate(gust.values):
+        windVal = wind.valueAt(gust.times[i])
+        minValidGust = max(1.2 * windVal, windVal + 1)
+        #if minValidGust > v:
+        #    print "gust fixup: %s %s %s" % (gust.times[i], v, minValidGust)
+        newValues.append(max(minValidGust, v))
+    gust.values = newValues
 
 def debug():
     sites = Site.objects.all()

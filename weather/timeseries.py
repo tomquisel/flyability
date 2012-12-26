@@ -1,4 +1,4 @@
-import datetime, pytz
+import datetime, pytz, bisect
 
 class TimeSeries(object):
     def __init__(self, name, times, values, tz):
@@ -65,29 +65,40 @@ class TimeSeries(object):
             if before is None or after is None:
                 v = default
             else:
-                # compute our value as the weighted average of before and after
-                bdist = abs((ts - self.times[ind-1]).total_seconds())
-                adist = abs((ts - self.times[ind]).total_seconds())
-                aweight = 1 - adist / (adist + bdist)
-                bweight = 1 - aweight
-                v = bweight * before + aweight * after
+                v = self.tsWeightedAverage(ts, ind)
             res.append(v)
         assert(len(res) == len(tslist))
         return res
 
+    def valueAt(self, ts, default=None):
+        ts = self.makeOneAware(ts, self.tz)
+        pos = bisect.bisect_left(self.times, ts)
+        if self.times[pos] == ts:
+            return self.values[pos]
+        if pos == 0 or pos == len(self.times):
+            return default
+        return self.tsWeightedAverage(ts, pos)
+
     def readNatural(self):
         return (self.times, self.values)
-    
+
+    def tsWeightedAverage(self, ts, ind):
+        # compute our value as the weighted average of before and after
+        bdist = abs((ts - self.times[ind-1]).total_seconds())
+        adist = abs((ts - self.times[ind]).total_seconds())
+        aweight = 1 - adist / (adist + bdist)
+        bweight = 1 - aweight
+        return bweight * self.values[ind-1] + aweight * self.values[ind]
+
     @classmethod
     def makeAware(cls, tslist, tz):
-        res = []
-        for ts in tslist:
-            if ts.tzinfo is None:
-                awarets = tz.localize(ts)
-            else:
-                awarets = ts
-            res.append(awarets)
-        return res
+        return [ cls.makeOneAware(ts, tz) for ts in tslist ]
+
+    @classmethod
+    def makeOneAware(cls, ts, tz):
+        if ts.tzinfo is None:
+            return tz.localize(ts)
+        return ts
 
     hour = datetime.timedelta(hours=1)
 
