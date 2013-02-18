@@ -157,7 +157,7 @@ Plotter2.prototype.plotFly = function(id) {
             }
         },
         series: [{ 
-                name: "Flyability for P2 pilots", 
+                name: "Flyability for " + this.level + " pilots", 
                 data: this.flyability
         }],
     });
@@ -189,28 +189,21 @@ Plotter2.prototype.plotPop = function(id) {
     });
 };
 
-function makePlotBands() {
+Plotter2.prototype.makePlotBands = function() {
     var res = [
         {
-            from: 12,
-            to: 15,
+            from: this.maxWind,
+            to: this.maxGust,
             color: 'rgb(255, 220, 220)',
             label: {
-                text: 'P2 wind unsafe',
+                text: this.level + ' wind unsafe',
             }
         }, {
-            from: 15,
-            to: 18,
-            color: 'rgb(255, 185, 185)',
-            label: {
-                text: 'P3 wind / P2 gust unsafe',
-            }
-        }, {
-            from: 18,
+            from: this.maxGust,
             to: 2000,
             color: 'rgb(255, 150, 150)',
             label: {
-                text: 'P3 gust unsafe',
+                text: this.level + ' gust unsafe',
             }
         }, 
     ];
@@ -239,7 +232,7 @@ Plotter2.prototype.plotWind = function(id, arrowMaker)
 {
     var gustMax = Math.max.apply(Math, this.gust);
     var windMax = Math.max.apply(Math, this.wind);
-    var chartMax = Math.round(Math.max(gustMax + 2, windMax + 2, 20));
+    var chartMax = Math.round(Math.max(gustMax + 2, windMax + 2, this.maxGust+5));
     var chartMin = Math.round(- 1/4 * chartMax);
     var dir = makeWindValues(this.dir, chartMax, arrowMaker);
     var series = [];
@@ -257,6 +250,14 @@ Plotter2.prototype.plotWind = function(id, arrowMaker)
             type: 'scatter', 
             marker: { symbol: arrowMaker(215, 15) } 
         });
+
+        var ticks = [chartMin];
+        for (var i=0; i<this.maxWind-1; i+=5) {
+            ticks.push(i);
+        }
+        ticks.push(this.maxWind);
+        ticks.push(this.maxGust);
+        ticks.push(chartMax);
 
     this.chartWind = new Highcharts.Chart({
         chart: {
@@ -282,11 +283,11 @@ Plotter2.prototype.plotWind = function(id, arrowMaker)
                 }
             },
             tickPositioner: function() {
-                return [chartMin, 0, 5, 10, chartMax];
+                return ticks;
             },
             min: chartMin,
             max: chartMax,
-            plotBands : makePlotBands(),
+            plotBands : this.makePlotBands(),
             plotLines : [ { value: 0, width: 2, color: '#000'} ]
         },
         tooltip: {

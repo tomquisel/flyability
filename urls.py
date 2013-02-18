@@ -14,6 +14,7 @@ urlpatterns = patterns('siteviewer.views',
     url(r'^wind/dir_(?P<wind>[-\d]+)_(?P<siteid>\d+)_(?P<size>\d+).png$', 
         'windDir', name='windDir'),
     url(r'^sitelist$', 'sitelist', name='sitelist'),
+    url(r'^setlevel$', 'setlevel', name='setlevel'),
 
     # unused
     #url(r'^flyability/wind/arrow_(?P<wind>[-\d]+)_(?P<left>\d+)_(?P<right>\d+)_(?P<size>\d+).png$', 'windArrow'),

@@ -33,6 +33,20 @@
     </div>
 
     <div class="span10 site-main">
+        <form id="levelForm" action="/setlevel" method="post">
+            <h2>Weather Forecast for 
+                <select id="level" name="level"> 
+                    {% for l in levels %}
+                        <option value="{{l.level}}" 
+                        {% if l.selected %}selected{% endif %}>
+                        {{l.level}}</option>
+                    {% endfor %}
+                </select>
+                <input type="hidden" name="site" value="{% url 'site' site.country site.state site.name %}">
+                {% csrf_token %}
+                Pilots
+            </h2>
+        </form>
         <ul class="nav nav-tabs daynav">
             {% if not days %}
             <div class="alert">No weather data available at this time.</div>
@@ -125,6 +139,9 @@
             plotter.gust = {{ day.gust }};
             plotter.dir = {{ day.dir }};
             plotter.flyDetails = {{ day.flyDetails|safe }};
+            plotter.maxWind = {{ maxWind }};
+            plotter.maxGust = {{ maxGust }};
+            plotter.level = "{{ level }}";
             plotter.setOptions();
 
             var flyId = "{{day.name}}_flyability";
@@ -138,6 +155,9 @@
             plotter.plotPop(popId);
         {% endfor %}
         $('#{{ highlightedDay }}_tab').tab('show');
+        $('#level').change( function() {
+            $('#levelForm').submit();
+        });
     });
 </script>
 {% endblock %}

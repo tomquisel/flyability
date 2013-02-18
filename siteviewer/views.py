@@ -1,7 +1,7 @@
 import datetime, time
 import json
 from django.http import HttpResponse, Http404 
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, loader
 from django.views.decorators.cache import cache_control
 import django.utils.timezone as djtz
@@ -12,6 +12,7 @@ from math import sin, cos, atan2, pi
 import weather.main as weather
 import siteviewer.mapstate as mapstate
 from profiler import profile
+import predictor
 
 def index(request):
     sites = main.getAllSites();
@@ -67,12 +68,25 @@ def site(request, country, state, name):
     site = sites[0]
     env = {'site' : site}
     djtz.activate(site.timezone)
+
+    level = request.session.get('level', 'P2')
+    lDicts = []
+    for l in predictor.levels:
+        lDict = { 'level' : l }
+        if request.session.get('level') == l:
+            lDict['selected'] = True
+        lDicts.append(lDict)
+    env['levels'] = lDicts
+
     try:
-        mgr = main.ForecastMgr(site)
+        mgr = main.ForecastMgr(site, level)
         days = mgr.getDays()
         env['highlightedDay'] = mgr.computeHighlightDay(days)
         env['days'] = days
         env['fetchTime'] = mgr.fetchTime
+        env['maxWind'] = mgr.predictor.maxWind
+        env['maxGust'] = mgr.predictor.maxGust
+        env['level'] = mgr.level
     except weather.NoWeatherDataException: 
         pass
     return render_to_response('siteviewer/siteview.html', env,
@@ -151,6 +165,18 @@ def windDir(request, wind, siteid, size):
     if isinstance(response, Exception):
         raise response
     return response
+
+def setlevel(request):
+    P = request.POST 
+    if not P or P.get('level') is None or P.get('site') is None:
+        success = False
+        return render_to_response('siteviewer/setlevel_fail.html', {},
+                                  context_instance=RequestContext(request))
+    else:
+        if P['level'] in predictor.levels:
+            request.session['level'] = P['level']
+        return redirect(P['site'])
+
 
 # unused
 #def windArrow(request, wind, left, right, size):

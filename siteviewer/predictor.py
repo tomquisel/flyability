@@ -6,12 +6,18 @@ from scipy.stats import norm
 import astral
 from weather.timeseries import TimeSeries
 
+levels = [ 'P2', 'P3', 'P4' ]
+windMaxMap = { 'P2' : 12, 'P3' : 15, 'P4' : 20 }
+gustMaxMap = { 'P2' : 15, 'P3' : 18, 'P4' : 25 }
+
 class Predictor(object):
 
-    def __init__(self, times, timeseries, site):
+    def __init__(self, times, timeseries, site, level):
         self.times = times
         self.timeseries = timeseries
         self.site = site
+        self.maxWind = windMaxMap[level]
+        self.maxGust = gustMaxMap[level]
 
         self.dayIntervals = self.getDayIntervals()
         self.values = self.computeFlyability()
@@ -52,8 +58,8 @@ class Predictor(object):
             if self.isDay(t):
                 prob = 1.0
             dirProb = getWindDirChances(site, dir[i])
-            windProb = getWindSpeedChances(wind[i])
-            gustProb = getGustSpeedChances(gust[i])
+            windProb = self.getWindSpeedChances(wind[i])
+            gustProb = self.getGustSpeedChances(gust[i])
             popProb = getRainChances(pop[i])
             prob *= dirProb * windProb * gustProb * popProb
             values['dir'].append(int(round(100 * dirProb)))
@@ -94,6 +100,13 @@ class Predictor(object):
             res[k] = v[start:end]
         return res
 
+    def getWindSpeedChances(self, speed):
+        return normSmooth(self.maxWind-speed, 3)
+
+    def getGustSpeedChances(self, speed):
+        return normSmooth(self.maxGust-speed, 3)
+
+
 ################## HELPERS ##########################
 
 class Smoother(object):
@@ -117,12 +130,6 @@ def getWindDirChances(site, dir):
     #print dir, takeoff
     #print res, samples
     return res
-
-def getWindSpeedChances(speed):
-    return normSmooth(12-speed, 3)
-
-def getGustSpeedChances(speed):
-    return normSmooth(15-speed, 3)
 
 def getRainChances(pop):
     return 1 - pop/100.0

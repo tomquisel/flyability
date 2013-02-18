@@ -9,6 +9,22 @@ body { height: 100%; margin: 0; padding: 0 }
     margin-top: 1px;
 }
 
+#levelForm {
+    margin: 0;
+    padding: 0;
+}
+
+h2 > select {
+    font-size: 30px;
+    font-weight: bold;
+    height: 40px;
+    width: 3em;
+    text-rendering: optimizelegibility;
+    margin: -2px 0 0 0;
+    padding: 0;
+    color: #333;
+}
+
 .daytab {
     width: 6em;
     color: #333;

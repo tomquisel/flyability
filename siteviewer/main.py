@@ -39,8 +39,9 @@ def addSiteDetails(site):
 
 
 class ForecastMgr(object):
-    def __init__(self, site, startDay = None, days=7):
+    def __init__(self, site, level = 'P2', startDay = None, days=7):
         self.site = site
+        self.level = level
         self.days = days
         self.tz = pytz.timezone(site.timezone)
         if startDay is None:
@@ -140,5 +141,6 @@ class ForecastMgr(object):
         wdata = weather.getWeatherData(self.site, start)
         times = TimeSeries.range(start, hours, TimeSeries.hour)
         awareTimes = TimeSeries.makeAware(times, self.tz)
-        predictor = Predictor(awareTimes, wdata.seriesDict, self.site)
+        predictor = Predictor(awareTimes, wdata.seriesDict, self.site, 
+                              self.level)
         return (times, wdata.seriesDict, predictor, wdata.fetchTime)

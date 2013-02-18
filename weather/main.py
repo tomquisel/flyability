@@ -6,6 +6,9 @@ from timeseries import TimeSeries
 from weather.models import Forecast, ForecastData
 from weather.models import Observation, ObservationData
 from siteviewer.models import Site
+import logging
+
+logger = logging.getLogger("flyability")
 
 def fetchForecast(site):
     forecast = Forecast(site = site, lat = site.lat, lon = site.lon)
@@ -78,6 +81,8 @@ def modelsToTimeSeries(values, tz):
     # since we get gust and wind from two different data sources, they 
     # sometimes disagree. I trust the wind source more, so I fix up gust to 
     # be consistent with it.
+    print seriesDict['gust'].values
+    print seriesDict['wind'].values
     fixupGust(seriesDict['gust'], seriesDict['wind'])
     return seriesDict
 
@@ -96,7 +101,7 @@ def knotsToMPH(knots):
 def fixupGust(gust, wind):
     newValues = []
     for i,v in enumerate(gust.values):
-        windVal = wind.valueAt(gust.times[i])
+        windVal = wind.valueAt(gust.times[i], 0.0)
         minValidGust = max(1.2 * windVal, windVal + 1)
         #if minValidGust > v:
         #    print "gust fixup: %s %s %s" % (gust.times[i], v, minValidGust)
