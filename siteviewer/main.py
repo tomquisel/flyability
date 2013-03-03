@@ -123,11 +123,11 @@ class ForecastMgr(object):
             fullName = self.level + "_" + n
             if fullName in self.seriesDict:
                 vals = self.seriesDict[fullName].\
-                    interpolate(self.times[startInd:endInd])
+                    interpolate(self.times[startInd:endInd], 0.0)
             else:
                 vals = [0] * (endInd - startInd)
             values[n] = vals
-        return (predictor.summarizeScores(scores), times, values)
+        return (predictor.summarizeScores(values['flyability']), times, values)
 
     @classmethod
     def shortDay(cls, d):
