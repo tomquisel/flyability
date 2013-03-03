@@ -60,6 +60,7 @@ def addSummary(site, level):
         obj['short'] = ForecastMgr.shortDay(day['date'])
         out.append(obj)
     setattr(site, 'days', out)
+    setattr(site, 'statecode', mapstate.getCode(site.state))
 
 #######################################################################
 
