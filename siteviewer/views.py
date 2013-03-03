@@ -90,7 +90,7 @@ def summary(request):
     site = get_object_or_404(Site, pk=id)
     djtz.activate(site.timezone)
     level = request.session.get('level', 'P2')
-    main.addSiteDetails(site, level)
+    main.addSummary(site, level)
     env = {'site' : site}
     return render_to_response('siteviewer/sitesummary.html', env,
                               context_instance=RequestContext(request))
@@ -140,7 +140,7 @@ def search(request):
         dkm = int(round(dkm))
         setattr(s, 'dist_mi', dmi)
         setattr(s, 'dist_km', dkm)
-        main.addSiteDetails(s, level)
+        main.addSummary(s, level)
     t4 = time.time()
 
     print "Times: %s %s %s" % (t2-t1, t3-t2, t4-t3)

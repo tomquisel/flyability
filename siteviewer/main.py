@@ -2,6 +2,7 @@ import datetime as dt, pytz
 import bisect
 from django.http import Http404 
 from weather.timeseries import TimeSeries
+from weather.models import WeatherSummary
 import weather.main as weather
 import predictor
 import json
@@ -44,6 +45,21 @@ def addSiteDetails(site, level):
         setattr(site, 'days', days)
     except weather.NoWeatherDataException: 
         setattr(site, 'days', [])
+
+#######################################################################
+
+def addSummary(site, level):
+    summaries = WeatherSummary.objects.filter(site=site, level=level)
+    if len(summaries) == 0:
+        return
+    days = summaries[0].getData()
+    out = []
+    for day in days:
+        obj = {}
+        obj['color'] = ForecastMgr.getColor(day['score'])
+        obj['short'] = ForecastMgr.shortDay(day['date'])
+        out.append(obj)
+    setattr(site, 'days', out)
 
 #######################################################################
 
@@ -109,15 +125,12 @@ class ForecastMgr(object):
             else:
                 vals = [0] * (endInd - startInd)
             values[n] = vals
-        scores = list(values['flyability'])
-        scores.sort()
-        # take the top 33rd percentile as the score
-        summary = scores[len(scores) * 2 / 3]
-        return (summary, times, values)
+        return (predictor.summarizeScores(scores), times, values)
 
     @classmethod
-    def shortDay(cls, i):
-        return ['Su','M', 'T', 'W', 'Th', 'F', 'Sa'][int(i)]
+    def shortDay(cls, d):
+        dow = d.strftime("%w")
+        return ['Su','M', 'T', 'W', 'Th', 'F', 'Sa'][int(dow)]
 
     @classmethod 
     def interpolateColor(cls, start, end, magnitude):
@@ -147,7 +160,7 @@ class ForecastMgr(object):
             dayStart = self.startTime + inc * n
             day['start'] = dayStart
             day['name'] = dayStart.strftime("%A") 
-            day['short'] = self.shortDay(dayStart.strftime("%w"))
+            day['short'] = self.shortDay(dayStart)
             day['date'] = dayStart
             fly, flyTimes, flyValues = self.getDay(dayStart)
             day['flyability'] = fly
