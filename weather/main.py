@@ -81,8 +81,6 @@ def modelsToTimeSeries(values, tz):
     # since we get gust and wind from two different data sources, they 
     # sometimes disagree. I trust the wind source more, so I fix up gust to 
     # be consistent with it.
-    print seriesDict['gust'].values
-    print seriesDict['wind'].values
     fixupGust(seriesDict['gust'], seriesDict['wind'])
     return seriesDict
 

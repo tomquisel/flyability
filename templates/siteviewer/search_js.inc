@@ -4,7 +4,10 @@
         "{% filter escapejs %}{% include "siteviewer/search_loading.inc" %}{% endfilter %}"
         );
         $.fly.jsp.reinitialise();
-        $.get("{% url 'search' %}", {lat : lat, lon : lon, query : query}, renderResults)
+        var level = $('#level').val();
+        $.get("{% url 'search' %}", 
+              {lat : lat, lon : lon, query : query, level: level}, 
+              renderResults)
             .error(function () {console.log("AJAX fail."); });
     }
     
@@ -19,8 +22,8 @@
     }
 
     function renderResults(data) {
-        var data = "<h4>Paragliding Sites near <br/>" + $.fly.address + 
-            "</h4>" + data;
+        //var data = "<h4>Paragliding Sites near <br/>" + $.fly.address + 
+        //    "</h4>" + data;
         $.fly.jsp.getContentPane().html(data);
         $.fly.jsp.reinitialise();
         var ids = [];

@@ -1,10 +1,9 @@
 import datetime
-import bisect
 from collections import defaultdict
 import numpy as np
 from scipy.stats import norm
-import astral
 from weather.timeseries import TimeSeries
+from siteviewer.daytime import DayTime
 
 levels = [ 'P2', 'P3', 'P4' ]
 windMaxMap = { 'P2' : 12, 'P3' : 15, 'P4' : 20 }
@@ -13,35 +12,14 @@ gustMaxMap = { 'P2' : 15, 'P3' : 18, 'P4' : 25 }
 class Predictor(object):
 
     def __init__(self, times, timeseries, site, level):
+        self.site = site
         self.times = times
         self.timeseries = timeseries
-        self.site = site
         self.maxWind = windMaxMap[level]
         self.maxGust = gustMaxMap[level]
+        self.dayTime = DayTime(site, times)
 
-        self.dayIntervals = self.getDayIntervals()
         self.values = self.computeFlyability()
-
-    def getDay(self, start):
-        end = start + datetime.timedelta(days=1)
-        i = bisect.bisect_left(self.times, start)
-        startInd = None
-        endInd = None
-        while i < len(self.times) and self.times[i] < end:
-            isDay = self.isDay(self.times[i]) 
-            if isDay and startInd is None:
-                startInd = i
-            if not isDay and not startInd is None:
-                endInd = i
-                break
-            i += 1
-        times = self.times[startInd:endInd]
-        values = self.getValuesInRange(startInd, endInd)
-        scores = list(values['flyability'])
-        scores.sort()
-        # take the top 33rd percentile as the score
-        summary = scores[len(scores) * 2 / 3]
-        return (summary, times, values)
 
     def computeFlyability(self):
         times = self.times
@@ -55,7 +33,7 @@ class Predictor(object):
         values = defaultdict(list)
         for i,t in enumerate(times):
             prob = 0
-            if self.isDay(t):
+            if self.dayTime.isDay(t):
                 prob = 1.0
             dirProb = getWindDirChances(site, dir[i])
             windProb = self.getWindSpeedChances(wind[i])
@@ -69,36 +47,6 @@ class Predictor(object):
             values['flyability'].append(int(round(100 * prob)))
 
         return values
-
-    def getDayIntervals(self):
-        site = self.site
-        times = self.times
-        days = []
-        a = astral.Astral()
-        dates = set([])
-        for dt in times:
-           date = datetime.datetime.date(dt)
-           dates.add(date)
-        dates = list(dates)
-        dates.sort()
-        for date in dates:
-            sunInfo = a.sun_utc(date, site.lat, site.lon)
-            days.append( (sunInfo['sunrise'], sunInfo['sunset']) )
-        return days
-
-    def isDay(self, t):
-        sunsetFudge = datetime.timedelta(hours=1)
-        sunriseFudge = datetime.timedelta(hours=2)
-        for sunrise, sunset in self.dayIntervals:
-            if t > sunrise + sunriseFudge and t < sunset + sunsetFudge:
-                return True
-        return False
-
-    def getValuesInRange(self, start, end):
-        res = {}
-        for k,v in self.values.items():
-            res[k] = v[start:end]
-        return res
 
     def getWindSpeedChances(self, speed):
         return normSmooth(self.maxWind-speed, 3)

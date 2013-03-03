@@ -14,9 +14,18 @@ Flyability Paragliding Forecasts
 <div class="searchrow">
     <form class="form-search" id="search-form" method="GET" action="{% url 'search' %}">
         <fieldset>
+            Paragliding Site Forecasts for
+            <select id="level" name="level" class="levelSelect"> 
+                {% for l in levels %}
+                    <option value="{{l.level}}" 
+                    {% if l.selected %}selected{% endif %}>
+                    {{l.level}}</option>
+                {% endfor %}
+            </select>
+            Pilots near
             <input id="geocomplete" type="text" name="query" 
                 value="{{ request.session.query }}"
-                class="input-large search-query" 
+                class="input-large" 
                 placeholder="Enter your city / town" />
             
             <button id="search" type="submit" class="btn">Search</button>

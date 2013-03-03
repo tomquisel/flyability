@@ -1,11 +1,15 @@
 import datetime as dt, pytz
+import bisect
 from django.http import Http404 
 from weather.timeseries import TimeSeries
 import weather.main as weather
-from predictor import Predictor
+import predictor
 import json
 from siteviewer.models import Site
 import mapstate
+from siteviewer.daytime import DayTime
+
+#######################################################################
 
 def getAllSites():
     query = Site.objects.filter(
@@ -22,24 +26,46 @@ def getAllSites():
     sites = list(query)
     return sites
 
+#######################################################################
+
 def getOr404(d, s):
     res = d.get(s)
     if res is None:
         raise Http404
     return res
 
-def addSiteDetails(site):
+#######################################################################
+
+def addSiteDetails(site, level):
     setattr(site, 'statecode', mapstate.getCode(site.state))
     try:
-        mgr = ForecastMgr(site)
+        mgr = ForecastMgr(site, level)
         days = mgr.getDays(False)
         setattr(site, 'days', days)
     except weather.NoWeatherDataException: 
         setattr(site, 'days', [])
 
+#######################################################################
+
+def addLevels(request, env):
+    level = request.session.get('level', 'P2')
+    lDicts = []
+    for l in predictor.levels:
+        lDict = { 'level' : l }
+        if level == l:
+            lDict['selected'] = True
+        lDicts.append(lDict)
+    env['levels'] = lDicts
+    env['level'] = level
+
+def setLevel(request, level):
+    if level in predictor.levels:
+        request.session['level'] = level
+
+#######################################################################
 
 class ForecastMgr(object):
-    def __init__(self, site, level = 'P2', startDay = None, days=7):
+    def __init__(self, site, level, startDay = None, days=7):
         self.site = site
         self.level = level
         self.days = days
@@ -51,13 +77,43 @@ class ForecastMgr(object):
         self.startTime = dt.datetime.combine(self.startDay, 
                                              dt.time(tzinfo=self.tz))
 
-        (times, seriesDict, predictor, fetchTime) = \
+        (times, seriesDict, fetchTime) = \
                 self.fetchSeries(start = self.startTime, hours = self.days * 24)
 
         self.times = times
         self.seriesDict = seriesDict
-        self.predictor = predictor
         self.fetchTime = fetchTime
+        self.dayTime = DayTime(site, times)
+
+    def getDay(self, start):
+        end = start + dt.timedelta(days=1)
+        i = bisect.bisect_left(self.times, start)
+        startInd = None
+        endInd = None
+        while i < len(self.times) and self.times[i] < end:
+            isDay = self.dayTime.isDay(self.times[i]) 
+            if isDay and startInd is None:
+                startInd = i
+            if not isDay and not startInd is None:
+                endInd = i
+                break
+            i += 1
+        times = self.times[startInd:endInd]
+        names = ['flyability', 'dir', 'wind', 'gust', 'pop']
+        values = {}
+        for n in names:
+            fullName = self.level + "_" + n
+            if fullName in self.seriesDict:
+                vals = self.seriesDict[fullName].\
+                    interpolate(self.times[startInd:endInd])
+            else:
+                vals = [0] * (endInd - startInd)
+            values[n] = vals
+        scores = list(values['flyability'])
+        scores.sort()
+        # take the top 33rd percentile as the score
+        summary = scores[len(scores) * 2 / 3]
+        return (summary, times, values)
 
     @classmethod
     def shortDay(cls, i):
@@ -93,7 +149,7 @@ class ForecastMgr(object):
             day['name'] = dayStart.strftime("%A") 
             day['short'] = self.shortDay(dayStart.strftime("%w"))
             day['date'] = dayStart
-            fly, flyTimes, flyValues = self.predictor.getDay(dayStart)
+            fly, flyTimes, flyValues = self.getDay(dayStart)
             day['flyability'] = fly
             # horrible that this isn't in the template 
             day['barheight'] = int(round(44 * fly / 100))
@@ -141,6 +197,4 @@ class ForecastMgr(object):
         wdata = weather.getWeatherData(self.site, start)
         times = TimeSeries.range(start, hours, TimeSeries.hour)
         awareTimes = TimeSeries.makeAware(times, self.tz)
-        predictor = Predictor(awareTimes, wdata.seriesDict, self.site, 
-                              self.level)
-        return (times, wdata.seriesDict, predictor, wdata.fetchTime)
+        return (times, wdata.seriesDict, wdata.fetchTime)

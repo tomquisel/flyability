@@ -1,23 +1,27 @@
-import datetime, time
+import datetime as dt, time
 
 import django.utils.timezone as tz
 from siteviewer.models import Site
 from siteviewer.main import getAllSites
 import weather.main
-from weather.models import Forecast, ForecastData, Observation, ObservationData
+from weather.models import Forecast, ForecastData, Observation, \
+        ObservationData, ForecastValue
 import observation_fetcher as of
 import condition
 from optparse import OptionParser
+from weather.timeseries import TimeSeries
+from siteviewer.predictor import Predictor
+import siteviewer.predictor as predictor
 
-old = tz.now() - datetime.timedelta(minutes=30)
+old = tz.now() - dt.timedelta(minutes=30)
 
 def updateForecast(site):
     t1 = time.time()
     recent = Forecast.objects.filter(site_id=site.id).\
                 filter(fetch_time__gt=old)
-    if len(recent) > 0:
-        print "Skipping update of forecast for %s" % site.name
-        return
+    #if len(recent) > 0:
+    #    print "Skipping update of forecast for %s" % site.name
+    #    return
     t2 = time.time()
     print "Updating forecast for %s" % site.name
     res = weather.main.fetchForecast(site)
@@ -28,6 +32,27 @@ def updateForecast(site):
     forecast, values = res
     forecast.save()
     t4 = time.time()
+
+    # compute our flyability predictions
+    try:
+        seriesDict = weather.main.modelsToTimeSeries(values, site.timezone)
+    except weather.main.NoWeatherDataException:
+        print "No weather data for site %s!! Skipping update." % site.name
+        return
+    thisHour = dt.datetime.now().replace(minute=0, second=0, microsecond=0)
+    times = TimeSeries.range(thisHour, 168, TimeSeries.hour)
+    awareTimes = TimeSeries.makeAware(times, seriesDict['wind'].tz)
+    for level in predictor.levels:
+        pred = Predictor(awareTimes, seriesDict, site, level)
+        flyability = pred.computeFlyability()
+        print level
+        print flyability['flyability']
+        for name in flyability:
+            for i,f in enumerate(flyability[name]):
+                fullName = level + "_" + name
+                values.append(ForecastValue(fullName, flyability[name][i], 
+                              pred.times[i]))
+
     data = ForecastData(forecast=forecast)
     data.setData(values)
     data.save()

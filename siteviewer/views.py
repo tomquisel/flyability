@@ -28,6 +28,7 @@ def index(request):
         sitesobj.append(out)
 
     env = { 'sitesobj' : json.dumps(sitesobj) }
+    main.addLevels(request, env)
     return render_to_response('siteviewer/index.html', env,
                               context_instance=RequestContext(request))
 def sitelist(request):
@@ -69,24 +70,16 @@ def site(request, country, state, name):
     env = {'site' : site}
     djtz.activate(site.timezone)
 
-    level = request.session.get('level', 'P2')
-    lDicts = []
-    for l in predictor.levels:
-        lDict = { 'level' : l }
-        if request.session.get('level') == l:
-            lDict['selected'] = True
-        lDicts.append(lDict)
-    env['levels'] = lDicts
+    main.addLevels(request, env)
 
     try:
-        mgr = main.ForecastMgr(site, level)
+        mgr = main.ForecastMgr(site, env['level'])
         days = mgr.getDays()
         env['highlightedDay'] = mgr.computeHighlightDay(days)
         env['days'] = days
         env['fetchTime'] = mgr.fetchTime
-        env['maxWind'] = mgr.predictor.maxWind
-        env['maxGust'] = mgr.predictor.maxGust
-        env['level'] = mgr.level
+        env['maxWind'] = predictor.windMaxMap[env['level']]
+        env['maxGust'] = predictor.gustMaxMap[env['level']]
     except weather.NoWeatherDataException: 
         pass
     return render_to_response('siteviewer/siteview.html', env,
@@ -96,7 +89,8 @@ def summary(request):
     id = int(main.getOr404(request.GET, 'id'))
     site = get_object_or_404(Site, pk=id)
     djtz.activate(site.timezone)
-    main.addSiteDetails(site)
+    level = request.session.get('level', 'P2')
+    main.addSiteDetails(site, level)
     env = {'site' : site}
     return render_to_response('siteviewer/sitesummary.html', env,
                               context_instance=RequestContext(request))
@@ -125,12 +119,14 @@ def dist(s, lat, lon):
     return atan2((n1 + n2)** 0.5, d) * 3963.1676
 
 
-#@profile("search.prof")
+@profile("search.prof")
 def search(request):
     lat = float(main.getOr404(request.GET, 'lat'))
     lon = float(main.getOr404(request.GET, 'lon'))
     query = main.getOr404(request.GET, 'query')
+    level = main.getOr404(request.GET, 'level')
     request.session['query'] = query
+    main.setLevel(request, level)
     t1 = time.time()
     sites = main.getAllSites()
     t2 = time.time()
@@ -144,7 +140,7 @@ def search(request):
         dkm = int(round(dkm))
         setattr(s, 'dist_mi', dmi)
         setattr(s, 'dist_km', dkm)
-        main.addSiteDetails(s)
+        main.addSiteDetails(s, level)
     t4 = time.time()
 
     print "Times: %s %s %s" % (t2-t1, t3-t2, t4-t3)
@@ -173,8 +169,7 @@ def setlevel(request):
         return render_to_response('siteviewer/setlevel_fail.html', {},
                                   context_instance=RequestContext(request))
     else:
-        if P['level'] in predictor.levels:
-            request.session['level'] = P['level']
+        main.setLevel(request, P['level'])
         return redirect(P['site'])
 
 
