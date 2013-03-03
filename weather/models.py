@@ -88,3 +88,25 @@ class ObservationData(models.Model):
             v2 = [v.name, v.value]
             converted.append(v2)
         return json.dumps(converted)
+
+class WeatherSummary(models.Model):
+    site = models.ForeignKey(Site)
+    level = models.CharField(max_length=255)
+    data = models.TextField()
+
+    def getData(self):
+        converted = []
+        data = json.loads(self.data)
+        for tup in data:
+            o = {}
+            o['date'] = datetime.date.fromordinal(int(tup[0]))
+            o['score'] = tup[1]
+            converted.append(o)
+        return converted
+
+    def setData(self, data):
+        converted = []
+        for o in data:
+            ordinal = datetime.date.toordinal(o['date'])
+            converted.append((ordinal, o['score']))
+        self.data = json.dumps(converted)

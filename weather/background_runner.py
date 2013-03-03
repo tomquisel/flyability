@@ -5,7 +5,7 @@ from siteviewer.models import Site
 from siteviewer.main import getAllSites
 import weather.main
 from weather.models import Forecast, ForecastData, Observation, \
-        ObservationData, ForecastValue
+        ObservationData, ForecastValue, WeatherSummary
 import observation_fetcher as of
 import condition
 from optparse import OptionParser
@@ -45,19 +45,45 @@ def updateForecast(site):
     for level in predictor.levels:
         pred = Predictor(awareTimes, seriesDict, site, level)
         flyability = pred.computeFlyability()
-        print level
-        print flyability['flyability']
+        #print level
+        #print flyability['flyability']
         for name in flyability:
             for i,f in enumerate(flyability[name]):
                 fullName = level + "_" + name
                 values.append(ForecastValue(fullName, flyability[name][i], 
                               pred.times[i]))
-
+        saveSummaryData(site, level, pred.dayTime, pred.times, \
+                flyability['flyability'])
     data = ForecastData(forecast=forecast)
     data.setData(values)
     data.save()
+
+
     t5 = time.time()
     print "Forecast: %s %s %s %s" % ( t2-t1, t3-t2, t4-t3, t5-t4)
+
+def saveSummaryData(site, level, dayTime, times, scores):
+    summaryData = []
+    curScores = []
+    curDate = None
+    l = len(times)
+    for i,f in enumerate(scores):
+        isDay = dayTime.isDay(times[i])
+        if isDay:
+            curScores.append(f)
+            curDate = times[i].date()
+        if (not isDay and len(curScores)) or (isDay and i == l-1):
+            obj = {}
+            obj['date'] = curDate
+            obj['score'] = predictor.summarizeScores(curScores)
+            summaryData.append(obj)
+            curScores = []
+    assert(len(curScores) == 0)
+    WeatherSummary.objects.filter(site=site, level=level).delete()
+    summary = WeatherSummary(site=site, level=level)
+    #print summaryData
+    summary.setData(summaryData)
+    summary.save()
 
 of.fetch()
 observationIndex = of.buildIndex()

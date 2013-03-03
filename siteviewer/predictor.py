@@ -57,6 +57,13 @@ class Predictor(object):
 
 ################## HELPERS ##########################
 
+def summarizeScores(scores):
+    s = list(scores)
+    s.sort()
+    # take the top 33rd percentile as the score
+    summary = s[len(s) * 2 / 3]
+    return summary
+
 class Smoother(object):
     def __init__(self, sd, n, inc):
         self.xs = np.linspace(-n*inc, n*inc, 2*n+1)
