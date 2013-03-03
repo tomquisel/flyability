@@ -119,7 +119,7 @@ def dist(s, lat, lon):
     return atan2((n1 + n2)** 0.5, d) * 3963.1676
 
 
-@profile("search.prof")
+#@profile("search.prof")
 def search(request):
     lat = float(main.getOr404(request.GET, 'lat'))
     lon = float(main.getOr404(request.GET, 'lon'))
