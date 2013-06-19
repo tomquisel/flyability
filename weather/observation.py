@@ -26,6 +26,7 @@ class ObservationObj(object):
             print "Failed to parse data as XML!"
             self.failed = True
             return
+        self.weather = ""
         for tag, (name, conv, minv, maxv) in self.mapping.items():
             v = tree.xpath("/current_observation/%s/text()" % tag)
             if len(v) < 1:
@@ -42,6 +43,7 @@ class ObservationObj(object):
                 return
             setattr(self, name, v)
         self.iid = int(self.name, 36)
+        self.pop = conditionMgr.getPOP(self.weather)
 
     def toDjangoModels(self, site, conditionMgr):
         dt = datetime.datetime.fromtimestamp(self.time)
@@ -57,11 +59,10 @@ class ObservationObj(object):
                 continue
             o = ObservationValue( name, getattr(self, name) )
             values.append(o)
-        pop = conditionMgr.getPOP(self.weather)
-        if pop is None:
+        if self.pop is None:
             print "WARNING: unknown weather type '%s'" % self.weather
-            pop = 0
-        o = ObservationValue( "pop", pop )
+            self.pop = 0
+        o = ObservationValue( "pop", self.pop )
         values.append(o)
         return (obs, values)
 
