@@ -30,7 +30,6 @@ def updateForecast(site):
         print "weather.gov is having trouble. Rejecting results."
         return
     forecast, values = res
-    forecast.save()
     t4 = time.time()
 
     # compute our flyability predictions
@@ -39,6 +38,9 @@ def updateForecast(site):
     except weather.main.NoWeatherDataException:
         print "No weather data for site %s!! Skipping update." % site.name
         return
+    # we got data back, we can safely save the forecast without creating
+    # a dangling entry
+    forecast.save()
     thisHour = dt.datetime.now().replace(minute=0, second=0, microsecond=0)
     times = TimeSeries.range(thisHour, 168, TimeSeries.hour)
     awareTimes = TimeSeries.makeAware(times, seriesDict['wind'].tz)

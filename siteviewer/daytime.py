@@ -20,7 +20,10 @@ class DayTime(object):
         dates = list(dates)
         dates.sort()
         for date in dates:
-            sunInfo = a.sun_utc(date, site.lat, site.lon)
+            try:
+                sunInfo = a.sun_utc(date, site.lat, site.lon)
+            except astral.AstralError:
+                continue
             days.append( (sunInfo['sunrise'], sunInfo['sunset']) )
         return days
 
