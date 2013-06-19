@@ -32,31 +32,30 @@ class Predictor(object):
 
         values = defaultdict(list)
         for i,t in enumerate(times):
-            dirProb, windProb, gustProb, popProb, prob = \
-                getSinglePrediction(dir[i], wind[i], gust[i], pop[i],
-                    self.maxWind, self.maxGust, site)
-            if not self.dayTime.isDay(t):
-                prob = 0.0
-            values['dir'].append(dirProb)
-            values['wind'].append(windProb)
-            values['gust'].append(gustProb)
-            values['pop'].append(popProb)
-            values['flyability'].append(prob)
+            prob = 0
+            if self.dayTime.isDay(t):
+                prob = 1.0
+            dirProb = getWindDirChances(site, dir[i])
+            windProb = self.getWindSpeedChances(wind[i])
+            gustProb = self.getGustSpeedChances(gust[i])
+            popProb = getRainChances(pop[i])
+            prob *= dirProb * windProb * gustProb * popProb
+            values['dir'].append(int(round(100 * dirProb)))
+            values['wind'].append(int(round(100 * windProb)))
+            values['gust'].append(int(round(100 * gustProb)))
+            values['pop'].append(int(round(100 * popProb)))
+            values['flyability'].append(int(round(100 * prob)))
+
         return values
+
+    def getWindSpeedChances(self, speed):
+        return normSmooth(self.maxWind-speed, 3)
+
+    def getGustSpeedChances(self, speed):
+        return normSmooth(self.maxGust-speed, 3)
 
 
 ################## HELPERS ##########################
-
-def getSinglePrediction(dir, wind, gust, pop, maxWind, maxGust, site):
-    def percify(x):
-        return int(round(100*x))
-    dirProb = getWindDirChances(site, dir)
-    windProb = getWindSpeedChances(maxWind, wind)
-    gustProb = getWindSpeedChances(maxGust, gust)
-    popProb = getRainChances(pop)
-    prob = dirProb * windProb * gustProb * popProb
-    probs = (dirProb, windProb, gustProb, popProb, prob)
-    return map(probs, percify)
 
 def summarizeScores(scores):
     s = list(scores)
@@ -78,9 +77,6 @@ smoothN = 5
 smoothInc = 6
 
 smoother = Smoother(smoothSD, smoothN, smoothInc)
-
-def getWindSpeedChances(maxWind, speed):
-    return normSmooth(maxWind-speed, 3)
 
 def getWindDirChances(site, dir):
     takeoff = site.getTakeoffObj()
