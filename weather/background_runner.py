@@ -1,27 +1,49 @@
-import datetime as dt, time
+import datetime as dt
+import time
+from optparse import OptionParser
 
 import django.utils.timezone as tz
+
+import weather.main
+from weather.models import (Forecast, ForecastData, Observation,
+        ObservationData, ForecastValue, WeatherSummary)
+import observation_fetcher
+import condition
+from weather.timeseries import TimeSeries
 from siteviewer.models import Site
 from siteviewer.main import getAllSites
-import weather.main
-from weather.models import Forecast, ForecastData, Observation, \
-        ObservationData, ForecastValue, WeatherSummary
-import observation_fetcher as of
-import condition
-from optparse import OptionParser
-from weather.timeseries import TimeSeries
 from siteviewer.predictor import Predictor
 import siteviewer.predictor as predictor
 
-old = tz.now() - dt.timedelta(minutes=30)
 
-def updateForecast(site):
+def main():
+    recentCutoff = tz.now() - dt.timedelta(minutes=30)
+
+    parser = OptionParser()
+    parser.add_option("-s", "--site", dest="site",
+                      help="update site with this id", metavar="SITE")
+    (options, args) = parser.parse_args()
+
+    if options.site:
+        query = Site.objects.filter(id=options.site)
+        sites = list(query)
+        recentCutoff = tz.now()
+    else: 
+        sites = getAllSites()
+
+    observationUpdater = ObservationUpdater(recentCutoff)
+    for site in sites:
+        print "Fetching forecast & observation for %s, %s, %s %s" % \
+                (site.name, site.state, site.country, site.id)
+        updateForecast(site, recentCutoff)
+        observationUpdater.update(site)
+
+
+def updateForecast(site, recentCutoff):
     t1 = time.time()
-    recent = Forecast.objects.filter(site_id=site.id).\
-                filter(fetch_time__gt=old)
-    #if len(recent) > 0:
-    #    print "Skipping update of forecast for %s" % site.name
-    #    return
+    if recentExistsAlready(Forecast, site, recentCutoff):
+        print "Skipping update of forecast for %s" % site.name
+        return
     t2 = time.time()
     print "Updating forecast for %s" % site.name
     res = weather.main.fetchForecast(site)
@@ -64,6 +86,7 @@ def updateForecast(site):
     t5 = time.time()
     print "Forecast: %s %s %s %s" % ( t2-t1, t3-t2, t4-t3, t5-t4)
 
+
 def saveSummaryData(site, level, dayTime, times, scores):
     summaryData = []
     curScores = []
@@ -87,42 +110,35 @@ def saveSummaryData(site, level, dayTime, times, scores):
     summary.setData(summaryData)
     summary.save()
 
-of.fetch()
-observationIndex = of.buildIndex()
-conditionMgr = condition.buildConditionMgr()
-def updateObservation(site):
-    t1 = time.time()
-    recent = Observation.objects.filter(site_id=site.id).\
-                filter(fetch_time__gt=old)
-    if len(recent) > 0:
-        print "Skipping update of observation for %s" % site.name
-        return
-    t2 = time.time()
-    nearest = observationIndex.getNearest(site.lat, site.lon)
-    t3 = time.time()
-    result = nearest.next()
-    obs, values = result.toDjangoModels(site, conditionMgr)
-    obs.save()
-    t4 = time.time()
-    data = ObservationData(observation = obs)
-    data.setData(values)
-    data.save()
-    t5 = time.time()
-    print "Observation: %s %s %s %s" % ( t2-t1, t3-t2, t4-t3, t5-t4)
 
-parser = OptionParser()
-parser.add_option("-s", "--site", dest="site",
-                  help="update site with this id", metavar="SITE")
-(options, args) = parser.parse_args()
+class ObservationUpdater(object):
+    
+    def __init__(self, recentCutoff):
+        self.recentCutoff = recentCutoff
+        observation_fetcher.fetch()
+        self.observationIndex = observation_fetcher.buildIndex()
+        self.conditionMgr = condition.buildConditionMgr()
 
-if options.site:
-    query = Site.objects.filter(id=options.site)
-    sites = list(query)
-    old = tz.now()
-else: 
-    sites = getAllSites()
+    def update(self, site):
+        if recentExistsAlready(Observation, site, self.recentCutoff):
+            print "Skipping update of observation for %s" % site.name
+            return
+        print "Updating observation for %s" % site.name
+        nearest = self.observationIndex.getNearest(site.lat, site.lon).next()
+        self.saveFullObservation(site, nearest)
 
-for site in sites:
-    print "Fetching forecast for %s, %s, %s %s" % (site.name, site.state, site.country, site.id)
-    updateForecast(site)
-    updateObservation(site)
+    def saveFullObservation(self, site, observation):
+        obs, values = observation.toDjangoModels(site, self.conditionMgr)
+        obs.save()
+        data = ObservationData(observation = obs)
+        data.setData(values)
+        data.save()
+
+
+def recentExistsAlready(model, site, recentCutoff):
+    recent = model.objects.filter(site_id=site.id, fetch_time__gt=recentCutoff)
+    return len(recent) > 0
+
+
+if __name__ == '__main__':
+    main()

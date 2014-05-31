@@ -5,7 +5,7 @@ import hashlib
 def cachingFetch(url, params, expiration=600, details={},
                  cacheDir='/var/django/cache'):
     key = hashit( (url, params) )
-    fn = cacheDir + key
+    fn = cacheDir + '/' + key
     print fn,
     if os.path.exists(fn):
         if os.path.getmtime(fn) > (time.time() - expiration):
