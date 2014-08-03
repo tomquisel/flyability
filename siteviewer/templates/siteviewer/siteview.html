@@ -21,7 +21,7 @@
         <h3>{{ site.shortname }}</h3>
         </div>
         <p>Launch Direction</p>
-        <img class="sideimg" src="{% url 'windDir' -1 site.id 100 %}">
+        <img class="sideimg" src="{% url windDir -1 site.id 100 %}">
         <a href="http://maps.google.com/?q={{ site.lat }},{{ site.lon }}&z=9" 
             target="_blank" ><img class="sideimg"
             src="http://maps.googleapis.com/maps/api/staticmap?center={{ site.lat }},{{ site.lon }}&markers={{ site.lat }},{{ site.lon }}&zoom=9&size=150x150&sensor=false"></a>
@@ -42,7 +42,7 @@
                         {{l.level}}</option>
                     {% endfor %}
                 </select>
-                <input type="hidden" name="site" value="{% url 'site' site.country site.state site.name %}">
+                <input type="hidden" name="site" value="{% url site site.country site.state site.name %}">
                 {% csrf_token %}
                 Pilots
             </h2>
@@ -117,7 +117,7 @@
         }
         var unit = 5.0;
         dir = discretize(dir, unit);
-        res = 'url({% url 'windDir' 123456 site.id 234567 %})';
+        res = 'url({% url windDir 123456 site.id 234567 %})';
         res = res.replace(/123456/, dir);
         res = res.replace(/234567/, size);
         return res;

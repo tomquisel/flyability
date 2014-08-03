@@ -1,6 +1,6 @@
 # Django settings for flyability project.
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 FORCE_SCRIPT_NAME = ''
 SESSION_COOKIE_AGE = 24 * 3600 * 365
@@ -65,8 +65,8 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    '/usr/lib/python2.7/dist-packages/django/contrib/admin/media',
-    '/var/django/flyability/static',
+    #'/usr/local/lib/python2.7/dist-packages/django/contrib/admin/media',
+    '/var/django/flyability/flyability/static',
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -96,7 +96,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.gzip.GZipMiddleware',
-    'middleware.SetRemoteAddrFromForwardedFor'
+    #'middleware.SetRemoteAddrFromForwardedFor'
 )
 
 ROOT_URLCONF = 'flyability.urls'

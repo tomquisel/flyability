@@ -17,7 +17,7 @@
 <ul>
     {% for s in sites %}
         {% if s.name %}
-            {% url 'site' s.country s.state s.name as siteurl %}
+            {% url site s.country s.state s.name as siteurl %}
             <li><a href="{{ siteurl }}">{{ s.name }}</a></li>
         {% else %}
             <h3 id="{{s.state}}">{{ s.state }}</h3>

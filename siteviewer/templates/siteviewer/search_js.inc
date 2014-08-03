@@ -5,7 +5,7 @@
         );
         $.fly.jsp.reinitialise();
         var level = $('#level').val();
-        $.get("{% url 'search' %}", 
+        $.get("{% url search %}", 
               {lat : lat, lon : lon, query : query, level: level}, 
               renderResults)
             .error(function () {console.log("AJAX fail."); });
@@ -51,7 +51,7 @@
             $.fly.mapper = new Mapper({
                 div: $("#mapdiv")[0], 
                 spinner: "{{ STATIC_URL }}/spinner.gif",
-                infoURL: "{% url 'summary' %}"
+                infoURL: "{% url summary %}"
             });
             $.fly.mapper.draw($.fly.lat, $.fly.lon, {{ sitesobj|safe }});
         }

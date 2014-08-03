@@ -4,7 +4,7 @@
         <div id="site_{{ s.id }}" class="resitem clickdiv">
             <div style="width:100%">
                 <b><a target="_blank"
-                    href={% url 'site' s.country s.state s.name %}
+                    href={% url site s.country s.state s.name %}
                 >{{ s.shortname }}, {{s.statecode}}</a></b> 
                 <span class="right"><b>{{ s.dist_mi }}</b> mi </span>
             </div>

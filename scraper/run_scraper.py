@@ -8,52 +8,87 @@ from geonames import GeonamesClient
 geoCli = GeonamesClient('flyability')
 
 def run():
-    finishedFile = '/tmp/finished.list'
     base = 'www.paraglidingearth.com'
-    toTry = getValidIds(base, '/pgearth/index.php?accueil=monde')
-    finished = getFinished(finishedFile)
-    toTry = list(set(toTry) - set(finished))
-    print "Will scrape %s sites." % len(toTry)
-    random.shuffle(toTry)
-    try:
-        for i in toTry:
-            try:
-                status = scrape(base,
-                                '/pgearth/index.php?site=%s', 
-                                '/pgearth/orientation.php?site=%s', 
-                                i)
-            except:
-                time.sleep(random.randint(60, 300))
-            else:
-                finished.append(i)
-                if status != 'hit':
-                    time.sleep(random.randint(5, 30))
-    finally:
-        out = open(finishedFile, 'wb')
-        for i in finished:
-            print >>out, i
-        out.close()
+    site_id_fetcher = SiteIdFetcher(base)
+    for site in site_id_fetcher.get_all_site_ids():
+        #try:
+        status = scrape(base,
+                        '/pgearth/index.php?site=%s', 
+                        '/pgearth/orientation.php?site=%s', 
+                        site)
+        #except Exception, e:
+        #    time.sleep(random.randint(60, 300))
+        #else:
+        if status != 'hit':
+            time.sleep(random.randint(5, 30))
 
-def getValidIds(base, url):
-    res = []
-    print "Fetching entire list..."
-    data = cachingFetch((base, url), (), 365 * 86400)
-    print "Parsing list..."
-    soup = BeautifulSoup(data)
-    for a in soup.find_all("a"):
-        m = re.search("index.php\?site=(\d+)", a['href'])
-        if m:
-            res.append(int(m.group(1)))
-    print "Got %s sites." %(len(res))
-    return res
+class SiteIdFetcher(object):
+    def __init__(self, url_base):
+        self.state_file  = '/tmp/site_id_fetcher_state.json'
+        self.path_prefix = '/pgearth/fiche_pays_imprimable.php?pays='
+        self.url_base = url_base
+        self.max_country = 200
+        try:
+            self.load_state()
+        except IOError, e:
+            self.state = {
+                'next_country_id': 1,
+                'next_site_id_index': 0,
+                'site_ids': [],
+            }
+            self.save_state()
 
-def getFinished(f):
-    res = [ int(l.strip()) for l in open(f).readlines() ]
-    print "Read %s already finished sites" % len(res)
-    return res
+    def load_state(self):
+        self.state = json.load(open(self.state_file))
+
+    def save_state(self):
+        json.dump(self.state, open(self.state_file, 'wb'), indent=1)
+
+    def get_all_site_ids(self):
+        while True:
+            # record that the client successfully processed the last site_id
+            self.save_state()
+            print self.state
+            while self.needs_more_site_ids():
+                if self.done():
+                    return
+                self.load_next_site_id_chunk()
+            yield self.state['site_ids'][self.state['next_site_id_index']]
+            self.state['next_site_id_index'] += 1
+    
+    def load_next_site_id_chunk(self):
+        path = "%s%s" % (self.path_prefix, self.state['next_country_id'])
+        print "Fetching site ids for country %s..." % \
+                self.state['next_country_id']
+        ids = self.fetch_site_ids_for_country(self.url_base, path)
+        self.state['site_ids'].extend(ids)
+        self.state['next_country_id'] += 1
+        self.save_state()
+        return ids
+    
+    @staticmethod
+    def fetch_site_ids_for_country(base, path): 
+        ids = []
+        data = cachingFetch((base, path), (), 365 * 86400)
+        print "Parsing %s" % path
+        soup = BeautifulSoup(data)
+        for img in soup.find_all("img"):
+            m = re.search("windrose.php?.*id_site=(\d+)", img['src'])
+            if m:
+                ids.append(int(m.group(1)))
+        print "Got %s site ids." %(len(ids))
+        return ids
+
+    def done(self):
+        return self.state['next_country_id'] >= self.max_country
+
+    def needs_more_site_ids(self): 
+        return len(self.state['site_ids']) <= self.state['next_site_id_index']
+
 
 class MissingDataException(Exception):
     pass
+
 
 def scrape(base, siteUrl, takeoffUrl, siteId):
     out = Site()
