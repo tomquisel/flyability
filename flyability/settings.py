@@ -1,6 +1,6 @@
 # Django settings for flyability project.
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 FORCE_SCRIPT_NAME = ''
 SESSION_COOKIE_AGE = 24 * 3600 * 365

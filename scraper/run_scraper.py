@@ -9,7 +9,8 @@ geoCli = GeonamesClient('flyability')
 
 def run():
     base = 'www.paraglidingearth.com'
-    site_id_fetcher = SiteIdFetcher(base)
+    # only fetch United States sites
+    site_id_fetcher = SiteIdFetcher(base, 223, 224)
     for site in site_id_fetcher.get_all_site_ids():
         #try:
         status = scrape(base,
@@ -23,16 +24,16 @@ def run():
             time.sleep(random.randint(5, 30))
 
 class SiteIdFetcher(object):
-    def __init__(self, url_base):
+    def __init__(self, url_base, start, end):
         self.state_file  = '/tmp/site_id_fetcher_state.json'
         self.path_prefix = '/pgearth/fiche_pays_imprimable.php?pays='
         self.url_base = url_base
-        self.max_country = 200
+        self.max_country = end
         try:
             self.load_state()
         except IOError, e:
             self.state = {
-                'next_country_id': 1,
+                'next_country_id': start,
                 'next_site_id_index': 0,
                 'site_ids': [],
             }
@@ -48,7 +49,7 @@ class SiteIdFetcher(object):
         while True:
             # record that the client successfully processed the last site_id
             self.save_state()
-            print self.state
+            #print self.state
             while self.needs_more_site_ids():
                 if self.done():
                     return

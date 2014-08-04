@@ -8,7 +8,8 @@ tmpDir = '/var/django/observationtmp'
 
 def fetch():
     outFile = "%s/all_xml.zip" % tmpDir
-    if os.path.getmtime(outFile) < time.time() - 30 * 60:
+    if not os.path.exists(outFile) or \
+            os.path.getmtime(outFile) < time.time() - 30 * 60:
         sp.check_call(["curl", url, "-o", outFile])
         sp.check_call(["unzip", "-o", outFile, "-d", tmpDir])
     else:
