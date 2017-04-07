@@ -27,9 +27,12 @@ def cachingFetch(url, params, expiration=600, details={},
 agent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.4 (KHTML, like Gecko) Chrome/22.0.1229.94 Safari/537.4"
 
 def fetch(url, params):
-    print "Fetching %s%s" % (url[0],url[1] % params)
-    conn = httplib.HTTPConnection(url[0])
-    conn.request("GET", url[1] % params, headers={'user-agent' : agent})
+    print "Fetching %s://%s%s" % (url[0], url[1], url[2] % params)
+    if url[0] == 'https':
+        conn = httplib.HTTPSConnection(url[1])
+    else:
+        conn = httplib.HTTPConnection(url[1])
+    conn.request("GET", url[2] % params, headers={'user-agent' : agent})
     r = conn.getresponse()
     print r.status, r.reason
     if r.status != httplib.OK:
